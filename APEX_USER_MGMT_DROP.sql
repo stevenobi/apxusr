@@ -20,6 +20,7 @@ drop sequence    "APEX_APP_USERROLE_SEQ";
 drop trigger     "APEX_APP_USRROL_BIU_TRG";
 drop trigger     "APEX_APPUSRDEFROL_TRG";
 
+drop table       "APEX_APP_USER_REG"       purge; 
 drop table       "APEX_APP_USER_ROLE_MAP"  purge;
 drop table       "APEX_APP_USER"           purge;
 drop table       "APEX_APP_ROLE"           purge;

@@ -144,8 +144,8 @@ create unique index "APEX_APP_USER_UNQ1" on "APEX_APP_USER"(app_user_id, app_id)
 create unique index "APEX_APP_USER_UNQ2" on "APEX_APP_USER"(upper(app_username), upper(app_user_email), app_id);
 create index "APEX_APP_USER_APP_ID" on "APEX_APP_USER"(app_id);
 create index "APEX_APP_USER_STATUS_FK_IDX" on "APEX_APP_USER"(app_user_status_id);
-create index "APEX_APP_USER_DEFROLE_FK_IDX" on "APEX_APP_USER"(app_user_default_role_id);
-create index "APEX_APP_USER_DEFROLE_FK_IDX" on "APEX_APP_USER"(app_user_parent_user_id);
+create index "APEX_APP_USER_DEFROLE_FK_IDX" on "APEX_APP_USER"(APP_USER_DEFAULT_ROLE_ID);
+create index "APEX_APP_USER_PARENT_FK_IDX" on "APEX_APP_USER"(app_user_parent_user_id);
 
 create sequence "APEX_APP_USER_ID_SEQ" start with 5 increment by 1 nocache;
 
