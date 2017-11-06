@@ -17,8 +17,7 @@
 -----------------------------------------------------------------------------------------------------
 -- Status Table for Application, Users, Roles,...
 create table "APX$APP_STATUS" (
-app_status_pk number not null,  
-app_status_id number not null unique, -- extra field for certain predefined values like 0, 1,...
+app_status_id number not null, -- extra field for certain predefined values like 0, 1,...
 app_status varchar2(64) not null,
 app_status_code varchar2(6),
 app_status_scope varchar2(20),
@@ -28,16 +27,15 @@ created date,
 created_by varchar2(64),
 modified date,
 modified_by varchar2(64),
-constraint "APX$APP_STATUS_PK" primary key (app_status_pk),
+constraint "APX$APP_STATUS_PK" primary key (app_status_id),
 constraint "APX$APP_STATUS_PARENT_FK" foreign key (app_parent_status_id) references "APX$APP_STATUS"(app_status_id)
 );
 
 create unique index "APX$APP_STATUS_UNQ1" on "APX$APP_STATUS"(app_status_id, app_id);
-create unique index "APX$APP_STATUS_UNQ2" on "APX$APP_STATUS"(upper(app_status), upper(app_status_scope), app_status_id, app_id);
-create index "APX$APP_STATUS_CODE" on "APX$APP_STATUS"(app_status_code, app_status);
-create index "APX$APP_STATUS_APP_ID" on "APX$APP_STATUS"(app_id);
+create unique index "APX$APP_STATUS_UNQ2" on "APX$APP_STATUS"(upper(app_status), upper(app_status_scope), app_id);
+create index "APX$APP_STATUS_CODE_IDX" on "APX$APP_STATUS"(app_status_code, app_status);
+create index "APX$APP_STATUS_APP_ID_IDX" on "APX$APP_STATUS"(app_id);
 
-create sequence "APX$APP_STATUS_PK_SEQ" start with 1 increment by 1 nocache;
 create sequence "APX$APP_STATUS_ID_SEQ" start with 1 increment by 1 nocache;
 
 create or replace trigger "APX$APP_STATUS_BIU_TRG"
@@ -46,11 +44,6 @@ referencing old as old new as new
 for each row
 begin
   if inserting then
-    if (:new.app_status_pk is null) then
-        select "APX$APP_STATUS_PK_SEQ".NEXTVAL
-        into :new.app_status_pk
-        from dual;
-    end if;    
     if (:new.app_status_id is null) then
         select "APX$APP_STATUS_ID_SEQ".NEXTVAL
         into :new.app_status_id
@@ -70,9 +63,8 @@ end;
 
 --------------------------------------------------------------------------------------
 -- Application Roles
-create table "APX$APP_ROLE" (
-app_role_pk number not null,  
-app_role_id number not null unique,
+create table "APX$APP_ROLE" (  
+app_role_id number not null,
 app_rolename varchar2(64) not null,
 app_role_code varchar2(8) null,
 app_role_description varchar2(128),
@@ -84,19 +76,18 @@ created date,
 created_by varchar2(64),
 modified date,
 modified_by varchar2(64),
-constraint "APX$APPROLE_ROLE_PK" primary key (app_role_pk),
+constraint "APX$APPROLE_ROLE_PK" primary key (app_role_id),
 constraint "APX$APPROLE_STATUS_FK" foreign key (app_role_status_id) references "APX$APP_STATUS"(app_status_id) on delete set null,
 constraint "APX$APPROLE_PARENT_FK" foreign key (app_parent_role_id) references "APX$APP_ROLE"(app_role_id) on delete set null
 );
 
 create unique index "APX$APP_ROLE_UNQ1" on "APX$APP_ROLE"(app_role_id, app_id);
-create unique index "APX$APP_ROLE_UNQ2" on "APX$APP_ROLE"(upper(app_rolename), upper(app_role_scope), app_role_id, app_id);
+create unique index "APX$APP_ROLE_UNQ2" on "APX$APP_ROLE"(upper(app_rolename), upper(app_role_scope), app_id);
 create index "APX$APP_ROLE_STATUS_FK_IDX" on "APX$APP_ROLE"(app_role_status_id);
 create index "APX$APP_ROLE_PARENT_FK_IDX" on "APX$APP_ROLE"(app_parent_role_id);
 create index "APX$APP_ROLE_APP_ID" on "APX$APP_ROLE"(app_id);
 
-create sequence "APX$APP_ROLE_PK_SEQ" start with 1 increment by 1 nocache;
-create sequence "APX$APP_ROLE_ID_SEQ" start with 50 increment by 10 nocache;
+create sequence "APX$APP_ROLE_ID_SEQ" start with 10 increment by 1 nocache;
 
 create or replace trigger "APX$APP_ROLE_BIU_TRG"
 before insert or update on APX$APP_ROLE
@@ -104,11 +95,6 @@ referencing old as old new as new
 for each row
 begin
   if inserting then
-    if (:new.app_role_pk is null) then
-        select "APX$APP_ROLE_PK_SEQ".NEXTVAL
-        into :new.app_role_pk
-        from dual;
-    end if;  
     if (:new.app_role_id is null) then
         select "APX$APP_ROLE_ID_SEQ".NEXTVAL
         into :new.app_role_id
@@ -128,8 +114,7 @@ end;
 --------------------------------------------------------------------------------------
 -- Application User
 create table "APX$APP_USER" (
-app_user_pk number not null,  
-app_user_id number not null unique,
+app_user_id number not null,
 app_username varchar2(64) not null,
 app_user_email varchar2(64) not null,
 app_user_default_role_id number default 1 not null, -- 0 PUBLIC, 1 USER
@@ -149,21 +134,20 @@ created date,
 created_by varchar2(64),
 modified date,
 modified_by varchar2(64),
-constraint "APX$APP_USER_PK" primary key(app_user_pk),
+constraint "APX$APP_USER_PK" primary key(app_user_id),
 constraint "APX$APP_USER_STATUS_FK" foreign key (app_user_status_id) references "APX$APP_STATUS"(app_status_id) on delete set null,
 constraint "APX$APP_USER_DEFROLE_FK" foreign key (app_user_default_role_id) references "APX$APP_ROLE"(app_role_id) on delete set null,
 constraint "APX$APP_USER_PARENT_FK" foreign key (app_user_parent_user_id) references "APX$APP_USER"(app_user_id) on delete set null
 );
 
 create unique index "APX$APP_USER_UNQ1" on "APX$APP_USER"(app_user_id, app_id);
-create unique index "APX$APP_USER_UNQ2" on "APX$APP_USER"(upper(app_username), upper(app_user_email), app_user_id, app_id);
+create unique index "APX$APP_USER_UNQ2" on "APX$APP_USER"(upper(app_username), upper(app_user_email), app_id);
 create index "APX$APP_USER_APP_ID" on "APX$APP_USER"(app_id);
 create index "APX$APP_USER_STATUS_FK_IDX" on "APX$APP_USER"(app_user_status_id);
 create index "APX$APP_USER_DEFROLE_FK_IDX" on "APX$APP_USER"(app_user_default_role_id);
 create index "APX$APP_USER_DEFROLE_FK_IDX" on "APX$APP_USER"(app_user_parent_user_id);
 
-create sequence "APX$APP_USER_PK_SEQ" start with 1 increment by 1 nocache;
-create sequence "APX$APP_USER_ID_SEQ" start with 2 increment by 1 nocache;
+create sequence "APX$APP_USER_ID_SEQ" start with 5 increment by 1 nocache;
 
 create or replace trigger "APX$APP_USER_BIU_TRG"
 before insert or update on "APX$APP_USER"
@@ -191,7 +175,6 @@ end;
 --------------------------------------------------------------------------------------
 -- Application User Registration
 create table "APX$APP_USER_REG" (
-app_user_pk number not null,  
 app_user_id number not null unique,
 app_username varchar2(64) not null,
 app_user_email varchar2(64) not null,
@@ -212,9 +195,9 @@ created date,
 created_by varchar2(64),
 modified date,
 modified_by varchar2(64),
-constraint "APX$APP_USREG_PK" primary key(app_user_pk),
+constraint "APX$APP_USREG_PK" primary key(app_user_id),
 constraint "APX$APP_USREG_STATUS_FK" foreign key (app_user_status_id) references "APX$APP_STATUS"(app_status_id) on delete set null,
-constraint "APX$APP_USREG_DEFROLE_FK" foreign key (app_user_default_role_id) references "APX$APP_ROLE"(app_role_id) on delete set null,
+constraint "APX$APP_USREG_DEFROLE_FK" foreign key (app_user_default_role_id) references "APX$APP_ROLE"(app_role_id) on delete set null
 );
 
 create unique index "APX$APP_USER_UNQ1" on "APX$APP_USER_REG"(app_user_id, app_id);
