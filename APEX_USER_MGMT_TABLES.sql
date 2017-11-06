@@ -175,7 +175,7 @@ end;
 --------------------------------------------------------------------------------------
 -- Application User Registration
 create table "APEX_APP_USER_REG" (
-app_user_id number not null unique,
+app_user_id number not null,
 app_username varchar2(64) not null,
 app_user_email varchar2(64) not null,
 app_user_default_role_id number default 1 not null, -- 0 PUBLIC, 1 USER
@@ -200,9 +200,9 @@ constraint "APEX_APP_USREG_STATUS_FK" foreign key (app_user_status_id) reference
 constraint "APEX_APP_USREG_DEFROLE_FK" foreign key (app_user_default_role_id) references "APEX_APP_ROLE"(app_role_id) on delete set null
 );
 
-create unique index "APEX_APP_USER_UNQ1" on "APEX_APP_USER_REG"(app_user_id, app_id);
-create unique index "APEX_APP_USER_UNQ2" on "APEX_APP_USER_REG"(upper(app_username), upper(app_user_email), app_user_id, app_id);
-create index "APEX_APP_USER_APP_ID" on "APEX_APP_USER_REG"(app_id);
+create unique index "APEX_APP_USREG_UNQ1" on "APEX_APP_USER_REG"(APP_USER_ID, APP_ID);
+create unique index "APEX_APP_USREG_UNQ2" on "APEX_APP_USER_REG"(UPPER(APP_USERNAME), UPPER(APP_USER_EMAIL), APP_USER_ID, APP_ID);
+create index "APEX_APP_USREG_APP_ID" on "APEX_APP_USER_REG"(app_id);
 create index "APEX_APP_USREG_STATUS_FK_IDX" on "APEX_APP_USER_REG"(app_user_status_id);
 create index "APEX_APP_USREG_DEFROLE_FK_IDX" on "APEX_APP_USER_REG"(app_user_default_role_id);
 create index "APEX_APP_USREG_PARENT_FK_IDX" on "APEX_APP_USER_REG"(app_user_parent_user_id);
