@@ -181,7 +181,6 @@ app_user_email varchar2(64) not null,
 app_user_default_role_id number default 1 not null, -- 0 PUBLIC, 1 USER
 app_user_code varchar2(8),
 app_user_ad_login varchar2(64),
-app_user_novell_login varchar2(64),
 app_user_first_name varchar2(32),
 app_user_last_name varchar2(32),
 app_user_adress varchar2(64),
@@ -191,6 +190,9 @@ app_user_description varchar2(128),
 app_user_status_id number default 1,
 app_user_parent_user_id number,
 app_id number,
+app_user_token varchar2(50),
+app_user_token_time timestamp,
+app_token_valid_until date
 created date,
 created_by varchar2(64),
 modified date,
@@ -207,7 +209,6 @@ create index "APEX_APP_USREG_STATUS_FK_IDX" on "APEX_APP_USER_REG"(app_user_stat
 create index "APEX_APP_USREG_DEFROLE_FK_IDX" on "APEX_APP_USER_REG"(app_user_default_role_id);
 create index "APEX_APP_USREG_PARENT_FK_IDX" on "APEX_APP_USER_REG"(app_user_parent_user_id);
 
-create sequence "APEX_APP_USREG_PK_SEQ" start with 1 increment by 1 nocache;
 create sequence "APEX_APP_USREG_ID_SEQ" start with 2 increment by 1 nocache;
 
 create or replace trigger "APEX_APP_USER_BIU_TRG"

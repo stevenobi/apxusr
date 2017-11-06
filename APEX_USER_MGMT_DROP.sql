@@ -19,6 +19,9 @@ drop trigger     "APEX_APP_STATUS_BIU_TRG";
 drop sequence    "APEX_APP_USERROLE_SEQ";
 drop trigger     "APEX_APP_USRROL_BIU_TRG";
 drop trigger     "APEX_APPUSRDEFROL_TRG";
+drop sequence    "APEX_APP_SETTING_SEQ";
+drop sequence    "APEX_APP_USREG_ID_SEQ";
+drop sequence    "APEX_APP_USREG_PK_SEQ";
 
 drop table       "APEX_SYS_BUILTINS" purge;
 drop table       "APEX_APP_SETTINGS" purge;
