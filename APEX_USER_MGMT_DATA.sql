@@ -11,26 +11,94 @@
 -----------------------------------------------------------------------------------------------------
 
 
+-----------------------------------------------------------------------------------------------------
 
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Sample Data
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- Status
 
--- DEFAULT Status first
-INSERT INTO "APEX_APP_STATUS" (APP_STATUS_ID, APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE, APP_ID) 
-VALUES ('0', 'DEFAULT', 'DEF', 'ALL', v('FB_FLOW_ID'));
--- Status by Scope
-INSERT INTO "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE, APP_ID) VALUES ('OPEN', 'OPN', 'ACCOUNT', v('FB_FLOW_ID'));
-INSERT INTO "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE, APP_ID) VALUES ('LOCKED', 'LCK', 'ACCOUNT', v('FB_FLOW_ID'));
-INSERT INTO "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE, APP_ID) VALUES ('EXPIRED', 'XPR', 'ACCOUNT', v('FB_FLOW_ID'));
-INSERT INTO "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE, APP_ID) VALUES ('SUSPENDED', 'SUS', 'ACCOUNT', v('FB_FLOW_ID'));
-INSERT INTO "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE, APP_ID) VALUES ('UP', 'UP', 'APPLICATION', v('FB_FLOW_ID'));
-INSERT INTO "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE, APP_ID) VALUES ('DOWN', 'DWN', 'APPLICATION', v('FB_FLOW_ID'));
+-----------------------------------------------------------------------------------------------------
+
+-- Scopes
+
+-- DEFAULT Scopes first
+insert into "APEX_APP_SCOPE" (APP_SCOPE_ID, APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('0', 'DEFAULT', 'DEF', V('FB_FLOW_ID'));
+-- App Scopes
+insert into "APEX_APP_SCOPE" (APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('ALL', 'ALL', V('FB_FLOW_ID'));
+insert into "APEX_APP_SCOPE" (APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('DOMAIN', 'DOM', V('FB_FLOW_ID'));
+insert into "APEX_APP_SCOPE" (APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('APPLICATION', 'APP', V('FB_FLOW_ID'));
+insert into "APEX_APP_SCOPE" (APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('PAGE', 'PAGE', V('FB_FLOW_ID'));
+insert into "APEX_APP_SCOPE" (APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('ITEM', 'ITEM', V('FB_FLOW_ID'));
+insert into "APEX_APP_SCOPE" (APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('AUTHENTICATION', 'AUTH', V('FB_FLOW_ID'));
+insert into "APEX_APP_SCOPE" (APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('AUTHORIZATION', 'AUT', V('FB_FLOW_ID'));
+insert into "APEX_APP_SCOPE" (APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('PRIVILEGE', 'PRIV', V('FB_FLOW_ID'));
+insert into "APEX_APP_SCOPE" (APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('GROUP', 'GRP', V('FB_FLOW_ID'));
+insert into "APEX_APP_SCOPE" (APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('ROLE', 'ROLE', V('FB_FLOW_ID'));
+insert into "APEX_APP_SCOPE" (APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('USER', 'USER', V('FB_FLOW_ID'));
+insert into "APEX_APP_SCOPE" ( APP_SCOPE, APP_SCOPE_CODE, APP_ID) 
+values ('ACCOUNT', 'ACC', V('FB_FLOW_ID'));
 
 commit;
 
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------
+-- Status
+
+-- DEFAULT Status first
+
+insert into APEX_APP_STATUS (APP_STATUS_ID, APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE_ID, APP_ID)
+values ('0', 'DEFAULT', 'DEF', (SELECT APP_SCOPE_ID from APEX_APP_SCOPE WHERE APP_SCOPE = 'ALL'), V('FB_FLOW_ID'));
+-- Status by Scope
+insert into "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE_ID, APP_ID) 
+values ('OPEN', 'OPN', (SELECT APP_SCOPE_ID from APEX_APP_SCOPE where APP_SCOPE = 'ACCOUNT'), v('FB_FLOW_ID'));
+insert into "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE_ID, APP_ID) 
+values ('LOCKED', 'LCK', (SELECT APP_SCOPE_ID from APEX_APP_SCOPE WHERE APP_SCOPE = 'ACCOUNT'), V('FB_FLOW_ID'));
+insert into "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE_ID, APP_ID) 
+VALUES ('EXPIRED', 'XPR', (SELECT APP_SCOPE_ID from APEX_APP_SCOPE WHERE APP_SCOPE = 'ACCOUNT'), v('FB_FLOW_ID'));
+insert into "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE_ID, APP_ID)
+values ('SUSPENDED', 'SUS', (SELECT APP_SCOPE_ID from APEX_APP_SCOPE WHERE APP_SCOPE = 'ACCOUNT'), V('FB_FLOW_ID'));
+insert into "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE_ID, APP_ID) 
+values ('UP', 'UP', (SELECT APP_SCOPE_ID from APEX_APP_SCOPE WHERE APP_SCOPE = 'APPLICATION'), V('FB_FLOW_ID'));
+insert into "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE_ID, APP_ID) 
+values ('DOWN', 'DWN', (select APP_SCOPE_ID from APEX_APP_SCOPE where APP_SCOPE = 'APPLICATION'), V('FB_FLOW_ID'));
+insert into "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE_ID, APP_ID) 
+VALUES ('NEW', 'NEW', (SELECT APP_SCOPE_ID from APEX_APP_SCOPE WHERE APP_SCOPE = 'USER'), v('FB_FLOW_ID'));
+insert into "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE_ID, APP_ID) 
+values ('REGISTERED', 'REG', (select APP_SCOPE_ID from APEX_APP_SCOPE where APP_SCOPE = 'USER'), V('FB_FLOW_ID'));
+insert into "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE_ID, APP_ID) 
+VALUES ('VERIFIED', 'VER', (SELECT APP_SCOPE_ID from APEX_APP_SCOPE WHERE APP_SCOPE = 'USER'), v('FB_FLOW_ID'));
+insert into "APEX_APP_STATUS" (APP_STATUS, APP_STATUS_CODE, APP_STATUS_SCOPE_ID, APP_ID) 
+values ('VALID', 'VAL', (select APP_SCOPE_ID from APEX_APP_SCOPE where APP_SCOPE = 'USER'), V('FB_FLOW_ID'));
+
+commit;
+
+
+-----------------------------------------------------------------------------------------------------
+-- Domain
+
+-- DEFAULT Domain first
+insert into "APEX_APP_DOMAIN" (APP_DOMAIN_ID, APP_DOMAIN_NAME, APP_DOMAIN, APP_DOMAIN_CODE, APP_DOMAIN_DESCRIPTION)
+VALUES (0, 'Default Domain', 'default.net', 'DEF', 'Default Domain for Public or not yet registered Users');
+
+-- Test Data
+insert into "APEX_APP_DOMAIN" (APP_DOMAIN_NAME, APP_DOMAIN, APP_DOMAIN_CODE, APP_DOMAIN_DESCRIPTION)
+values ('My Domain', 'mydomain.de', 'MYD', 'Test Domain for Registration');
+
+
+commit;
+
+
+-----------------------------------------------------------------------------------------------------
 -- Roles 
 -- can provide security levels groupwise in a up- or downwards security classification. 
 -- In this case we go upwards, means the higher the group_id the higher the privileges, except for root, who is allways allowed to all at any time.

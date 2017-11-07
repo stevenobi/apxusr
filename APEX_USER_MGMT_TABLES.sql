@@ -28,12 +28,35 @@ created_by varchar2(64),
 modified date,
 modified_by varchar2(64),
 constraint "APEX_APP_SCOPE_ID" primary key (app_scope_id),
-constraint "APEX_APP_SCOPE_PARENT_FK" foreign key (APP_PARENT_SCOPE_ID) references "APEX_APP_SCOPE"(APP_SCOPE_ID),
-constraint "APEX_APP_SCOPE_SCOPE_CHK" check (app_scope in ('DEFAULT', 'DOMAIN', 'APPLICATION', 'PAGE', 'ITEM', 'AUTHORIZATION', 'AUTHENTICATION', 'PRIVILEGE', 'GROUP', 'ROLE', 'USER'))
+constraint "APEX_APP_SCOPE_PARENT_FK" foreign key (APP_PARENT_SCOPE_ID) references "APEX_APP_SCOPE"(APP_SCOPE_ID)
 ) organization index;
 
 create unique index "APEX_APP_SCOPE_UNQ1" on "APEX_APP_SCOPE"(app_scope_id, app_id);
 create unique index "APEX_APP_SCOPE_UNQ2" on "APEX_APP_SCOPE"(upper(app_scope), upper(app_scope_code), app_id);
+
+create sequence "APEX_APP_SCOPE_ID_SEQ" start with 1 increment by 1 nocache;
+
+create or replace trigger "APEX_APP_SCOPE_BIU_TRG"
+before insert or update on "APEX_APP_SCOPE"
+referencing old as old new as new
+for each row
+begin
+  if inserting then
+    if (:new.app_scope_id is null) then
+        select "APEX_APP_SCOPE_ID_SEQ".NEXTVAL
+        into :new.app_scope_id
+        from dual;
+    end if;    
+    select sysdate, nvl(v('APP_USER'), user)
+    into :new.created, :new.created_by
+    from dual;
+  elsif updating then
+    select sysdate, nvl(v('APP_USER'), user)
+    into :new.modified, :new.modified_by
+    from dual;
+  end if;
+end;
+/
 
 -----------------------------------------------------------------------------------------------------
 -- Status Table for Application, Users, Roles,...
@@ -142,15 +165,16 @@ end;
 --------------------------------------------------------------------------------------
 -- Application Domains
 create table "APEX_APP_DOMAIN" (  
-app_domain_id number not null,
-app_domain_name varchar2(64) not null,
+APP_DOMAIN_ID number not null,
+app_domain_name varchar2(64) not null, -- conceptual name like MyDomain
+app_domain varchar2(64) not null, -- fully qualified domain name (f.e.: mydomain.net)
 app_domain_code varchar2(8) null,
 app_domain_description varchar2(128),
-app_domain_status_id number,
-app_domain_scope_id number,
 app_id number,
 app_parent_domain_id number,
+app_domain_status_id number,
 app_domain_sec_level number default 0,
+app_domain_scope_id number default 0,
 app_domain_homepage varchar2(1000),
 created date,
 created_by varchar2(64),
@@ -163,7 +187,9 @@ constraint "APEX_APPDOMAIN_PARENT_FK" foreign key (app_parent_domain_id) referen
 );
 
 create unique index "APEX_APP_DOMAIN_UNQ1" on "APEX_APP_DOMAIN"(APP_DOMAIN_ID, APP_ID);
-create unique index "APEX_APP_DOMAIN_UNQ2" on "APEX_APP_DOMAIN"(upper(app_domain_name), app_domain_scope_id, app_id);
+create unique index "APEX_APP_DOMAIN_UNQ2" on "APEX_APP_DOMAIN"(upper(app_domain_name), app_id);
+create unique index "APEX_APP_DOMAIN_UNQ3" on "APEX_APP_DOMAIN"(upper(app_domain), app_id);
+create unique index "APEX_APP_DOMAIN_UNQ4" on "APEX_APP_DOMAIN"(upper(app_domain_name), upper(app_domain), app_id);
 create index "APEX_APP_DOMAIN_STATUS_FK_IDX" on "APEX_APP_DOMAIN"(app_domain_status_id);
 create index "APEX_APP_DOMAIN_PARENT_FK_IDX" on "APEX_APP_DOMAIN"(app_parent_domain_id);
 create index "APEX_APP_DOMAIN_SECLEV" on "APEX_APP_DOMAIN"(app_domain_sec_level);

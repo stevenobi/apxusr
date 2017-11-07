@@ -10,6 +10,8 @@
 --
 -----------------------------------------------------------------------------------------------------
 
+drop sequence    "APEX_APP_SCOPE_ID_SEQ";
+drop trigger     "APEX_APP_SCOPE_BIU_TRG";
 drop sequence    "APEX_APP_PRIV_ID_SEQ";
 drop trigger     "APEX_APP_PRIV_BIU_TRG";
 drop sequence    "APEX_APP_DOMAIN_ID_SEQ";
