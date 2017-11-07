@@ -534,9 +534,9 @@ begin
         select 0 into :new.app_user_scope_id from DUAL;
       end;
     end if;
-    if (:new.APP_USERNAME is null) then
+    if (:new.APP_USERNAME is null or :new.APP_USERNAME = 'NewAppUser') then
       begin
-        select :new.app_user_first_name||' '||:new.app_user_last_name
+        select nvl(:new.app_user_first_name, 'New')||' '||nvl(:new.app_user_last_name, 'User')
         into :new.APP_USERNAME
         from dual;
         EXCEPTION when NO_DATA_FOUND then
