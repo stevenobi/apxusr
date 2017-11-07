@@ -10,39 +10,39 @@
 --
 -----------------------------------------------------------------------------------------------------
 
-drop sequence    "APEX_APP_SCOPE_ID_SEQ";
-drop trigger     "APEX_APP_SCOPE_BIU_TRG";
-drop sequence    "APEX_APP_PRIV_ID_SEQ";
-drop trigger     "APEX_APP_PRIV_BIU_TRG";
-drop sequence    "APEX_APP_DOMAIN_ID_SEQ";
-drop trigger     "APEX_APP_DOMAIN_BIU_TRG";
-drop sequence    "APEX_APP_GROUP_ID_SEQ";
-drop trigger     "APEX_APP_GROUP_BIU_TRG";
-drop sequence    "APEX_APP_USER_ID_SEQ";
-drop trigger     "APEX_APP_USER_BIU_TRG" ;
-drop sequence    "APEX_APP_ROLE_ID_SEQ";
-drop trigger     "APEX_APP_ROLE_BIU_TRG" ;
-drop sequence    "APEX_APP_STATUS_ID_SEQ";
-drop trigger     "APEX_APP_STATUS_BIU_TRG";
-drop sequence    "APEX_APP_USERROLE_SEQ";
-drop trigger     "APEX_APP_USRROL_BIU_TRG";
-drop trigger     "APEX_APPUSRDEFROL_TRG";
-drop sequence    "APEX_APP_SETTING_SEQ";
-drop trigger     "APEX_APP_SETTING_BIU_TRG";
-drop sequence    "APEX_APP_USREG_ID_SEQ";
-drop trigger     "APEX_APP_USRREG_BIU_TRG";
+drop sequence    "APX$APP_SCOPE_ID_SEQ";
+drop trigger     "APX$APP_SCOPE_BIU_TRG";
+drop sequence    "APX$APP_PRIV_ID_SEQ";
+drop trigger     "APX$APP_PRIV_BIU_TRG";
+drop sequence    "APX$APP_DOMAIN_ID_SEQ";
+drop trigger     "APX$APP_DOMAIN_BIU_TRG";
+drop sequence    "APX$APP_GROUP_ID_SEQ";
+drop trigger     "APX$APP_GROUP_BIU_TRG";
+drop sequence    "APX$APP_USER_ID_SEQ";
+drop trigger     "APX$APP_USER_BIU_TRG" ;
+drop sequence    "APX$APP_ROLE_ID_SEQ";
+drop trigger     "APX$APP_ROLE_BIU_TRG" ;
+drop sequence    "APX$APP_STATUS_ID_SEQ";
+drop trigger     "APX$APP_STATUS_BIU_TRG";
+drop sequence    "APX$APP_USERROLE_SEQ";
+drop trigger     "APX$APP_USRROL_BIU_TRG";
+drop trigger     "APX$APP_USRDEFROL_TRG";
+drop sequence    "APX$APP_SETTING_SEQ";
+drop trigger     "APX$APP_SETTING_BIU_TRG";
+drop sequence    "APX$APP_USREG_ID_SEQ";
+drop trigger     "APX$APP_USRREG_BIU_TRG";
 
-drop table       "APEX_SYS_BUILTINS"      purge;
-drop table       "APEX_APP_SETTINGS"      purge;
-drop table       "APEX_APP_USER_ROLE_MAP" purge;
-drop table       "APEX_APP_USER_REG"      purge;
-drop table       "APEX_APP_USER"          purge;
-drop table       "APEX_APP_ROLE"          purge;
-drop table       "APEX_APP_GROUP"         purge;
-drop table       "APEX_APP_PRIVILEGES"    purge;
-drop table       "APEX_APP_DOMAIN"        purge;
-drop table       "APEX_APP_STATUS"        purge;
-drop table       "APEX_APP_SCOPE"         purge;
+drop table       "APX$SYS_BUILTINS"      purge;
+drop table       "APX$APP_SETTINGS"      purge;
+drop table       "APX$APP_USER_ROLE_MAP" purge;
+drop table       "APX$APP_USER_REG"      purge;
+drop table       "APX$APP_USER"          purge;
+drop table       "APX$APP_ROLE"          purge;
+drop table       "APX$APP_GROUP"         purge;
+drop table       "APX$APP_PRIVILEGES"    purge;
+drop table       "APX$APP_DOMAIN"        purge;
+drop table       "APX$APP_STATUS"        purge;
+drop table       "APX$APP_SCOPE"         purge;
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

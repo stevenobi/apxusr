@@ -125,6 +125,20 @@ VALUES ('1010', 'MANAGEMENT', 'MGM', 'Company Managers', '1', v('FB_FLOW_ID'));
 commit;
 
 
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- User Registration
+
+-- Test User Registrations
+insert into APEX_APP_USER_REG (APP_USERNAME,APP_USER_EMAIL,APP_USER_FIRST_NAME,APP_USER_LAST_NAME) 
+values ('NewAppUser','someone@mydomain.de',1,null,'Some','One');
+insert into APEX_APP_USER_REG (APP_USERNAME,APP_USER_EMAIL,APP_USER_FIRST_NAME,APP_USER_LAST_NAME)
+values ('Someone Else','someoneelse@mydomain.de',1,null,'Someone','Else');
+insert into APEX_APP_USER_REG (APP_USERNAME,APP_USER_EMAIL,APP_USER_FIRST_NAME,APP_USER_LAST_NAME)
+values ('Yo Un','youn@mydomain.de',1,null,'Yo','Un');
+
+
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Default User
 
