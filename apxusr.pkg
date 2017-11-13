@@ -1,0 +1,524 @@
+----------------------------------------------------------------------------------
+--
+-- Title: apxusr.pkg (APEX USers and Roles)
+--
+-- Description: PL/SQL Package to manage APEX User and Roles.
+--
+-- Requirements: apxsys package
+--
+-- History:      19.09.2007  Obermeyer: created
+--                   29.01.2017 S.Obermeyer refactored to APEX
+--
+----------------------------------------------------------------------------------
+
+-- Standard Values are defined in this Package and used as defaults
+-- in procedures and functions used by APXDBA Scripts and processes.
+-- This Package provides only GLOBAL Variables to be used externally.
+-- The only Methods are SET, GET and DISPLAY Methods.
+
+-- No DEFAULT values usually indicate that the value is set in the
+-- Initialization Section of the package body.
+
+------------------------------------------------------------------
+--                          Package Specification
+------------------------------------------------------------------
+CREATE OR REPLACE PACKAGE "APXUSR" AUTHID CURRENT_USER IS
+
+-- Name of this package
+pkg VARCHAR2(10) := 'APXUSR';
+
+-- Version of Oracle
+db_version VARCHAR2(20) := '12.1.0.1';
+
+------------------------------------------------------------------
+-- Generic Types
+------------------------------------------------------------------
+
+-- Scalar Subtypes based on Oracle Datatypes
+SUBTYPE plstype IS PLS_INTEGER;
+SUBTYPE vc32Ktype IS VARCHAR2(32000);
+SUBTYPE vc4000type IS VARCHAR2(4000);
+SUBTYPE vc1000type IS VARCHAR2(1000);
+SUBTYPE vc512type IS VARCHAR2(512);
+SUBTYPE vc256type IS VARCHAR2(256);
+SUBTYPE vc128type IS VARCHAR2(128);
+SUBTYPE vc12type IS VARCHAR2(12);
+SUBTYPE vc8type IS VARCHAR2(8);
+
+-- global Types
+SUBTYPE appidtype IS "APEX_APPLICATIONS"."APPLICATION_ID"%TYPE;
+SUBTYPE wsidtype IS "APEX_WORKSPACES"."WORKSPACE_ID"%TYPE;
+SUBTYPE seclevel IS plstype;
+SUBTYPE seclevelname IS vc1000type;
+SUBTYPE nametype IS vc128type;
+SUBTYPE codetype IS "APEX_APP_STATUS"."APP_STATUS_CODE"%TYPE;
+SUBTYPE tokentype IS "APX$APP_USER_REG"."APP_USER_TOKEN"%TYPE;
+SUBTYPE datetype IS DATE;
+SUBTYPE tstype IS TIMESTAMP;
+
+-- Domains
+SUBTYPE domainidtype    IS "APEX_APP_DOMAIN"."APP_DOMAIN_ID"%TYPE;
+SUBTYPE domaintype      IS "APEX_APP_DOMAIN"."APP_DOMAIN"%TYPE;
+SUBTYPE domainnametype  IS "APEX_APP_DOMAIN"."APP_DOMAIN_NAME"%TYPE;
+SUBTYPE domaincodetype  IS "APEX_APP_DOMAIN"."APP_DOMAIN_CODE"%TYPE;
+SUBTYPE domaindescrtype IS "APEX_APP_DOMAIN"."APP_DOMAIN_DESCRIPTION"%TYPE;
+
+-- Roles
+SUBTYPE roleidtype      IS "APEX_APP_ROLE"."APP_ROLE_ID"%TYPE;
+SUBTYPE rolenametype    IS "APEX_APP_ROLE"."APP_ROLE_NAME"%TYPE;
+SUBTYPE rolecodetype    IS "APEX_APP_ROLE"."APP_ROLE_CODE"%TYPE;
+SUBTYPE roledescrtype   IS "APEX_APP_ROLE"."APP_ROLE_DESCRIPTION"%TYPE;
+
+-- Groups
+SUBTYPE groupidtype     IS "APEX_APP_GROUP"."APP_GROUP_ID"%TYPE;
+SUBTYPE groupnametype   IS "APEX_APP_GROUP"."APP_GROUP_NAME"%TYPE;
+SUBTYPE groupcodetype   IS "APEX_APP_GROUP"."APP_GROUP_CODE"%TYPE;
+SUBTYPE groupdescrtype  IS "APEX_APP_GROUP"."APP_GROUP_DESCRIPTION"%TYPE;
+
+-- User
+SUBTYPE useridtype      IS "APEX_APP_USER"."APP_USER_ID"%TYPE;
+SUBTYPE usernametype    IS "APEX_APP_USER"."APP_USERNAME"%TYPE;
+SUBTYPE usercodetype    IS "APEX_APP_USER"."APP_USER_CODE"%TYPE;
+
+-- Privileges
+SUBTYPE prividtype      IS "APEX_APP_PRIVILEGES"."APP_PRIV_ID"%TYPE;
+SUBTYPE privnametype    IS "APEX_APP_PRIVILEGES"."APP_PRIVILEGE"%TYPE;
+SUBTYPE privcodetype    IS "APEX_APP_PRIVILEGES"."APP_PRIV_CODE"%TYPE;
+SUBTYPE privdescrtype   IS "APEX_APP_PRIVILEGES"."APP_PRIV_DESCRIPTION"%TYPE;
+
+
+------------------------------------------------------------------
+-- Package Variables
+------------------------------------------------------------------
+
+-- WORKSPACE_ID Type
+l_wsid wsidtype;
+
+-- APP_ID Type
+l_appid appidtype;
+
+-- DATE Type
+l_date datetype;
+
+-- Group ID of a named Group
+l_groupid plstype;
+
+-- Role ID of a named Role
+l_roleid plstype;
+
+-- Domain ID of a named Domain
+l_domainid plstype;
+
+-- Prvilege ID of a named Privilege
+l_privid plstype;
+
+-- User ID of named User
+l_userid plstype;
+
+-- User Token of a named User
+l_token tokentype;
+
+
+------------------------------------------------------------------
+-- Collections
+------------------------------------------------------------------
+
+
+------------------------------------------------------------------
+-- Roles
+------------------------------------------------------------------
+
+-- Collection of Rolenames
+TYPE rolename_type IS TABLE OF ROLENAMETYPE
+INDEX BY PLSTYPE;
+
+-- Collection of Role IDs
+TYPE roleid_type IS TABLE OF ROLEIDTYPE
+INDEX BY VC1000TYPE;
+
+-- Collection Variable (initialized in Init Section)
+roles    rolename_type;
+roleids roleid_type;
+
+
+------------------------------------------------------------------
+-- Users
+------------------------------------------------------------------
+
+-- Collection of Usernames
+TYPE username_type IS TABLE OF usernametype
+INDEX BY PLSTYPE;
+
+-- Collection of User IDs
+TYPE userid_type IS TABLE OF useridtype
+INDEX BY VC1000TYPE;
+
+-- Collection Variable (initialized in Init Section)
+users    username_type;
+userids  userid_type;
+
+
+------------------------------------------------------------------
+-- Groups
+------------------------------------------------------------------
+
+-- Collection of Groupnames
+TYPE groupname_type IS TABLE OF groupnametype
+INDEX BY PLSTYPE;
+
+-- Collection of Group IDs
+TYPE groupid_type IS TABLE OF groupidtype
+INDEX BY VC1000TYPE;
+
+-- Collection Variable (initialized in Init Section)
+groups    groupname_type;
+groupids  groupid_type;
+
+
+------------------------------------------------------------------
+-- Domains
+------------------------------------------------------------------
+
+-- Collection of Domainames
+TYPE domainname_type IS TABLE OF domainnametype
+INDEX BY PLSTYPE;
+
+-- Collection of Domain IDs
+TYPE domainid_type IS TABLE OF domainidtype
+INDEX BY VC1000TYPE;
+
+-- Collection Variable (initialized in Init Section)
+domains    domainname_type;
+domainids  domainid_type;
+
+
+------------------------------------------------------------------
+-- Privileges
+------------------------------------------------------------------
+
+-- Collection of Privnames
+TYPE privname_type IS TABLE OF privnametype
+INDEX BY PLSTYPE;
+
+-- Collection of Priv IDs
+TYPE privid_type IS TABLE OF prividtype
+INDEX BY VC1000TYPE;
+
+-- Collection Variable (initialized in Init Section)
+privs    privname_type;
+privids  privid_type;
+
+
+------------------------------------------------------------------
+-- Security Level
+------------------------------------------------------------------
+
+-- Collection of Security Levels
+TYPE seclevname_tab IS TABLE OF seclevelname
+INDEX BY PLSTYPE;
+
+-- Collection of Priv IDs
+TYPE seclevel_tab IS TABLE OF seclevel
+INDEX BY VC1000TYPE;
+
+-- Collection Variable (initialized in Init Section)
+seclevnames    seclevname_tab;
+seclevels      seclevel_tab;
+
+
+------------------------------------------------------------------
+-- ROLES and USERS TABLE Types
+------------------------------------------------------------------
+
+-- Cursor for ROLE IDs and Names
+CURSOR role_cur IS SELECT app_role_id, app_role_name FROM "APEX_APP_ROLE";
+
+-- all ROLE Ids record
+TYPE all_roleids_type IS TABLE OF PLS_INTEGER
+INDEX BY "APEX_APP_ROLE"."APP_ROLE_NAME"%TYPE;
+
+-- ROLE IDs type variable
+all_roleids          all_roleids_type;
+
+-- all ROLE Names record
+TYPE all_rolenames_type IS TABLE OF VARCHAR2(512)
+INDEX BY PLS_INTEGER;
+
+-- ROLE Names type variable
+all_roles        all_rolenames_type;
+
+------------------------------------------------------------------
+-- Cursor for USER IDs and Names
+CURSOR user_cur IS SELECT app_user_id, app_username FROM "APEX_APP_USER";
+
+-- all USER Ids record
+TYPE all_userids_type IS TABLE OF PLS_INTEGER
+INDEX BY "APEX_APP_USER"."APP_USERNAME"%TYPE;
+
+-- USER IDs type variable
+all_userids          all_userids_type;
+
+-- all USER Names record
+TYPE all_usernames_type IS TABLE OF VARCHAR2(512)
+INDEX BY PLS_INTEGER;
+
+-- USER Names type variable
+all_users        all_usernames_type;
+
+
+------------------------------------------------------------------
+-- Cursor for USER and ROLE Mapping
+CURSOR app_user_roles (
+p_appid IN "APEX_APP_USER"."APP_ID"%TYPE,
+p_userid IN "APEX_APP_USER"."APP_USER_ID"%TYPE)
+IS
+SELECT * FROM "APEX_APP_USER_ROLE_MAP"
+    WHERE app_id = p_appid
+    AND app_user_id = p_userid;
+
+-- Cursor to select everything in "APEX_APP_USER_ROLE_MAP" table
+CURSOR app_user_roles_cur IS SELECT * FROM "APEX_APP_USER_ROLE_MAP";
+
+-- Collection of all Role Mappings from Cursor
+TYPE userrolemap_type IS TABLE OF app_user_roles_cur%ROWTYPE
+INDEX BY PLS_INTEGER;
+
+-- Variable for Collection
+userrolemap      userrolemap_type;
+
+
+------------------------------------------------------------------
+-- Cursor for GROUP IDs and Names
+CURSOR group_cur IS SELECT app_group_id, app_group_name FROM "APEX_APP_GROUP";
+
+-- all GROUP Ids record
+TYPE all_groupids_type IS TABLE OF PLS_INTEGER
+INDEX BY "APEX_APP_GROUP"."APP_GROUP_NAME"%TYPE;
+
+-- GROUP IDs type variable
+all_groupids          all_groupids_type;
+
+-- all GROUP Names record
+TYPE all_groupnames_type IS TABLE OF VARCHAR2(512)
+INDEX BY PLS_INTEGER;
+
+-- GROUP Names type variable
+all_groups        all_groupnames_type;
+
+
+------------------------------------------------------------------
+-- Cursor for DOMAIN IDs and Names
+CURSOR domain_cur IS SELECT app_domain_id, app_domain_name FROM "APEX_APP_DOMAIN";
+
+-- all DOMAIN Ids record
+TYPE all_domainids_type IS TABLE OF PLS_INTEGER
+INDEX BY "APEX_APP_DOMAIN"."APP_DOMAIN"%TYPE;
+
+-- DOMAIN IDs type variable
+all_domainids          all_domainids_type;
+
+-- all DOMAIN Names record
+TYPE all_domain_type IS TABLE OF VARCHAR2(512)
+INDEX BY PLS_INTEGER;
+
+-- DOMAIN Names type variable
+all_domains        all_domain_type;
+
+
+
+------------------------------------------------------------------
+-- Cursor for PRIV IDs and Names
+CURSOR priv_cur IS SELECT app_priv_id, app_privilege FROM "APEX_APP_PRIVILEGES";
+
+-- all PRIV Ids record
+TYPE all_privids_type IS TABLE OF PLS_INTEGER
+INDEX BY "APEX_APP_PRIVILEGES"."APP_PRIVILEGE"%TYPE;
+
+-- PRIV IDs type variable
+all_privids          all_privids_type;
+
+-- all PRIV Names record
+TYPE all_priv_type IS TABLE OF VARCHAR2(512)
+INDEX BY PLS_INTEGER;
+
+-- PRIV Names type variable
+all_privs        all_priv_type;
+
+
+------------------------------------------------------------------
+-- Cursor for SECLEVEL IDs and Names
+CURSOR seclevel_cur IS SELECT app_user_sec_level FROM "APEX_APP_USER";
+
+-- all SECLEVEL Ids record
+TYPE all_seclevelids_type IS TABLE OF PLS_INTEGER
+INDEX BY PLS_INTEGER;
+
+-- SECLEVEL IDs type variable
+all_seclevelids          all_seclevelids_type;
+
+-- all SECLEVEL Names record
+TYPE all_seclevel_type IS TABLE OF VARCHAR2(512)
+INDEX BY PLS_INTEGER;
+
+-- SECLEVEL Names type variable
+all_seclevels        all_seclevel_type;
+
+
+------------------------------------------------------------------
+
+
+------------------------------------------------------------------
+-- Package Procedures and Functions
+------------------------------------------------------------------
+
+FUNCTION "GETID" (
+name_in IN NAMETYPE)
+RETURN PLS_INTEGER;
+
+FUNCTION "GETNAME" (
+id_in IN plstype)
+RETURN NAMETYPE;
+
+FUNCTION "GETCODE" (
+code_in IN codetype)
+RETURN PLSTYPE;
+
+PROCEDURE "CREATE" (
+username_in IN "APEX_APP_USER_REG"."APP_USERNAME"%TYPE,
+owner_in IN ALL_TABLES.OWNER%TYPE DEFAULT USER,
+force_insert BOOLEAN DEFAULT FALSE);
+
+PROCEDURE "SET_ANALYZE_PARAMETER" (
+table_in IN ALL_TABLES.TABLE_NAME%TYPE,
+owner_in IN ALL_TABLES.OWNER%TYPE DEFAULT USER,
+force_insert BOOLEAN DEFAULT FALSE);
+
+END "APXUSR";
+/
+
+------------------------------------------------------------------
+--                          Package Body
+------------------------------------------------------------------
+CREATE OR REPLACE PACKAGE BODY "APXUSR"
+IS
+
+FUNCTION "GETID" (
+name_in IN NAMETYPE)
+RETURN PLS_INTEGER
+is
+begin
+null;
+end;
+
+FUNCTION "GETNAME" (
+id_in IN plstype)
+RETURN NAMETYPE
+is
+begin
+null;
+end;
+
+FUNCTION "GETCODE" (
+code_in IN codetype)
+RETURN PLSTYPE
+is
+begin
+null;
+end;
+
+PROCEDURE "CREATE" (
+username_in IN "APEX_APP_USER_REG"."APP_USERNAME"%TYPE,
+owner_in IN ALL_TABLES.OWNER%TYPE DEFAULT USER,
+force_insert BOOLEAN DEFAULT FALSE)
+is
+begin
+null;
+end;
+
+PROCEDURE "SET_ANALYZE_PARAMETER" (
+table_in IN ALL_TABLES.TABLE_NAME%TYPE,
+owner_in IN ALL_TABLES.OWNER%TYPE DEFAULT USER,
+force_insert BOOLEAN DEFAULT FALSE)
+is
+begin
+null;
+end;
+
+
+-- get the PROC_ID for a named process
+function "USERID" (
+p_username IN NAMETYPE)
+RETURN PLS_INTEGER
+IS
+usr NAMETYPE;
+retval PLS_INTEGER;
+BEGIN
+    usr := UPPER(p_username);
+            retval := all_userids(usr);
+    IF retval IS NULL THEN
+        RETURN NULL;
+    ELSE
+        RETURN retval;
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE;
+END;
+
+------------------------------------------------------------------
+
+
+
+------------------------------------------------------------------
+-- Initialization Section
+------------------------------------------------------------------
+BEGIN
+
+    -- Need separate initialization sections to catch exceptions
+
+    -- current Database Version
+    BEGIN
+      null;
+    END;
+/*
+    -- fill the Role id collection with cursor values
+    BEGIN
+        FOR i IN roleid_cur LOOP
+            all_roleids(i.app_rolename) := i.app_role_id;
+            all_roles(i.app_role_id) := i.app_rolename;
+        END LOOP;
+        EXCEPTION WHEN OTHERS THEN
+          apxsys.p ('ERROR: Package "'||pkg||'" Initializing ROLE Collections!');
+          apxsys.p (SQLERRM);
+    END;
+
+    -- fill the User id collection with cursor values
+    BEGIN
+        FOR i IN role_cur LOOP
+            all_roleids(i.app_rolename) := i.app_role_id;
+            all_roles(i.app_role_id) := i.app_rolename;
+        END LOOP;
+        EXCEPTION WHEN OTHERS THEN
+          apxsys.p ('ERROR: Package "'||pkg||'" Initializing ROLE Collections!');
+          apxsys.p (SQLERRM);
+    END;
+
+*/
+
+------------------------------------------------------------------
+-- End of Initialization Section
+------------------------------------------------------------------
+
+END "APXUSR";
+/
+
+------------------------------------------------------------------
+-- Display Errors if any
+------------------------------------------------------------------
+@@show_pkg_errors.sql "APXUSR"
+--@@show_pkg_source.sql "APXUSR"
+
+------------------------------------------------------------------
+-- Privileges
+------------------------------------------------------------------
+--EXEC dbaver.pubpkg(USER, 'APXUSR');
