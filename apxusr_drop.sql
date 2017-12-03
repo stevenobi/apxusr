@@ -22,8 +22,6 @@ drop sequence    "APX$APP_USER_ID_SEQ";
 drop trigger     "APX$APP_USER_BIU_TRG" ;
 drop sequence    "APX$APP_ROLE_ID_SEQ";
 drop trigger     "APX$APP_ROLE_BIU_TRG" ;
-drop sequence    "APX$APP_STATUS_ID_SEQ";
-drop trigger     "APX$APP_STATUS_BIU_TRG";
 drop sequence    "APX$APP_USERROLE_SEQ";
 drop trigger     "APX$APP_USRROL_BIU_TRG";
 drop trigger     "APX$APP_USRDEFROL_TRG";
@@ -33,16 +31,14 @@ drop sequence    "APX$APP_USREG_ID_SEQ";
 drop trigger     "APX$APP_USRREG_BIU_TRG";
 
 drop table       "APX$SYS_BUILTINS"      purge;
-drop table       "APX$APP_SETTINGS"      purge;
 drop table       "APX$APP_USER_ROLE_MAP" purge;
+drop table       "APX$APP_USER_SESSION"  purge;
 drop table       "APX$APP_USER_REG"      purge;
 drop table       "APX$APP_USER"          purge;
 drop table       "APX$APP_ROLE"          purge;
 drop table       "APX$APP_GROUP"         purge;
-drop table       "APX$APP_PRIVILEGES"    purge;
+drop table       "APX$APP_PRIVILEGE"     purge;
 drop table       "APX$APP_DOMAIN"        purge;
-drop table       "APX$APP_STATUS"        purge;
-drop table       "APX$APP_SCOPE"         purge;
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -61,7 +57,7 @@ drop view "APEX_ROLES";
 drop view "APEX_APPLICATION_ROLES";
 drop view "APEX_DEFAULT_ROLE";
 drop view "APEX_ALL_USERS";
-drop view "APEX_USERS"; 
+drop view "APEX_USERS";
 drop view "APEX_USER_ROLES";
 drop view "WORKSPACE_ADMINS";
 drop view "APPLICATION_ADMINS";

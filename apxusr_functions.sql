@@ -72,7 +72,7 @@ begin
     return false;
   end if;
 exception when no_data_found then
-  return false;  
+  return false;
 end;
 /
 
@@ -89,15 +89,15 @@ begin
     select max_security_level
     into l_seclev
     from "APEX_USERS"
-    where upper(trim(app_username)) = upper(trim(p_name));  
+    where upper(trim(app_username)) = upper(trim(p_name));
   elsif upper(p_scope) = 'ROLE' then
     select app_role_id
-    into l_seclev 
+    into l_seclev
     from "APEX_ROLES"
     where upper(trim(app_rolename)) = upper(trim(p_name));
   else
     l_seclev := 0;
-  end if;      
+  end if;
 return l_seclev;
 exception when no_data_found then
   return 0;
@@ -117,15 +117,15 @@ begin
     select max_security_level
     into l_seclev
     from "APEX_USERS"
-    where upper(trim(app_user_code)) = upper(trim(p_code));  
+    where upper(trim(app_user_code)) = upper(trim(p_code));
   elsif upper(p_scope) = 'ROLE' then
     select app_role_id
-    into l_seclev 
+    into l_seclev
     from "APEX_ROLES"
     where upper(trim(app_role_code)) = upper(trim(p_code));
   else
     l_seclev := 0;
-  end if;      
+  end if;
 return l_seclev;
 exception when no_data_found then
   return 0;
@@ -178,13 +178,13 @@ begin
  -- we want to check if the exact role is given
     select 1 into l_has_role
     from "APEX_USER_ROLES"
-    where upper(trim(username)) = upper(trim(p_name))  
+    where upper(trim(username)) = upper(trim(p_name))
     and upper(trim(role_name)) = upper(trim(p_role));
   if l_has_role = 1 then
     l_result := true;
   else
     l_result := false;
-  end if;    
+  end if;
 return l_result;
 end;
 /
