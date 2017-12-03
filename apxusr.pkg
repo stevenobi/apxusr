@@ -363,6 +363,21 @@ INDEX BY PLS_INTEGER;
 -- SECLEVEL Names type variable
 all_seclevels        all_seclevel_type;
 
+------------------------------------------------------------------
+-- Cursor for Options and Values
+CURSOR option_cur (p_process_id in number)
+IS
+SELECT app_process_option, app_process_option_value
+FROM "APEX_APP_PROCESS_OPTION"
+WHERE app_process_id = p_process_id;
+
+-- all option Ids record
+TYPE all_option_values_type IS TABLE OF VARCHAR2(1000)
+INDEX BY VARCHAR2(1000);
+
+-- option IDs type variable
+all_option_values          all_option_values_type;
+
 
 ------------------------------------------------------------------
 
@@ -388,10 +403,13 @@ username_in IN "APEX_APP_USER_REG"."APP_USERNAME"%TYPE,
 owner_in IN ALL_TABLES.OWNER%TYPE DEFAULT USER,
 force_insert BOOLEAN DEFAULT FALSE);
 
-PROCEDURE "SET_ANALYZE_PARAMETER" (
-table_in IN ALL_TABLES.TABLE_NAME%TYPE,
-owner_in IN ALL_TABLES.OWNER%TYPE DEFAULT USER,
-force_insert BOOLEAN DEFAULT FALSE);
+PROCEDURE "SET_OBJECT_PARAMETER" (
+p_owner IN ALL_OBJECTS.OWNER%TYPE DEFAULT USER,
+p_object IN ALL_OBJECTS.OBJECT_NAME%TYPE DEFAULT NULL, -- 'FUNCTION', 'PROCDURE', 'PACKAGE', 'PACKAGE SPEC', 'PACKAGE BODY', 'TRIGGER'
+p_param_name IN VARCHAR2,
+p_param_value IN VARCHAR2,
+p_memory_only IN BOOLEAN DEFAULT FALSE,
+p_force BOOLEAN DEFAULT FALSE);
 
 END "APXUSR";
 /
@@ -401,6 +419,29 @@ END "APXUSR";
 ------------------------------------------------------------------
 CREATE OR REPLACE PACKAGE BODY "APXUSR"
 IS
+
+-- Private Variables and Methods
+
+procedure apx$get (
+    p_what in varchar2,
+    p_which in varchar2 default null,
+    p_options in all_option_values_type
+) is
+begin
+null;
+end;
+
+procedure apx$set (
+    p_what in varchar2,
+    p_which in varchar2 default null,
+    p_options in all_option_values_type
+) is
+begin
+null;
+end;
+
+
+-- Public Methods
 
 FUNCTION "GETID" (
 name_in IN NAMETYPE)
@@ -435,10 +476,13 @@ begin
 null;
 end;
 
-PROCEDURE "SET_ANALYZE_PARAMETER" (
-table_in IN ALL_TABLES.TABLE_NAME%TYPE,
-owner_in IN ALL_TABLES.OWNER%TYPE DEFAULT USER,
-force_insert BOOLEAN DEFAULT FALSE)
+PROCEDURE "SET_OBJECT_PARAMETER" (
+p_owner IN ALL_OBJECTS.OWNER%TYPE DEFAULT USER,
+p_object IN ALL_OBJECTS.OBJECT_NAME%TYPE DEFAULT NULL, -- 'FUNCTION', 'PROCDURE', 'PACKAGE', 'PACKAGE SPEC', 'PACKAGE BODY', 'TRIGGER'
+p_param_name IN VARCHAR2,
+p_param_value IN VARCHAR2,
+p_memory_only IN BOOLEAN DEFAULT FALSE,
+p_force BOOLEAN DEFAULT FALSE)
 is
 begin
 null;
