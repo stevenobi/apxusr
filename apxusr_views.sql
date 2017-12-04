@@ -18,11 +18,9 @@ set define off
 -- All APEX Application Username format
 create or replace view "APP_USERNAME_FORMAT"
 as
-select app_setting_value as username_format
-from "APX_APP_SETTINGS"
-where app_id = v('APP_ID')
-and app_setting_category = 'AUTHENTICATION'
-and app_setting_name = 'USERNAME_FORMAT';
+select nvl(apx_config_value, apx_config_def_value) as username_format
+from "APEX_SETTINGS"
+where apx_config_name = 'USERNAME_FORMAT';
 
 
 --------------------------------------------------------------------------------------
