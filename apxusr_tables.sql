@@ -35,7 +35,7 @@ created_by varchar2(64),
 modified date,
 modified_by varchar2(64),
 constraint "APX$APPDOMAIN_DOMAIN_ID" primary key (app_domain_id),
-constraint "APX$APPDOMAIN_CTX_FK" foreign key (app_domain_ctx_id) references "APX$CTX"(apx_ctx_id) on delete set null,
+constraint "APX$APPDOMAIN_CTX_FK" foreign key (app_domain_ctx_id) references "APX$APP_CTX"(app_ctx_id) on delete set null,
 constraint "APX$APPDOMAIN_STATUS_FK" foreign key (app_domain_status_id) references "APX$STATUS"(app_status_id) on delete set null,
 constraint "APX$APPDOMAIN_PARENT_FK" foreign key (app_parent_domain_id) references "APX$APP_DOMAIN"(app_domain_id) on delete set null
 );
@@ -92,7 +92,7 @@ created_by varchar2(64),
 modified date,
 modified_by varchar2(64),
 constraint "APX$APPPRIV_PRIV_ID" primary key (app_priv_id),
-constraint "APX$APPPRIV_CTX_FK" foreign key (app_priv_ctx_id) references "APX$CTX"(apx_ctx_id) on delete set null,
+constraint "APX$APPPRIV_CTX_FK" foreign key (app_priv_ctx_id) references "APX$APP_CTX"(app_ctx_id) on delete set null,
 constraint "APX$APPPRIV_STATUS_FK" foreign key (app_priv_status_id) references "APX$STATUS"(app_status_id) on delete set null,
 constraint "APX$APPPRIV_PARENT_FK" foreign key (app_parent_priv_id) references "APX$APP_PRIVILEGE"(app_priv_id) on delete set null
 );
@@ -146,13 +146,13 @@ created_by varchar2(64),
 modified date,
 modified_by varchar2(64),
 constraint "APX$APPGROUP_GROUP_ID" primary key (app_group_id),
-constraint "APX$APPGROUP_CTX_FK" foreign key (app_group_ctx_id) references "APX$CTX"(apx_ctx_id) on delete set null,
+constraint "APX$APPGROUP_CTX_FK" foreign key (app_group_ctx_id) references "APX$APP_CTX"(app_ctx_id) on delete set null,
 constraint "APX$APPGROUP_STATUS_FK" foreign key (app_group_status_id) references "APX$STATUS"(app_status_id) on delete set null,
 constraint "APX$APPGROUP_DOMAIN_FK" foreign key (app_group_domain_id) references "APX$APP_DOMAIN"(app_domain_id) on delete set null,
 constraint "APX$APPGROUP_PARENT_FK" foreign key (app_parent_group_id) references "APX$APP_GROUP"(app_group_id) on delete set null
 );
 
-create unique index "APX$APP_GROUP_UNQ1" on "APX$APP_GROUP"(app_group_id, app_id);
+create unique index "APX$APP_GROUP_UNQ1" on "APX$APP_GROUP"(APP_GROUP_ID, APP_ID);
 create unique index "APX$APP_GROUP_UNQ2" on "APX$APP_GROUP"(upper(app_group_name), app_group_ctx_id, app_id);
 create index "APX$APP_GROUP_STATUS_FK_IDX" on "APX$APP_GROUP"(app_group_status_id);
 create index "APX$APP_GROUP_PARENT_FK_IDX" on "APX$APP_GROUP"(app_parent_group_id);
@@ -202,7 +202,7 @@ created_by varchar2(64),
 modified date,
 modified_by varchar2(64),
 constraint "APX$APPROLE_ROLE_ID" primary key (app_role_id),
-constraint "APX$APPROLE_CTX_FK" foreign key (app_role_ctx_id) references "APX$CTX"(apx_ctx_id) on delete set null,
+constraint "APX$APPROLE_CTX_FK" foreign key (app_role_ctx_id) references "APX$APP_CTX"(app_ctx_id) on delete set null,
 constraint "APX$APPROLE_STATUS_FK" foreign key (app_role_status_id) references "APX$STATUS"(app_status_id) on delete set null,
 constraint "APX$APPROLE_DOMAIN_FK" foreign key (app_role_domain_id) references "APX$APP_DOMAIN"(app_domain_id) on delete set null,
 constraint "APX$APPROLE_PARENT_FK" foreign key (app_parent_role_id) references "APX$APP_ROLE"(app_role_id) on delete set null
@@ -276,7 +276,7 @@ created_by varchar2(64),
 modified date,
 modified_by varchar2(64),
 constraint "APX$APP_USER_ID" primary key(app_user_id),
-constraint "APX$APP_USER_CTX_FK" foreign key (app_user_ctx_id) references "APX$CTX"(apx_ctx_id) on delete set null,
+constraint "APX$APP_USER_CTX_FK" foreign key (app_user_ctx_id) references "APX$APP_CTX"(app_ctx_id) on delete set null,
 constraint "APX$APP_USER_STATUS_FK" foreign key (app_user_status_id) references "APX$STATUS"(app_status_id) on delete set null,
 constraint "APX$APP_USER_DEFROLE_FK" foreign key (app_user_default_role_id) references "APX$APP_ROLE"(app_role_id) on delete set null,
 constraint "APX$APP_USER_DOMAIN_FK" foreign key (app_user_domain_id) references "APX$APP_DOMAIN"(app_domain_id) on delete set null,
@@ -310,10 +310,10 @@ begin
     end if;
     if (:new.APP_USER_CTX_ID is null) then
       begin
-        select APX_CONTEXT_ID
+        select APP_CTX_ID
         into :new.APP_USER_CTX_ID
-        from "APX$CTX"
-        where UPPER(APX_CONTEXT) = 'USER';
+        from "APX$APP_CTX"
+        where UPPER(APP_CTX) = 'USER';
         exception when no_data_found then
         select 0 into :new.APP_USER_CTX_ID from DUAL;
       end;
@@ -378,7 +378,7 @@ created_by varchar2(64),
 modified date,
 modified_by varchar2(64),
 constraint "APX$APP_USREG_ID" primary key(app_user_id),
-constraint "APX$APP_USREG_CTX_FK" foreign key (app_user_ctx_id) references "APX$CTX"(apx_ctx_id) on delete set null,
+constraint "APX$APP_USREG_CTX_FK" foreign key (app_user_ctx_id) references "APX$APP_CTX"(app_ctx_id) on delete set null,
 constraint "APX$APP_USREG_STATUS_FK" foreign key (app_user_status_id) references "APX$STATUS"(app_status_id) on delete set null,
 constraint "APX$APP_USREG_DOMAIN_FK" foreign key (app_user_domain_id) references "APX$APP_DOMAIN"(app_domain_id) on delete set null,
 constraint "APX$APP_USREG_DEFROLE_FK" foreign key (app_user_default_role_id) references "APX$APP_ROLE"(app_role_id) on delete set null
@@ -415,16 +415,18 @@ begin
     if (:new.APP_USER_TOKEN is null) then
       begin
         select APP_DOMAIN_NAME
-        into l_domain
+        into L_DOMAIN
         from "APX$APP_DOMAIN"
         where APP_DOMAIN_ID = :new.APP_USER_DOMAIN_ID;
       exception when no_data_found then
         l_domain := 'NewAppUserDomain.net';
       end;
       begin
-        select sysdate, sysdate +24/24, systimestamp, APX_GET_TOKEN(l_domain)
-        into :new.APP_USER_TOKEN_CREATED, :new.APP_USER_TOKEN_VALID_UNTIL,
-             :new.APP_USER_TOKEN_TS, :new.APP_USER_TOKEN
+        select sysdate, sysdate +24/24, systimestamp,
+        replace(UTL_RAW.CAST_TO_VARCHAR2(UTL_ENCODE.BASE64_ENCODE(UTL_RAW.CAST_TO_RAW(ABS(DBMS_RANDOM.random())||
+                l_domain||ABS(DBMS_RANDOM.random())))),
+                CHR(13)||CHR(10),'')
+        into :new.APP_USER_TOKEN_CREATED, :new.APP_USER_TOKEN_VALID_UNTIL, :new.APP_USER_TOKEN_TS, :new.APP_USER_TOKEN
         from dual;
       exception when no_data_found then
         select 0 into :new.app_user_ctx_id from DUAL;
@@ -432,10 +434,10 @@ begin
     end if;
     if (:new.APP_USER_CTX_ID is null) then
       begin
-        select APX_CONTEXT_ID
+        select APP_CTX_ID
         into :new.APP_USER_CTX_ID
-        from "APX$CTX"
-        where UPPER(APX_CONTEXT) = 'USER';
+        from "APX$APP_CTX"
+        where UPPER(APP_CTX) = 'USER';
         exception when no_data_found then
         select 0 into :new.app_user_ctx_id from DUAL;
       end;
@@ -445,8 +447,8 @@ begin
         select nvl(:new.app_user_first_name, 'New')||' '||nvl(:new.app_user_last_name, 'User')
         into :new.APP_USERNAME
         from dual;
-        exception when no_data_found then
-        select 'AppUser '||nvl(to_char(:new.app_user_id), to_number(SYS_GUID(),'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'))
+        EXCEPTION when NO_DATA_FOUND then
+        select 'AppUser '||nvl(to_char(:new.app_user_id), SYS_GUID())
         into :new.app_username from DUAL;
       end;
     end if;
@@ -550,7 +552,7 @@ constraint "APX$SYSBUILTIN_ID" primary key (app_builtin_id),
 constraint "APX$APPUSR_ID_FK" foreign key (app_user_id) references "APX$APP_USER"(app_user_id) on delete cascade,
 constraint "APX$APPROL_ID_FK" foreign key (app_role_id) references "APX$APP_ROLE"(app_role_id) on delete cascade,
 constraint "APX$SYSBUILTIN_STATUS_FK" foreign key (app_builtin_status_id) references "APX$APP_STATUS"(app_status_id) on delete set null,
-constraint "APX$SYSBUILTIN_CTX_FK" foreign key (app_builtin_ctx_id) references "APX$CTX"(apx_ctx_id) on delete set null,
+constraint "APX$SYSBUILTIN_CTX_FK" foreign key (app_builtin_ctx_id) references "APX$APP_CTX"(app_ctx_id) on delete set null,
 constraint "APX$SYSBUILTINS_FK" foreign key (app_builtin_parent_id) references "APX$APP_BUILTIN"(app_builtin_id) on delete set null
 ) organization index;
 
@@ -573,7 +575,7 @@ create table "APX$APP_USER_SESSION" (
 	app_user_last_login timestamp (6) with time zone default null,
 	app_user_last_logout timestamp (6) with time zone default null,
 constraint "APX$APPUSRSESSION_PK" primary key ("APP_USER_SESSION_ID"),
-constraint "APX$APPUSRSESSION_CTX_FK" foreign key (app_user_session_context) references "APX$CTX"(apx_ctx_id) on delete set null
+constraint "APX$APPUSRSESSION_CTX_FK" foreign key (app_user_session_context) references "APX$APP_CTX"(app_ctx_id) on delete set null
 );
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

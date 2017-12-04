@@ -22,7 +22,7 @@
 -- DEFAULT Scopes first
 insert into "APX$APP_SCOPE" (APP_SCOPE_ID, APP_SCOPE, APP_SCOPE_CODE, APP_PARENT_SCOPE_ID, APP_ID)
 values ('0', 'DEFAULT', 'DEF', V('FB_FLOW_ID'));
-
+									
 
 -- App Scopes
 insert into "APX$APP_SCOPE" (APP_SCOPE, APP_SCOPE_CODE, APP_ID)
@@ -54,10 +54,10 @@ values ('ACCOUNT', 'ACC', V('FB_FLOW_ID'));
 -- Internal Application Scopes last (mostly ADMIN Security Level)
 insert into "APX$APP_SCOPE" (APP_SCOPE_ID, APP_SCOPE, APP_SCOPE_CODE, APP_PARENT_SCOPE_ID, APP_SCOPE_SEC_LEVEL, APP_ID)
 values ('-1', 'SETTING', 'SET', 3, 1000, V('FB_FLOW_ID'));
-
+									
 insert into "APX$APP_SCOPE" (APP_SCOPE_ID, APP_SCOPE, APP_SCOPE_CODE, APP_PARENT_SCOPE_ID, APP_SCOPE_SEC_LEVEL, APP_ID)
 values ('10', 'APP_SETTING', 'APPSET', 3, 1000, V('FB_FLOW_ID'));
-
+									
 insert into "APX$APP_SCOPE" (APP_SCOPE_ID, APP_SCOPE, APP_SCOPE_CODE, APP_PARENT_SCOPE_ID, APP_SCOPE_SEC_LEVEL, APP_ID)
 values ('-20', 'USR_SETTING', 'USRSET', 3, 1000, V('FB_FLOW_ID'));
 
