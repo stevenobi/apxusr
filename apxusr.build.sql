@@ -1,6 +1,6 @@
 
 ---------------------------------------------------------------
-       ---- 17/12/19 22:54 Begin of SQL Build APX ----
+       ---- 17/12/21 22:32 Begin of SQL Build APX ----
 
 
 -- SQL Drop File
@@ -16,7 +16,6 @@ prompt
 prompt Dropping DB Model (Tables)
 prompt
 
-
 --@"/Users/stefan/Library/Mobile Documents/com~apple~CloudDocs/Projects/APEX/apx/workarea/plsql/packages/apxusr/workarea/model/apxusr_drop.sql"
 
 
@@ -28,6 +27,7 @@ drop table       "APX$BUILTIN"       purge;
 
 
 prompt APX$USER_ROLE_MAP
+drop  view       "APEX_USER_ROLES";
 drop synonym     "APEX_USER_ROLE_MAP";
 drop trigger     "APX$USRDEFROL_TRG";
 drop sequence    "APX$USERROLE_SEQ";
@@ -36,13 +36,18 @@ drop table       "APX$USER_ROLE_MAP" purge;
 
 
 prompt APX$USER_REGISTRATION
+drop view        "APEX_USER_REGISTRATIONS";
 drop synonym     "APEX_USER_REGISTRATION";
+drop synonym     "APEX_USER_ALL_REG";
+drop  view       "APEX_USER_REGISTRATIONS_ALL";
 drop synonym     "APEX_USREG";
 drop sequence    "APX$USREG_ID_SEQ";
 drop trigger     "APX$USRREG_BIU_TRG";
 drop table       "APX$USER_REG"      purge;
 
 prompt APX$USER
+drop synonym     "APEX_APP_USERS";
+drop view        "APEX_USERS";
 drop synonym     "APEX_USER";
 drop sequence    "APX$USER_ID_SEQ";
 drop trigger     "APX$USER_BIU_TRG" ;
@@ -50,6 +55,8 @@ drop table       "APX$USER"          purge;
 
 
 prompt APX$ROLE
+drop synonym     "APEX_APP_ROLES";
+drop view        "APEX_ROLES";
 drop synonym     "APEX_ROLE";
 drop sequence    "APX$ROLE_ID_SEQ";
 drop trigger     "APX$ROLE_BIU_TRG" ;
@@ -57,6 +64,8 @@ drop table       "APX$ROLE"          purge;
 
 
 prompt APX$PRIVILEGE
+drop view        "APEX_PRIVILEGES";
+drop synonym     "APEX_USER_PRIVILEGES";
 drop synonym     "APEX_PRIVILEGE";
 drop sequence    "APX$PRIV_ID_SEQ";
 drop trigger     "APX$PRIV_BIU_TRG";
@@ -64,6 +73,8 @@ drop table       "APX$PRIVILEGE"     purge;
 
 
 prompt APX$DOMAIN
+drop view        "APEX_DOMAINS";
+drop synonym     "APEX_USER_DOMAINS";
 drop synonym     "APEX_DOMAIN";
 drop sequence    "APX$DOMAIN_ID_SEQ";
 drop trigger     "APX$DOMAIN_BIU_TRG";
@@ -71,6 +82,8 @@ drop table       "APX$DOMAIN"        purge;
 
 
 prompt APX$GROUP
+drop view        "APEX_GROUPS";
+drop synonym     "APEX_USER_GROUPS";
 drop synonym     "APEX_GROUP";
 drop sequence    "APX$GROUP_ID_SEQ";
 drop trigger     "APX$GROUP_BIU_TRG";
@@ -78,7 +91,7 @@ drop table       "APX$GROUP"         purge;
 
 
 set pages 0 line 120 define off verify off feed off echo off timing off
-
+prompt
 --exit;
 
 ---------------------------------------------------------------
@@ -135,7 +148,7 @@ prompt Creating &1 DB Model (Tables)
 -- drop synonym     "APEX_BUILTIN";
 -- drop table       "APX$BUILTIN"       purge;
 
-
+-- drop view        "APEX_USER_ROLES";
 -- drop synonym     "APEX_USER_ROLE_MAP";
 -- drop trigger     "APX$USRDEFROL_TRG";
 -- drop sequence    "APX$USERROLE_SEQ";
@@ -143,37 +156,48 @@ prompt Creating &1 DB Model (Tables)
 -- drop table       "APX$USER_ROLE_MAP" purge;
 
 
+-- drop view        "APEX_USER_REGISTRATIONS";
 -- drop synonym     "APEX_USER_REGISTRATION";
+-- drop synonym     "APEX_USER_ALL_REG";
+-- drop  view       "APEX_USER_REGISTRATIONS_ALL";
 -- drop synonym     "APEX_USREG";
 -- drop sequence    "APX$USREG_ID_SEQ";
 -- drop trigger     "APX$USRREG_BIU_TRG";
 -- drop table       "APX$USER_REG"      purge;
 
 
+-- drop synonym     "APEX_APP_USERS";
+-- drop view        "APEX_USERS";
 -- drop synonym     "APEX_USER";
 -- drop sequence    "APX$USER_ID_SEQ";
 -- drop trigger     "APX$USER_BIU_TRG" ;
 -- drop table       "APX$USER"          purge;
 
 
+-- drop synonym     "APEX_APP_ROLES";
+-- drop view        "APEX_ROLES";
 -- drop synonym     "APEX_ROLE";
 -- drop sequence    "APX$ROLE_ID_SEQ";
 -- drop trigger     "APX$ROLE_BIU_TRG" ;
 -- drop table       "APX$ROLE"          purge;
 
-
+-- drop view        "APEX_PRIVILEGES";
+-- drop synonym     "APEX_USER_PRIVILEGES";
 -- drop synonym     "APEX_PRIVILEGE";
 -- drop sequence    "APX$PRIV_ID_SEQ";
 -- drop trigger     "APX$PRIV_BIU_TRG";
 -- drop table       "APX$PRIVILEGE"     purge;
 
-
+-- drop view        "APEX_DOMAINS";
+-- drop synonym     "APEX_USER_DOMAINS";
 -- drop synonym     "APEX_DOMAIN";
 -- drop sequence    "APX$DOMAIN_ID_SEQ";
 -- drop trigger     "APX$DOMAIN_BIU_TRG";
 -- drop table       "APX$DOMAIN"        purge;
 
 
+-- drop synonym     "APEX_USER_GROUPS"
+-- drop view        "APEX_GROUPS"
 -- drop synonym     "APEX_GROUP";
 -- drop sequence    "APX$GROUP_ID_SEQ";
 -- drop trigger     "APX$GROUP_BIU_TRG";
@@ -245,6 +269,35 @@ end;
 -- Synonyms on APX$GROUP
 create synonym  "APEX_GROUP"           for "APX$GROUP";
 
+--------------------------------------------------------------------------------------
+-- Views and more Synonyms on APEX_GROUP
+create view "APEX_GROUPS"
+as
+select
+g.apx_group_id as apex_group_id,
+g.apx_group_name as apex_group,
+g.apx_group_code as apex_group_code,
+g.apx_group_description as apex_group_description,
+s.apex_status as apex_group_status,
+c.apex_context as apex_group_context,
+(select b.apx_group_name from "APEX_GROUP" b
+ where b.apx_group_id = g.apx_parent_group_id) as apex_parent_group,
+g.apx_group_sec_level as apex_group_security_level,
+g.app_id as app_id,
+g.created,
+g.created_by,
+g.modified,
+g.modified_by
+from "APEX_GROUP" g
+left outer join "APEX_STATUS" s
+on (g.apx_group_status_id = s.apex_status_id)
+left outer join "APEX_CONTEXT" c
+on (g.apx_group_context_id = c.apex_context_id)
+order by 1, 2, 3;
+
+
+create synonym "APEX_USER_GROUPS" for "APEX_GROUPS";
+
 
 --------------------------------------------------------------------------------------
 -- Application Domains
@@ -315,6 +368,38 @@ end;
 -- Synonyms on APX$DOMAIN
 create synonym  "APEX_DOMAIN"           for "APX$DOMAIN";
 
+-- Apex Domains
+create view "APEX_DOMAINS"
+as
+select
+d.apx_domain_id as apex_domain_id,
+d.apx_domain as apex_domain,
+d.apx_domain_name as apex_fqdn,
+d.apx_domain_code as apex_domain_code,
+d.apx_domain_description as apex_domain_description,
+(select b.apx_domain from "APEX_DOMAIN" b
+ where b.apx_domain_id = d.apx_parent_domain_id) as apex_parent_domain,
+g.apex_group as apex_domain_group,
+d.apx_domain_sec_level as apex_domain_security_level,
+s.apex_status as apex_domain_status,
+c.apex_context as apex_domain_context,
+d.apx_domain_homepage as apex_domain_home_page,
+d.app_id as app_id,
+d.created,
+d.created_by,
+d.modified,
+d.modified_by
+from  "APEX_DOMAIN" d
+left outer join "APEX_GROUPS" g
+on (d.apx_domain_group_id = g.apex_group_id)
+left outer join "APEX_STATUS" s
+on (d.apx_domain_status_id = s.apex_status_id)
+left outer join "APEX_CONTEXT" c
+on (d.apx_domain_context_id = c.apex_context_id)
+order by 1, 2, 3;
+
+create synonym "APEX_USER_DOMAINS" for "APEX_DOMAINS";
+
 
 --------------------------------------------------------------------------------------
 -- Application Privileges
@@ -378,6 +463,36 @@ end;
 --------------------------------------------------------------------------------------
 -- Synonyms on APX$PRIVILEGE
 create synonym  "APEX_PRIVILEGE"        for "APX$PRIVILEGE";
+
+-- Apex Privileges
+create view "APEX_PRIVILEGES"
+as
+select
+p.apx_priv_id as apex_privilege_id,
+p.apx_privilege as apex_privilege,
+p.apx_priv_code as apex_privilege_code,
+p.apx_priv_description as apex_priv_description,
+s.apex_status as apex_priv_status,
+c.apex_context as apex_priv_context,
+(select b.apx_privilege from "APEX_PRIVILEGE" b
+ where b.apx_priv_id = p.apx_parent_priv_id) as apex_parent_privilege,
+p.apx_priv_sec_level as apex_priv_security_level,
+d.apex_domain,
+p.app_id,
+p.created,
+p.created_by,
+p.modified,
+p.modified_by
+from "APEX_PRIVILEGE" p
+left outer join "APEX_STATUS" s
+on (p.apx_priv_status_id = s.apex_status_id)
+left outer join "APEX_CONTEXT" c
+on (p.apx_priv_context_id = c.apex_context_id)
+left outer join "APEX_DOMAINS" d
+on (p.apx_priv_domain_id = d.apex_domain_id)
+order by 1, 2, 3;
+
+create synonym "APEX_USER_PRIVILEGES" for "APEX_PRIVILEGES";
 
 
 --------------------------------------------------------------------------------------
@@ -446,6 +561,36 @@ end;
 --------------------------------------------------------------------------------------
 -- Synonyms on APX$USER
 create synonym  "APEX_ROLE"             for "APX$ROLE";
+
+-- Apex Roles
+create view "APEX_ROLES"
+as
+select
+r.apx_role_id as apex_role_id,
+r.apx_role_name as apex_role,
+r.apx_role_code as apex_role_code,
+r.apx_role_description as apex_role_description,
+(select b.apx_role_name from "APEX_ROLE" b
+ where b.apx_role_id = r.apx_parent_role_id) as apex_parent_role,
+s.apex_status as apex_priv_status,
+c.apex_context as apex_priv_context,
+d.apex_domain,
+r.apx_role_sec_level as apex_role_security_level,
+r.app_id as app_id,
+r.created,
+r.created_by,
+r.modified,
+r.modified_by
+from  "APEX_ROLE" r
+left outer join "APEX_STATUS" s
+on (r.apx_role_status_id = s.apex_status_id)
+left outer join "APEX_CONTEXT" c
+on (r.apx_role_context_id = c.apex_context_id)
+left outer join "APEX_DOMAINS" d
+on (r.apx_role_domain_id = d.apex_domain_id)
+order by 1, 2, 3;
+
+create synonym "APEX_APP_ROLES" for "APEX_ROLES";
 
 
 --------------------------------------------------------------------------------------
@@ -552,11 +697,60 @@ end;
 -- Synonyms on APX$USER
 create synonym  "APEX_USER"             for "APX$USER";
 
+-- Apex Users
+create view "APEX_USERS"
+as
+select
+  u.apx_user_id as apex_user_id,
+  u.apx_username as apex_username,
+  u.apx_user_email as apex_user_email,
+  r.apex_role as apex_user_default_role,
+  u.apx_user_code as apex_user_code,
+  s.apex_status as apex_user_status,
+  c.apex_context as apex_user_context,
+  d.apex_domain as apex_user_domain,
+  u.apx_user_sec_level as apex_user_security_level,
+ (select b.apx_username from "APEX_USER" b
+  where b.apx_user_id = u.apx_user_parent_user_id) as apex_parent_user,
+  u.app_id as app_id,
+  u.apx_user_first_name as apex_user_first_name,
+  u.apx_user_last_name as apex_user_last_name,
+  u.apx_user_ad_login as apex_user_ldap_login,
+  u.apx_user_host_login as apex_user_host_login,
+  u.apx_user_email2 as apex_user_email2,
+  u.apx_user_email3 as apex_user_email3,
+  u.apx_user_twitter as apex_user_twitter,
+  u.apx_user_facebook as apex_user_facebook,
+  u.apx_user_linkedin as apex_user_linkedin,
+  u.apx_user_xing as apex_user_xing,
+  u.apx_user_other_social_media as apex_user_other_soial_media,
+  u.apx_user_phone1 as apex_user_phone1,
+  u.apx_user_phone2 as apex_user_phone2,
+  u.apx_user_adress as apex_user_full_adress,
+  u.apx_user_description as apex_user_description,
+  u.created,
+  u.created_by,
+  u.modified,
+  u.modified_by
+from "APEX_USER" u
+left outer join "APEX_ROLES" r
+on (u.apx_user_default_role_id = r.apex_role_id)
+left outer join "APEX_STATUS" s
+on (u.apx_user_status_id = s.apex_status_id)
+left outer join "APEX_CONTEXT" c
+on (u.apx_user_context_id = c.apex_context_id)
+left outer join "APEX_DOMAINS" d
+on (u.apx_user_domain_id = d.apex_domain_id)
+order by 1, 2, 3;
+
+
+create synonym "APEX_APP_USERS" for "APEX_USERS";
+
 
 --------------------------------------------------------------------------------------
 -- Application User Registration
 create table "APX$USER_REG" (
-APX_USER_ID number not null,
+apx_user_id number not null,
 apx_username varchar2(64) default 'NewAppUser' not null,
 apx_user_email varchar2(64) not null,
 apx_user_default_role_id number default 1 not null, -- 0 PUBLIC, 1 USER
@@ -689,6 +883,85 @@ create synonym  "APEX_USER_REGISTRATION"        for "APX$USER_REG";
 create synonym  "APEX_USREG"                    for "APX$USER_REG";
 
 
+-- Apex User Basic Registration
+create view "APEX_USER_REGISTRATIONS"
+as
+select
+  r.app_id,
+  r.apx_user_id as apex_user_id,
+  r.apx_user_domain_id as apex_user_domain,
+  r.apx_username as apex_username,
+  r.apx_user_email as apex_user_email,
+  r.apx_user_token_created as apex_user_token_created,
+  r.apx_user_token_valid_until as apex_user_token_valid_until,
+  r.apx_user_token_ts as apex_token_timestamp,
+  r.apx_user_token as apex_user_token,
+  r.apx_user_sec_level as apex_user_security_level,
+  c.apex_context as apex_user_context,
+  s.apex_status as apex_user_status,
+  (select b.apx_username from "APEX_USER" b
+  where b.apx_user_id = r.apx_user_parent_user_id) as apex_parent_user,
+  r.created,
+  r.created_by,
+  r.modified,
+  r.modified_by
+from "APEX_USER_REGISTRATION" r
+left outer join "APEX_STATUS" s
+on (r.apx_user_status_id = s.apex_status_id)
+left outer join "APEX_CONTEXT" c
+on (r.apx_user_context_id = c.apex_context_id)
+order by 1, 2, 3;
+
+-- All User Registration Details
+create view "APEX_USER_REGISTRATIONS_ALL"
+as
+select
+  u.apx_user_id as apex_user_id,
+  u.apx_username as apex_username,
+  u.apx_user_email as apex_user_email,
+  r.apex_role as apex_user_default_role,
+  u.apx_user_code as apex_user_code,
+  s.apex_status as apex_user_status,
+  c.apex_context as apex_user_context,
+  d.apex_domain as apex_user_domain,
+  u.apx_user_sec_level as apex_user_security_level,
+ (select b.apx_username from "APEX_USER" b
+  where b.apx_user_id = u.apx_user_parent_user_id) as apex_parent_user,
+  u.app_id as app_id,
+  u.apx_user_first_name as apex_user_first_name,
+  u.apx_user_last_name as apex_user_last_name,
+  u.apx_user_ad_login as apex_user_ldap_login,
+  u.apx_user_host_login as apex_user_host_login,
+  u.apx_user_email2 as apex_user_email2,
+  u.apx_user_email3 as apex_user_email3,
+  u.apx_user_twitter as apex_user_twitter,
+  u.apx_user_facebook as apex_user_facebook,
+  u.apx_user_linkedin as apex_user_linkedin,
+  u.apx_user_xing as apex_user_xing,
+  u.apx_user_other_social_media as apex_user_other_soial_media,
+  u.apx_user_phone1 as apex_user_phone1,
+  u.apx_user_phone2 as apex_user_phone2,
+  u.apx_user_adress as apex_user_full_adress,
+  u.apx_user_description as apex_user_description,
+  u.created,
+  u.created_by,
+  u.modified,
+  u.modified_by
+from "APEX_USER_REGISTRATION" u
+left outer join "APEX_ROLES" r
+on (u.apx_user_default_role_id = r.apex_role_id)
+left outer join "APEX_STATUS" s
+on (u.apx_user_status_id = s.apex_status_id)
+left outer join "APEX_CONTEXT" c
+on (u.apx_user_context_id = c.apex_context_id)
+left outer join "APEX_DOMAINS" d
+on (u.apx_user_domain_id = d.apex_domain_id)
+order by 1, 2, 3;
+
+
+create synonym "APEX_USER_ALL_REG" for "APEX_USER_REGISTRATIONS_ALL";
+
+
 --------------------------------------------------------------------------------------
 -- User Role Assignement
 create table "APX$USER_ROLE_MAP" (
@@ -760,6 +1033,33 @@ end;
 --------------------------------------------------------------------------------------
 -- Synonyms on APX$USER_ROLE_MAP
 create synonym  "APEX_USER_ROLE_MAP"    for "APX$USER_ROLE_MAP";
+
+-- Apex User Roles
+create view "APEX_USER_ROLES"
+as
+select
+  rm.apx_user_role_map_id as apex_user_loe_map_id,
+  rm.apx_user_id as apex_user_id,
+  u.apex_username,
+  u.apex_user_email,
+  u.apex_user_security_level,
+  rm.apx_role_id as apex_role_id,
+  r.apex_role,
+  r.apex_role_security_level,
+  s.apex_status_id as apex_user_role_status,
+  rm.app_id,
+  rm.created,
+  rm.created_by,
+  rm.modified,
+  rm.modified_by
+from "APEX_USER_ROLE_MAP" rm
+left outer join "APEX_USERS" u
+on (rm.apx_user_id = u.apex_user_id)
+left outer join "APEX_ROLES" r
+on (rm.apx_role_id = r.apex_role_id)
+left outer join "APEX_STATUS" s
+on (rm.apx_user_role_status_id = s.apex_status_id)
+order by 1, 2, 3;
 
 
 --------------------------------------------------------------------------------------
@@ -893,6 +1193,6 @@ set pages 0 line 120 define off verify off feed off timing off echo off
 EXIT SQL.SQLCODE;
 
 
-       ---- 17/12/19 22:54  End of SQL Build APX  ----
+       ---- 17/12/21 22:32  End of SQL Build APX  ----
 ---------------------------------------------------------------
 
