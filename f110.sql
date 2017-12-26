@@ -27,7 +27,7 @@ prompt APPLICATION 110 - User Management
 -- Application Export:
 --   Application:     110
 --   Name:            User Management
---   Date and Time:   22:29 Tuesday December 19, 2017
+--   Date and Time:   21:22 Tuesday December 26, 2017
 --   Exported By:     ADMIN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -38,11 +38,11 @@ prompt APPLICATION 110 - User Management
 -- Application Statistics:
 --   Pages:                      8
 --     Items:                    9
---     Validations:              4
+--     Validations:              3
 --     Processes:               12
 --     Regions:                 11
 --     Buttons:                  6
---     Dynamic Actions:          6
+--     Dynamic Actions:         11
 --   Shared Components:
 --     Logic:
 --     Navigation:
@@ -55,8 +55,8 @@ prompt APPLICATION 110 - User Management
 --       Themes:                 1
 --       Templates:
 --         Page:                10
---         Region:              15
---         Label:                5
+--         Region:              16
+--         Label:                6
 --         List:                11
 --         Popup LOV:            1
 --         Calendar:             1
@@ -114,7 +114,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171212212902'
+,p_last_upd_yyyymmddhh24miss=>'20171226212030'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -2606,6 +2606,42 @@ end;
 prompt --application/shared_components/user_interface/templates/region
 begin
 wwv_flow_api.create_plug_template(
+ p_id=>wwv_flow_api.id(5957615060054800)
+,p_layout=>'TABLE'
+,p_template=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'<div class="t-Login-region t-Form--stretchInputs t-Form--labelsAbove #REGION_CSS_CLASSES#" id="#REGION_ID#" #REGION_ATTRIBUTES#>',
+'  <div class="t-Login-header">',
+'    <span class="t-Login-logo #ICON_CSS_CLASSES#"></span>',
+'    <h1 class="t-Login-title" id="#REGION_STATIC_ID#_heading">#TITLE#</h1>',
+'  </div>',
+'  <div class="t-Login-body">',
+'    #BODY#',
+'  </div>',
+'  <div class="t-Login-buttons">',
+'    #NEXT#',
+'  </div>',
+'  <div class="t-Login-links">',
+'    #EDIT##CREATE#',
+'  </div>',
+'  #SUB_REGIONS#',
+'</div>'))
+,p_page_plug_template_name=>'LoginV'
+,p_internal_name=>'LOGINV'
+,p_theme_id=>101
+,p_theme_class_id=>23
+,p_preset_template_options=>'t-Form--labelsAbove'
+,p_default_label_alignment=>'RIGHT'
+,p_default_field_alignment=>'LEFT'
+);
+wwv_flow_api.create_plug_tmpl_display_point(
+ p_id=>wwv_flow_api.id(5958023337054805)
+,p_plug_template_id=>wwv_flow_api.id(5957615060054800)
+,p_name=>'Content Body'
+,p_placeholder=>'BODY'
+,p_has_grid_support=>false
+,p_glv_new_row=>true
+);
+wwv_flow_api.create_plug_template(
  p_id=>wwv_flow_api.id(13775003977068974)
 ,p_layout=>'TABLE'
 ,p_template=>wwv_flow_string.join(wwv_flow_t_varchar2(
@@ -4067,6 +4103,36 @@ end;
 /
 prompt --application/shared_components/user_interface/templates/label
 begin
+wwv_flow_api.create_field_template(
+ p_id=>wwv_flow_api.id(5956006411972860)
+,p_template_name=>'Required - Below'
+,p_internal_name=>'REQUIRED_BELOW'
+,p_template_body1=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'<div class="t-Form-labelContainer">',
+'  <label for="#CURRENT_ITEM_NAME#" id="#LABEL_ID#" class="t-Form-label">'))
+,p_template_body2=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' <span class="u-VisuallyHidden">(#VALUE_REQUIRED#)</span></label><span class="t-Form-required"><span class="a-Icon icon-asterisk"></span></span> #HELP_TEMPLATE#',
+'</div>'))
+,p_before_item=>'<div class="t-Form-fieldContainer t-Form-fieldContainer--stacked #ITEM_CSS_CLASSES#" id="#CURRENT_ITEM_CONTAINER_ID#">'
+,p_after_item=>'</div>'
+,p_item_pre_text=>'<span class="t-Form-itemText t-Form-itemText--pre">#CURRENT_ITEM_PRE_TEXT#</span>'
+,p_item_post_text=>'<span class="t-Form-itemText t-Form-itemText--post">#CURRENT_ITEM_POST_TEXT#</span>'
+,p_before_element=>'<div class="t-Form-inputContainer"><div class="t-Form-itemWrapper">'
+,p_after_element=>'#ITEM_PRE_TEXT##ITEM_POST_TEXT#</div></div>'
+,p_help_link=>'<button class="t-Button t-Button--noUI t-Button--helpButton js-itemHelp" data-itemhelp="#CURRENT_ITEM_ID#" title="#CURRENT_ITEM_HELP_LABEL#" aria-label="#CURRENT_ITEM_HELP_LABEL#" tabindex="-1" type="button"><span class="a-Icon icon-help" aria-hidden'
+||'="true"></span></button>'
+,p_inline_help_text=>'<span class="t-Form-inlineHelp">#CURRENT_ITEM_INLINE_HELP_TEXT#</span>'
+,p_error_template=>'<span class="t-Form-error">#ERROR_MESSAGE##INLINE_HELP_TEMPLATE##ERROR_TEMPLATE#</span>'
+,p_on_error_before_label=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'<div>',
+'    Hallo',
+''))
+,p_on_error_after_label=>'</div>'
+,p_theme_id=>101
+,p_theme_class_id=>4
+,p_preset_template_options=>'margin-top-md'
+,p_translate_this_template=>'Y'
+);
 wwv_flow_api.create_field_template(
  p_id=>wwv_flow_api.id(13844768632068998)
 ,p_template_name=>'Hidden'
@@ -9253,6 +9319,7 @@ wwv_flow_api.create_page(
  p_id=>102
 ,p_user_interface_id=>wwv_flow_api.id(4955200262726764)
 ,p_name=>'User Registration'
+,p_alias=>'USREG'
 ,p_page_mode=>'NORMAL'
 ,p_step_title=>'User Registration'
 ,p_warn_on_unsaved_changes=>'N'
@@ -9260,17 +9327,107 @@ wwv_flow_api.create_page(
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'AUTO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
+,p_javascript_file_urls=>'#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js'
+,p_javascript_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'// Globals',
+'var regButtonID = ''#REG''; //static ID of register button',
+'var emailField = ''#P102_EMAIL''; // email field on current page',
+'var errorFlag = emailField + ''-error'';  // email error field (for form validation)',
+'var url = ''https://ol7:8443/ords/apx/apxusr/ue/'';  // rest api url to get if user exists - returns JSON [ yes | no ]',
+'',
+'// set disabled attribute for register button',
+'function setButtonState(b) {',
+'    var e = $(errorFlag).css(''display'');',
+'    if (e === "none") {',
+'        $(b).removeAttr("disabled");',
+'    } else {',
+'        $(b).attr("disabled", "disabled");',
+'    }',
+'}',
+'',
+'// check if user already registered',
+'function checkUserExists(f) {',
+'    var myData, val;',
+'    if (f) { //field selector passed in ',
+'        val = $(f).val(); // assuming valid selector',
+'    } else {',
+'        val = $(emailField).val();           ',
+'    }   ',
+'    if (val.length > 2) {',
+'        var curl = url + val;',
+'        var curl_last = val.substr(val.length -1);',
+'        if (curl_last !== ".") {',
+'          //var dat = $.get(curl); // cannot async here',
+'          var dat = $.ajax({',
+'                     url: curl,',
+'                     dataType: ''json'',',
+'                     async: false,',
+'                     data: myData,',
+'                     success: function(data) {',
+'                        //stuff to do with data - if called async',
+'                        //console.log(''Response: '' + data);',
+'                     }',
+'                    });',
+'            var ue = dat.responseJSON.user_exists;',
+'            if (ue === "yes") {',
+'                var msg = ''User '' + val + '' exists!'';',
+'                //console.log(msg);',
+'                var errLabel = ''<label id="'' + errorFlag.substr(1, errorFlag.length) + ',
+'                    ''" class="error" for="'' + emailField.substr(1, emailField.length) + ',
+'                    ''" style="display: block;">'' + msg + ''</label>'';',
+'                var errLabelLen = $(errorFlag).length;',
+'                //console.log(''Error Len: '' + errLabelLen);',
+'                if (errLabelLen === 0) { ',
+'                    $(errLabel).insertAfter($(''input'' + emailField)); ',
+'                } else {',
+'                    $(errorFlag).text(msg).show();',
+'                    $(errorFlag).show();',
+'                }',
+'            } ',
+'        }          ',
+'    }',
+'}',
+'// wrapper to check for user exists and set button state',
+'function checkInput() {',
+'    checkUserExists(emailField);',
+'    setButtonState(regButtonID);',
+'}'))
 ,p_javascript_code_onload=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '$(''#R5690431702074214'').hide();',
+'$(''#P102_EMAIL'').attr(''type'', ''email'');',
+'$(''#wwvFlowForm'').validate();',
+'// prevent submit on pressing enter key',
+'$(''#wwvFlowForm'').on(''keyup keypress'', function(e) {',
+'  var keyCode = e.keyCode || e.which;',
+'  if (keyCode === 13) { ',
+'    e.preventDefault();',
+'    checkInput()',
+' //   return false;',
+'  }',
+'});',
 ''))
-,p_inline_css=>'#R5690431702074214 > div.t-Login-header > span { color: green; font-size: 72px; }'
+,p_css_file_urls=>'#WORKSPACE_IMAGES#css/validate/screen.css'
+,p_inline_css=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'#R5690431702074214 > div.t-Login-header > span { color: green; font-size: 72px; }',
+'.t-Form--labelsAbove .t-Form-fieldContainer .t-Form-inputContainer, .t-Form-fieldContainer--stacked .t-Form-inputContainer {',
+'    padding-top: 0;',
+'    margin-bottom: 24px;',
+'        height: 80px;',
+'}',
+'#P102_EMAIL-error {',
+'    top: 60px;',
+'    position: absolute;',
+'}',
+'#P102_EMAIL_CONTAINER > div.t-Form-labelContainer {',
+'    padding-bottom: 12px;',
+'}'))
 ,p_step_template=>wwv_flow_api.id(13761578240068968)
 ,p_page_template_options=>'#DEFAULT#'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171210221000'
+,p_last_upd_yyyymmddhh24miss=>'20171226212030'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5690431702074214)
@@ -9279,6 +9436,7 @@ wwv_flow_api.create_page_plug(
 ,p_region_css_classes=>'t-success'
 ,p_icon_css_classes=>'fa-check-circle'
 ,p_region_template_options=>'#DEFAULT#'
+,p_region_attributes=>'style="display:none;"'
 ,p_plug_template=>wwv_flow_api.id(13799328938068981)
 ,p_plug_display_sequence=>20
 ,p_include_in_reg_disp_sel_yn=>'N'
@@ -9300,7 +9458,7 @@ wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(10618508300570882)
 ,p_plug_name=>'User Registration'
 ,p_region_name=>'USREG'
-,p_icon_css_classes=>'fa-sign-in'
+,p_icon_css_classes=>'fa-cog'
 ,p_region_template_options=>'#DEFAULT#'
 ,p_plug_template=>wwv_flow_api.id(13799328938068981)
 ,p_plug_display_sequence=>10
@@ -9330,6 +9488,7 @@ wwv_flow_api.create_page_button(
 ,p_button_sequence=>30
 ,p_button_plug_id=>wwv_flow_api.id(10618508300570882)
 ,p_button_name=>'REGISTER'
+,p_button_static_id=>'REG'
 ,p_button_action=>'DEFINED_BY_DA'
 ,p_button_template_options=>'#DEFAULT#'
 ,p_button_template_id=>wwv_flow_api.id(13845333853068998)
@@ -9337,6 +9496,7 @@ wwv_flow_api.create_page_button(
 ,p_button_image_alt=>'Register'
 ,p_button_position=>'REGION_TEMPLATE_NEXT'
 ,p_warn_on_unsaved_changes=>null
+,p_button_cattributes=>'disabled="disabled"'
 );
 wwv_flow_api.create_page_branch(
  p_id=>wwv_flow_api.id(5668102663959102)
@@ -9357,26 +9517,50 @@ wwv_flow_api.create_page_item(
 ,p_display_as=>'NATIVE_TEXT_FIELD'
 ,p_cSize=>40
 ,p_cMaxlength=>100
-,p_field_template=>wwv_flow_api.id(13844768632068998)
+,p_tag_attributes=>'required="true"'
+,p_field_template=>wwv_flow_api.id(13845150629068998)
 ,p_item_icon_css_classes=>'fa-user'
 ,p_item_template_options=>'#DEFAULT#'
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'N'
-,p_attribute_04=>'TEXT'
-,p_attribute_05=>'NONE'
+,p_attribute_04=>'EMAIL'
+,p_attribute_05=>'BOTH'
 );
-wwv_flow_api.create_page_validation(
- p_id=>wwv_flow_api.id(5668047010959101)
-,p_validation_name=>'IsEmail'
-,p_validation_sequence=>10
-,p_validation=>'P102_EMAIL'
-,p_validation2=>'^*.@.*$'
-,p_validation_type=>'REGULAR_EXPRESSION'
-,p_error_message=>'Please enter a valid email address'
-,p_always_execute=>'Y'
-,p_when_button_pressed=>wwv_flow_api.id(5663444202844125)
-,p_associated_item=>wwv_flow_api.id(5663878678844127)
-,p_error_display_location=>'INLINE_WITH_FIELD'
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(5693475414074244)
+,p_name=>'CheckEmailOnClickDisabledButton'
+,p_event_sequence=>3
+,p_triggering_element_type=>'JQUERY_SELECTOR'
+,p_triggering_element=>'div.t-Login-buttons'
+,p_bind_type=>'bind'
+,p_bind_event_type=>'click'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(5693543015074245)
+,p_event_id=>wwv_flow_api.id(5693475414074244)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>'checkInput();'
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(5692915453074239)
+,p_name=>'CheckEmailOnClickRegisterButton'
+,p_event_sequence=>5
+,p_triggering_element_type=>'JQUERY_SELECTOR'
+,p_triggering_element=>'#REG'
+,p_bind_type=>'bind'
+,p_bind_event_type=>'click'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(5693065963074240)
+,p_event_id=>wwv_flow_api.id(5692915453074239)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>'checkInput();'
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(5691752677074227)
@@ -9384,7 +9568,7 @@ wwv_flow_api.create_page_da_event(
 ,p_event_sequence=>10
 ,p_triggering_element_type=>'BUTTON'
 ,p_triggering_button_id=>wwv_flow_api.id(5663444202844125)
-,p_bind_type=>'bind'
+,p_bind_type=>'live'
 ,p_bind_event_type=>'click'
 );
 wwv_flow_api.create_page_da_action(
@@ -9400,59 +9584,13 @@ wwv_flow_api.create_page_da_action(
  p_id=>wwv_flow_api.id(5691894129074228)
 ,p_event_id=>wwv_flow_api.id(5691752677074227)
 ,p_event_result=>'TRUE'
-,p_action_sequence=>20
+,p_action_sequence=>25
 ,p_execute_on_page_init=>'N'
 ,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'declare',
-'   l_body      clob;',
-'   l_body_html clob;',
-'   l_token     varchar2(1000);',
 'begin',
-'/*',
-'raise_application_error(-20002, ''In Process'');',
-'',
-'insert into apxusr.apx$app_user_reg (app_user_email, app_id)',
-'values(:P102_EMAIL, :APP_ID);',
-'select app_user_token',
-'into l_token',
-'from apxusr.apx$app_user_reg',
-'where app_user_email = :P102_EMAIL',
-'and app_id = :APP_ID;',
-'',
-'commit;',
-'*/',
-'l_token := apx_get_token(v(''P102_EMAIL''));',
-'for c1 in (',
-'   select workspace_id',
-'     from apex_applications',
-'    where application_id = :p_app_id )',
-'loop',
-'   apex_util.set_security_group_id(p_security_group_id =>',
-'c1.workspace_id);',
-'end loop;',
-'',
-'    l_body := ''To view the content of this message, please use an HTML enabled mail client.'' || utl_tcp.crlf;',
-' ',
-'    l_body_html := ''<html><body>'' || utl_tcp.crlf ||',
-'                   ''<p>Please confirm your registration at <a href="'' ||',
-'                   apex_mail.get_instance_url || ''f?p=''||v(''APP_ID'')||',
-'                   '':103::CONFIRM:NO::NEWUSER,TOKEN:''||v(''P102_EMAIL'')||'',''||l_token||''">Registration Confirmation</a> page.</p>'' || utl_tcp.crlf ||',
-'                   ''<p>Sincerely,<br />'' || utl_tcp.crlf ||',
-'                   ''Yo Bro from Next Do''''<br />'' || utl_tcp.crlf ||',
-'                   ''<img src="http://zapt1.staticworld.net/images/article/2013/04/oracle-logo-100033308-gallery.png" alt="Oracle Logo"></p>'' || utl_tcp.crlf ||',
-'                   ''</body></html>''; ',
-'    apex_mail.send (',
-'        p_to        => v(''P102_EMAIL''),   -- change to your email address',
-'        p_from      => ''s.obermeyer@t-online.de'', -- change to a real senders email address',
-'        p_body      => l_body,',
-'        p_body_html => l_body_html,',
-'        p_subj      => ''Registration Confirmation'' );',
-'htp.p(''User ''||v(''P102_EMAIL'')||'' successfully registered.'');',
-'apex_util.set_session_state(''P102_EMAIL'', v(''P102_EMAIL''));',
-'commit;',
-'end;',
-''))
+'  null;',
+'end;  '))
 ,p_attribute_02=>'P102_EMAIL'
 ,p_stop_execution_on_error=>'Y'
 ,p_wait_for_result=>'Y'
@@ -9461,7 +9599,7 @@ wwv_flow_api.create_page_da_action(
  p_id=>wwv_flow_api.id(5692128197074231)
 ,p_event_id=>wwv_flow_api.id(5691752677074227)
 ,p_event_result=>'TRUE'
-,p_action_sequence=>30
+,p_action_sequence=>35
 ,p_execute_on_page_init=>'N'
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
@@ -9469,6 +9607,62 @@ wwv_flow_api.create_page_da_action(
 '$(''#R10618508300570882'').delay(1000).fadeOut(400, function(){',
 '    $(''#R5690431702074214'').fadeIn(400);',
 '});'))
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(5692295524074232)
+,p_name=>'ResetErrorOnGetFocus'
+,p_event_sequence=>20
+,p_triggering_element_type=>'ITEM'
+,p_triggering_element=>'P102_EMAIL'
+,p_bind_type=>'bind'
+,p_bind_event_type=>'focusin'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(5692366858074233)
+,p_event_id=>wwv_flow_api.id(5692295524074232)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'$(errorFlag).fadeOut();',
+'$(''.t-Form-error'').fadeOut();'))
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(5692768803074237)
+,p_name=>'CheckEmailValidOnLoseFocus'
+,p_event_sequence=>30
+,p_triggering_element_type=>'ITEM'
+,p_triggering_element=>'P102_EMAIL'
+,p_bind_type=>'bind'
+,p_bind_event_type=>'focusout'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(5692860808074238)
+,p_event_id=>wwv_flow_api.id(5692768803074237)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>'checkInput();'
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(5693289251074242)
+,p_name=>'CheckEmailValidOnKeyUp'
+,p_event_sequence=>40
+,p_triggering_element_type=>'ITEM'
+,p_triggering_element=>'P102_EMAIL'
+,p_bind_type=>'live'
+,p_bind_event_type=>'keyup'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(5693368896074243)
+,p_event_id=>wwv_flow_api.id(5693289251074242)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>'checkInput();'
 );
 wwv_flow_api.create_page_process(
  p_id=>wwv_flow_api.id(5664621963844135)
