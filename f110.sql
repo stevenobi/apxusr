@@ -27,7 +27,7 @@ prompt APPLICATION 110 - User Management
 -- Application Export:
 --   Application:     110
 --   Name:            User Management
---   Date and Time:   21:22 Tuesday December 26, 2017
+--   Date and Time:   21:29 Tuesday December 26, 2017
 --   Exported By:     ADMIN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -114,7 +114,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171226212030'
+,p_last_upd_yyyymmddhh24miss=>'20171226212643'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -9427,7 +9427,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171226212030'
+,p_last_upd_yyyymmddhh24miss=>'20171226212643'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5690431702074214)
@@ -9578,7 +9578,10 @@ wwv_flow_api.create_page_da_action(
 ,p_action_sequence=>5
 ,p_execute_on_page_init=>'N'
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>'$(''#R10618508300570882 > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'')'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'$(''#P102_EMAIL'').attr(''disabled'', ''disabled'');',
+'$(''#REG'').attr(''disabled'', ''disabled'');',
+'$(''#R10618508300570882 > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'')'))
 );
 wwv_flow_api.create_page_da_action(
  p_id=>wwv_flow_api.id(5691894129074228)
