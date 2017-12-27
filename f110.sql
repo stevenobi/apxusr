@@ -27,7 +27,7 @@ prompt APPLICATION 110 - User Management
 -- Application Export:
 --   Application:     110
 --   Name:            User Management
---   Date and Time:   21:29 Tuesday December 26, 2017
+--   Date and Time:   02:14 Wednesday December 27, 2017
 --   Exported By:     ADMIN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -114,7 +114,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171226212643'
+,p_last_upd_yyyymmddhh24miss=>'20171227021255'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -9333,7 +9333,7 @@ wwv_flow_api.create_page(
 'var regButtonID = ''#REG''; //static ID of register button',
 'var emailField = ''#P102_EMAIL''; // email field on current page',
 'var errorFlag = emailField + ''-error'';  // email error field (for form validation)',
-'var url = ''https://ol7:8443/ords/apx/apxusr/ue/'';  // rest api url to get if user exists - returns JSON [ yes | no ]',
+'var url = ''https://ol7:8443/ords/apx/apxusr/us/'';  // rest api url to get if user exists - returns JSON [ yes | no ]',
 '',
 '// set disabled attribute for register button',
 'function setButtonState(b) {',
@@ -9368,9 +9368,9 @@ wwv_flow_api.create_page(
 '                        //console.log(''Response: '' + data);',
 '                     }',
 '                    });',
-'            var ue = dat.responseJSON.user_exists;',
-'            if (ue === "yes") {',
-'                var msg = ''User '' + val + '' exists!'';',
+'            var us = dat.responseJSON.user_status;',
+'            if (us > 0) {',
+'                var msg = ''User '' + val + '' exists! Status: '' + us;',
 '                //console.log(msg);',
 '                var errLabel = ''<label id="'' + errorFlag.substr(1, errorFlag.length) + ',
 '                    ''" class="error" for="'' + emailField.substr(1, emailField.length) + ',
@@ -9427,7 +9427,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171226212643'
+,p_last_upd_yyyymmddhh24miss=>'20171227021255'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5690431702074214)
