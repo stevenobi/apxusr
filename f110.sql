@@ -27,7 +27,7 @@ prompt APPLICATION 110 - User Management
 -- Application Export:
 --   Application:     110
 --   Name:            User Management
---   Date and Time:   02:14 Wednesday December 27, 2017
+--   Date and Time:   02:20 Thursday December 28, 2017
 --   Exported By:     ADMIN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -114,7 +114,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171227021255'
+,p_last_upd_yyyymmddhh24miss=>'20171228021637'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -9333,7 +9333,7 @@ wwv_flow_api.create_page(
 'var regButtonID = ''#REG''; //static ID of register button',
 'var emailField = ''#P102_EMAIL''; // email field on current page',
 'var errorFlag = emailField + ''-error'';  // email error field (for form validation)',
-'var url = ''https://ol7:8443/ords/apx/apxusr/us/'';  // rest api url to get if user exists - returns JSON [ yes | no ]',
+'var url = ''https://ol7:8443/ords/apx/apxusr/usr/'';  // rest api url to get if user exists - returns JSON [ yes | no ]',
 '',
 '// set disabled attribute for register button',
 'function setButtonState(b) {',
@@ -9346,7 +9346,7 @@ wwv_flow_api.create_page(
 '}',
 '',
 '// check if user already registered',
-'function checkUserExists(f) {',
+'function checkUserExists(f, checkDomain) {',
 '    var myData, val;',
 '    if (f) { //field selector passed in ',
 '        val = $(f).val(); // assuming valid selector',
@@ -9369,16 +9369,31 @@ wwv_flow_api.create_page(
 '                     }',
 '                    });',
 '            var us = dat.responseJSON.user_status;',
-'            if (us > 0) {',
-'                var msg = ''User '' + val + '' exists! Status: '' + us;',
-'                //console.log(msg);',
+'            ',
+'            if (us != 0) {',
+'                var msg = "";',
+'                if (us < 0 && checkDomain) { // checkDomain to handle certain events',
+'                    var l = (val.indexOf(''@'') > -1 ? val.substr(val.indexOf(''@'')+1, val.length).length : 0);',
+'                    //console.log(l);',
+'                    if (l > 3) {',
+'                        msg = ''User Domain invalid!'';',
+'                    }',
+'                } else if (us == 3 || us == 12 || us > 100) {',
+'                    msg = ''User '' + val + '' exists. Please reset your password.'';                    ',
+'                } else if (us == 11) {',
+'                    msg = ''User '' + val + '' exists. Please confirm your Registration.'';                    ',
+'                } else if (us == 1 || us == 2 || us == 10) {',
+'                    msg = ''Your Registration expired. Please register again.'';                    ',
+'                }',
+'                //msg = ''User '' + val + '' exists! Status: '' + us;',
+'                //console.log(''Message: '' + msg + '' Status: '' + us);',
 '                var errLabel = ''<label id="'' + errorFlag.substr(1, errorFlag.length) + ',
 '                    ''" class="error" for="'' + emailField.substr(1, emailField.length) + ',
 '                    ''" style="display: block;">'' + msg + ''</label>'';',
 '                var errLabelLen = $(errorFlag).length;',
 '                //console.log(''Error Len: '' + errLabelLen);',
 '                if (errLabelLen === 0) { ',
-'                    $(errLabel).insertAfter($(''input'' + emailField)); ',
+'                    $(errLabel).insertAfter($(''input'' + emailField));',
 '                } else {',
 '                    $(errorFlag).text(msg).show();',
 '                    $(errorFlag).show();',
@@ -9388,8 +9403,8 @@ wwv_flow_api.create_page(
 '    }',
 '}',
 '// wrapper to check for user exists and set button state',
-'function checkInput() {',
-'    checkUserExists(emailField);',
+'function checkInput(checkDomain) {',
+'    checkUserExists(emailField, checkDomain);',
 '    setButtonState(regButtonID);',
 '}'))
 ,p_javascript_code_onload=>wwv_flow_string.join(wwv_flow_t_varchar2(
@@ -9427,7 +9442,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171227021255'
+,p_last_upd_yyyymmddhh24miss=>'20171228021637'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5690431702074214)
@@ -9542,7 +9557,7 @@ wwv_flow_api.create_page_da_action(
 ,p_action_sequence=>10
 ,p_execute_on_page_init=>'N'
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>'checkInput();'
+,p_attribute_01=>'checkInput(true);'
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(5692915453074239)
@@ -9560,7 +9575,7 @@ wwv_flow_api.create_page_da_action(
 ,p_action_sequence=>10
 ,p_execute_on_page_init=>'N'
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>'checkInput();'
+,p_attribute_01=>'checkInput(true);'
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(5691752677074227)
@@ -9629,7 +9644,8 @@ wwv_flow_api.create_page_da_action(
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '$(errorFlag).fadeOut();',
-'$(''.t-Form-error'').fadeOut();'))
+'$(''.t-Form-error'').fadeOut();',
+'$(''#P102_EMAIL_CONTAINER > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');'))
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(5692768803074237)
@@ -9647,7 +9663,7 @@ wwv_flow_api.create_page_da_action(
 ,p_action_sequence=>10
 ,p_execute_on_page_init=>'N'
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>'checkInput();'
+,p_attribute_01=>'checkInput(true);'
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(5693289251074242)
