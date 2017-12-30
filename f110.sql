@@ -27,7 +27,7 @@ prompt APPLICATION 110 - User Management
 -- Application Export:
 --   Application:     110
 --   Name:            User Management
---   Date and Time:   02:20 Thursday December 28, 2017
+--   Date and Time:   22:04 Saturday December 30, 2017
 --   Exported By:     ADMIN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -114,7 +114,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171228021637'
+,p_last_upd_yyyymmddhh24miss=>'20171230125857'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -9378,7 +9378,9 @@ wwv_flow_api.create_page(
 '                    if (l > 3) {',
 '                        msg = ''User Domain invalid!'';',
 '                    }',
-'                } else if (us == 3 || us == 12 || us > 100) {',
+'                } else if (us == 3) {',
+'                    msg = ''Maximum Registration Attempts exceeded for User '' + val + ''.Please contact <a href="#">Support</a>.'';                                        ',
+'                } else if (us == 4 || us == 12 || us > 100) {',
 '                    msg = ''User '' + val + '' exists. Please reset your password.'';                    ',
 '                } else if (us == 11) {',
 '                    msg = ''User '' + val + '' exists. Please confirm your Registration.'';                    ',
@@ -9416,7 +9418,7 @@ wwv_flow_api.create_page(
 '  var keyCode = e.keyCode || e.which;',
 '  if (keyCode === 13) { ',
 '    e.preventDefault();',
-'    checkInput()',
+'    checkInput(true)',
 ' //   return false;',
 '  }',
 '});',
@@ -9427,7 +9429,7 @@ wwv_flow_api.create_page(
 '.t-Form--labelsAbove .t-Form-fieldContainer .t-Form-inputContainer, .t-Form-fieldContainer--stacked .t-Form-inputContainer {',
 '    padding-top: 0;',
 '    margin-bottom: 24px;',
-'        height: 80px;',
+'        height: 120px;',
 '}',
 '#P102_EMAIL-error {',
 '    top: 60px;',
@@ -9442,7 +9444,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171228021637'
+,p_last_upd_yyyymmddhh24miss=>'20171230125857'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5690431702074214)

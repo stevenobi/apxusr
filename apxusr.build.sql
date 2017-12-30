@@ -1,6 +1,6 @@
 
 ---------------------------------------------------------------
-       ---- 17/12/30 21:39 Begin of SQL Build APXUSR ----
+       ---- 17/12/30 22:00 Begin of SQL Build APXUSR ----
 
 
 -- SQL Drop File
@@ -1108,16 +1108,6 @@ end;
 create synonym  "APEX_USER_REGISTRATION"        for "APX$USER_REG";
 create synonym  "APEX_USREG"                    for "APX$USER_REG";
 
---------------------------------------------------------------------------------------
--- Test Data
-insert into APEX_USER_REGISTRATION (apx_username, apx_user_email, app_id)
-values('s.obermeyer@t-online.de', 's.obermeyer@t-online.de', nvl2(v('FB_FLOW_ID'), v('FB_FLOW_ID'), v('APP_ID')));
-
-insert into APEX_USER_REGISTRATION (apx_username, apx_user_email, app_id)
-values('djo@timeframes.de', 'djo@timeframes.de', nvl2(v('FB_FLOW_ID'), v('FB_FLOW_ID'), v('APP_ID')));
-
-commit;
-
 
 -- Apex User Basic Registration
 create view "APEX_USER_REGISTRATIONS"
@@ -1384,6 +1374,16 @@ when others then
   raise;
 end;
 /
+
+--------------------------------------------------------------------------------------
+-- Test Data
+insert into "APEX_USER_REGISTRATION" (apx_username, apx_user_email, apx_user_status_id, app_id)
+values('s.obermeyer@t-online.de', 's.obermeyer@t-online.de', 12, nvl2(v('FB_FLOW_ID'), v('FB_FLOW_ID'), v('APP_ID')));
+
+insert into "APEX_USER_REGISTRATION" (apx_username, apx_user_email, app_id)
+values('djo@timeframes.de', 'djo@timeframes.de', nvl2(v('FB_FLOW_ID'), v('FB_FLOW_ID'), v('APP_ID')));
+
+commit;
 
 
 -----------------------------------------------------------------------------------------------------
@@ -1777,6 +1777,6 @@ set pages 0 line 120 define off verify off feed off timing off echo off
 EXIT SQL.SQLCODE;
 
 
-       ---- 17/12/30 21:39  End of SQL Build APXUSR  ----
+       ---- 17/12/30 22:00  End of SQL Build APXUSR  ----
 ---------------------------------------------------------------
 
