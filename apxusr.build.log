@@ -1,8 +1,507 @@
 
-21.12.2017 22:32:02 *** APX Application Modules Install | Build: 1.0.0_0027.1712212232 | Commit: [master 9318813] ***
+30.12.2017 21:39:08 *** APXUSR Application Modules Install | Build: 1.0.0_0038.1712302139 | Commit: [master 38f38df] ***
+
+30.12.2017 21:39:11     Dropping: "APXUSR Objects"
+
+Dropping DB Model (Tables)
+
+APX$BUILTIN
+APX$USER_ROLE_MAP
+APX$USER_REGISTRATION
+APX$USER
+APX$ROLE
+APX$PRIVILEGE
+APX$DOMAIN
+APX$GROUP
+
+30.12.2017 21:39:15     Creating: "APXUSR Database Model"
+
+Creating APXUSR DB Model (Tables)
+
+Table "APX$GROUP" created.
+
+Elapsed: 00:00:00.027
+
+Index "APX$GROUP_UNQ1" created.
+
+Elapsed: 00:00:00.015
+
+Index "APX$GROUP_UNQ2" created.
+
+Elapsed: 00:00:00.012
+
+Index "APX$GROUP_UNQ3" created.
+
+Elapsed: 00:00:00.011
+
+Index "APX$GROUP_STATUS_FK_IDX" created.
+
+Elapsed: 00:00:00.010
+
+Index "APX$GROUP_PARENT_FK_IDX" created.
+
+Elapsed: 00:00:00.009
+
+Index "APX$GROUP_SECLEV" created.
+
+Elapsed: 00:00:00.008
+
+Index "APX$GROUP_APX_ID" created.
+
+Elapsed: 00:00:00.010
+
+Sequence "APX$GROUP_ID_SEQ" created.
+
+Elapsed: 00:00:00.007
+Elapsed: 00:00:00.033
+
+Synonym "APEX_GROUP" created.
+
+Elapsed: 00:00:00.014
+
+1 row inserted.
+
+Elapsed: 00:00:00.126
+
+1 row inserted.
+
+Elapsed: 00:00:00.008
+
+1 row inserted.
+
+Elapsed: 00:00:00.006
+
+1 row inserted.
+
+Elapsed: 00:00:00.006
+
+Commit complete.
+
+Elapsed: 00:00:00.005
+
+View "APEX_GROUPS" created.
+
+Elapsed: 00:00:00.020
+
+Synonym "APEX_USER_GROUPS" created.
+
+Elapsed: 00:00:00.009
+
+Table "APX$DOMAIN" created.
+
+Elapsed: 00:00:00.026
+
+Index "APX$DOMAIN_UNQ1" created.
+
+Elapsed: 00:00:00.026
+
+Index "APX$DOMAIN_UNQ2" created.
+
+Elapsed: 00:00:00.010
+
+Index "APX$DOMAIN_UNQ3" created.
+
+Elapsed: 00:00:00.010
+
+Index "APX$DOMAIN_GROUP_FK_IDX" created.
+
+Elapsed: 00:00:00.009
+
+Index "APX$DOMAIN_STATUS_FK_IDX" created.
+
+Elapsed: 00:00:00.011
+
+Index "APX$DOMAIN_PARENT_FK_IDX" created.
+
+Elapsed: 00:00:00.014
+
+Index "APX$DOMAIN_SECLEV" created.
+
+Elapsed: 00:00:00.009
+
+Index "APX$DOMAIN_APX_ID" created.
+
+Elapsed: 00:00:00.010
+
+Sequence "APX$DOMAIN_ID_SEQ" created.
+
+Elapsed: 00:00:00.007
+Elapsed: 00:00:00.036
+
+Synonym "APEX_DOMAIN" created.
+
+Elapsed: 00:00:00.016
+
+1 row inserted.
+
+Elapsed: 00:00:00.020
+
+1 row inserted.
+
+Elapsed: 00:00:00.007
+
+1 row inserted.
+
+Elapsed: 00:00:00.012
+
+Commit complete.
+
+Elapsed: 00:00:00.008
+
+View "APEX_DOMAINS" created.
+
+Elapsed: 00:00:00.026
+
+Synonym "APEX_USER_DOMAINS" created.
+
+Elapsed: 00:00:00.010
+
+View "APEX_VALID_DOMAINS" created.
+
+Elapsed: 00:00:00.029
+Elapsed: 00:00:00.019
+Elapsed: 00:00:00.021
+
+Grant succeeded.
+
+Elapsed: 00:00:00.009
+
+Table "APX$PRIVILEGE" created.
+
+Elapsed: 00:00:00.026
+
+Index "APX$PRIV_UNQ1" created.
+
+Elapsed: 00:00:00.012
+
+Index "APX$PRIV_UNQ2" created.
+
+Elapsed: 00:00:00.015
+
+Index "APX$PRIV_STATUS_FK_IDX" created.
+
+Elapsed: 00:00:00.009
+
+Index "APX$PRIV_PARENT_FK_IDX" created.
+
+Elapsed: 00:00:00.010
+
+Index "APX$PRIV_SECLEV" created.
+
+Elapsed: 00:00:00.010
+
+Index "APX$PRIV_APP_ID" created.
+
+Elapsed: 00:00:00.008
+
+Sequence "APX$PRIV_ID_SEQ" created.
+
+Elapsed: 00:00:00.007
+Elapsed: 00:00:00.021
+
+Synonym "APEX_PRIVILEGE" created.
+
+Elapsed: 00:00:00.010
+
+View "APEX_PRIVILEGES" created.
+
+Elapsed: 00:00:00.035
+
+Synonym "APEX_USER_PRIVILEGES" created.
+
+Elapsed: 00:00:00.009
+
+Table "APX$ROLE" created.
+
+Elapsed: 00:00:00.022
+
+Index "APX$ROLE_UNQ1" created.
+
+Elapsed: 00:00:00.010
+
+Index "APX$ROLE_UNQ2" created.
+
+Elapsed: 00:00:00.010
+
+Index "APX$ROLE_DOMAIN_FK_IDX" created.
+
+Elapsed: 00:00:00.012
+
+Index "APX$ROLE_CTX_FK_IDX" created.
+
+Elapsed: 00:00:00.010
+
+Index "APX$ROLE_STATUS_FK_IDX" created.
+
+Elapsed: 00:00:00.013
+
+Index "APX$ROLE_PARENT_FK_IDX" created.
+
+Elapsed: 00:00:00.008
+
+Index "APX$ROLE_SECLEV" created.
+
+Elapsed: 00:00:00.009
+
+Index "APX$ROLE_APX_ID" created.
+
+Elapsed: 00:00:00.009
+
+Sequence "APX$ROLE_ID_SEQ" created.
+
+Elapsed: 00:00:00.007
+Elapsed: 00:00:00.030
+
+Synonym "APEX_ROLE" created.
+
+Elapsed: 00:00:00.010
+
+1 row inserted.
+
+Elapsed: 00:00:00.018
+
+1 row inserted.
+
+Elapsed: 00:00:00.006
+
+1 row inserted.
+
+Elapsed: 00:00:00.007
+
+1 row inserted.
+
+Elapsed: 00:00:00.007
+
+1 row inserted.
+
+Elapsed: 00:00:00.006
+
+1 row inserted.
+
+Elapsed: 00:00:00.006
+
+Commit complete.
+
+Elapsed: 00:00:00.009
+
+View "APEX_ROLES" created.
+
+Elapsed: 00:00:00.028
+
+Synonym "APEX_APP_ROLES" created.
+
+Elapsed: 00:00:00.008
+
+Table "APX$USER" created.
+
+Elapsed: 00:00:00.029
+
+Index "APX$USER_UNQ1" created.
+
+Elapsed: 00:00:00.012
+
+Index "APX$USER_UNQ2" created.
+
+Elapsed: 00:00:00.010
+
+Index "APX$USER_APX_ID" created.
+
+Elapsed: 00:00:00.009
+
+Index "APX$USER_DOMAIN_FK_IDX" created.
+
+Elapsed: 00:00:00.009
+
+Index "APX$USER_CTX_FK_IDX" created.
+
+Elapsed: 00:00:00.009
+
+Index "APX$USER_STATUS_FK_IDX" created.
+
+Elapsed: 00:00:00.009
+
+Index "APX$USER_DEFROLE_FK_IDX" created.
+
+Elapsed: 00:00:00.008
+
+Index "APX$USER_PARENT_FK_IDX" created.
+
+Elapsed: 00:00:00.012
+
+Index "APX$USER_SECLEV" created.
+
+Elapsed: 00:00:00.014
+
+Sequence "APX$USER_ID_SEQ" created.
+
+Elapsed: 00:00:00.006
+Elapsed: 00:00:00.032
+
+Synonym "APEX_USER" created.
+
+Elapsed: 00:00:00.018
+
+View "APEX_USERS" created.
+
+Elapsed: 00:00:00.071
+
+Synonym "APEX_APP_USERS" created.
+
+Elapsed: 00:00:00.013
+
+Table "APX$USER_REG" created.
+
+Elapsed: 00:00:00.027
+
+Index "APX$USREG_UNQ1" created.
+
+Elapsed: 00:00:00.014
+
+Index "APX$USREG_UNQ2" created.
+
+Elapsed: 00:00:00.013
+
+Index "APX$USREG_UNQ3" created.
+
+Elapsed: 00:00:00.011
+
+Index "APX$USREG_UNQ4" created.
+
+Elapsed: 00:00:00.009
+
+Index "APX$USRREG_DOMAIN_FK_IDX" created.
+
+Elapsed: 00:00:00.012
+
+Index "APX$USRREG_CTX_FK_IDX" created.
+
+Elapsed: 00:00:00.014
+
+Index "APX$USRREG_STATUS_FK_IDX" created.
+
+Elapsed: 00:00:00.008
+
+Index "APX$USRREG_APXUSR_FK_IDX" created.
+
+Elapsed: 00:00:00.008
+
+Index "APX$USRREG_ROLE_FK_IDX" created.
+
+Elapsed: 00:00:00.008
+
+Sequence "APX$USREG_ID_SEQ" created.
+
+Elapsed: 00:00:00.007
+Elapsed: 00:00:00.042
+
+Synonym "APEX_USER_REGISTRATION" created.
+
+Elapsed: 00:00:00.013
+
+Synonym "APEX_USREG" created.
+
+Elapsed: 00:00:00.007
+
+1 row inserted.
+
+Elapsed: 00:00:00.053
+
+1 row inserted.
+
+Elapsed: 00:00:00.010
+
+Commit complete.
+
+Elapsed: 00:00:00.008
+
+View "APEX_USER_REGISTRATIONS" created.
+
+Elapsed: 00:00:00.033
+
+View "APEX_USER_REGISTRATIONS_ALL" created.
+
+Elapsed: 00:00:00.068
+
+Synonym "APEX_USER_ALL_REG" created.
+
+Elapsed: 00:00:00.010
+Elapsed: 00:00:00.026
+Elapsed: 00:00:00.026
+
+View "APEX_USER_REG_STATUS" created.
+
+Elapsed: 00:00:00.014
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.019
+
+Grant succeeded.
+
+Elapsed: 00:00:00.008
+
+Grant succeeded.
+
+Elapsed: 00:00:00.006
+
+Grant succeeded.
+
+Elapsed: 00:00:00.011
+
+Table "APX$USER_ROLE_MAP" created.
+
+Elapsed: 00:00:00.029
+
+Index "APX$USERROLMAP_STAT" created.
+
+Elapsed: 00:00:00.013
+
+Index "APX$USERROLEMAP_UNQ" created.
+
+Elapsed: 00:00:00.012
+
+Sequence "APX$USERROLE_SEQ" created.
+
+Elapsed: 00:00:00.010
+Elapsed: 00:00:00.020
+Elapsed: 00:00:00.016
+
+Synonym "APEX_USER_ROLE_MAP" created.
+
+Elapsed: 00:00:00.007
+
+View "APEX_USER_ROLES" created.
+
+Elapsed: 00:00:00.106
+
+Table "APX$BUILTIN" created.
+
+Elapsed: 00:00:00.025
+
+Index "APX$BUILTIN_UNQ" created.
+
+Elapsed: 00:00:00.016
+
+Index "APX$BUILTIN_CTX_FK_IDX" created.
+
+Elapsed: 00:00:00.012
+
+Index "APX$BUILTIN_STAT_FK_IDX" created.
+
+Elapsed: 00:00:00.009
+
+Synonym "APEX_BUILTIN" created.
+
+Elapsed: 00:00:00.010
+
+Gathering Stats...
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:01.606
 
 
-21.12.2017 22:32:02 *** DONE Status (0)
+30.12.2017 21:39:19 *** DONE Status (0)
 
-*** APX Application Modules Install End | Build: 1.0.0_0027.1712212232 | Commit: [master 9318813] ***
+*** APXUSR Application Modules Install End | Build: 1.0.0_0038.1712302139 | Commit: [master 38f38df] ***
 

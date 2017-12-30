@@ -1,8 +1,8 @@
-{ "application": "APX Application Modules",
+{ "application": "APXUSR Application Modules",
   "version": "1.0.0",
   "release": 
-    { "build": "0027",
+    { "build": "0038",
       "comment": "APXUSR",
-      "checksum": "6d43dd156ccf0a42efad579f619e0706" 
+      "checksum": "e55f78c16b61de57a69b76d4227c96db" 
     }
 }
