@@ -16,9 +16,6 @@ prompt
 prompt Dropping DB Model (Tables)
 prompt
 
---@"/Users/stefan/Library/Mobile Documents/com~apple~CloudDocs/Projects/APEX/apx/workarea/plsql/packages/apxusr/workarea/model/apxusr_drop.sql"
-
-
 -------------------------------------------------------------------------------
 -- Apex User, Groups, Domains Tables and Views
 prompt APX$BUILTIN
@@ -1465,21 +1462,21 @@ begin
     "ORDS"."ENABLE_SCHEMA";
 
     "ORDS"."ENABLE_OBJECT"(p_enabled => TRUE,
-                       p_schema => 'APXUSR',
+                       p_schema => user,
                        p_object => 'APEX_USER_REG_STATUS',
                        p_object_type => 'VIEW',
                        p_object_alias => 'apex_user_reg_status',
                        p_auto_rest_auth => TRUE);
 
     "ORDS"."ENABLE_OBJECT"(p_enabled => TRUE,
-                       p_schema => 'APXUSR',
+                       p_schema => user,
                        p_object => 'APX$USER_REG',
                        p_object_type => 'TABLE',
                        p_object_alias => 'apex_user_reg',
                        p_auto_rest_auth => TRUE);
 
     "ORDS"."ENABLE_OBJECT"(p_enabled => TRUE,
-                       p_schema => 'APXUSR',
+                       p_schema => user,
                        p_object => 'APX$STATUS',
                        p_object_type => 'TABLE',
                        p_object_alias => 'apex_user_status',
@@ -1496,7 +1493,7 @@ grant select on "APX$STATUS"                  to "PUBLIC";
 grant select on "APEX_USER_REG_STATUS"        to "PUBLIC";
 grant select on "APEX_USER_REGISTRATIONS"     to "PUBLIC";
 
------------------------–––––––––––––––––––––---------------------------------–––––––––––––––––––––----------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- REST Query to be used in Resource Handler
 --
 -- possible results:
