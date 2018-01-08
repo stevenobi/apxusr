@@ -1,7 +1,7 @@
 
-30.12.2017 22:00:16 *** APXUSR Application Modules Install | Build: 1.0.0_0039.1712302200 | Commit: [master 29bff4c] ***
+08.01.2018 02:38:58 *** APXUSR Application Modules Install | Build: 1.0.0_0042.1801080238 | Commit: [master abf7f50] ***
 
-30.12.2017 22:00:19     Dropping: "APXUSR Objects"
+08.01.2018 02:39:01     Dropping: "APXUSR Objects"
 
 Dropping DB Model (Tables)
 
@@ -14,66 +14,66 @@ APX$PRIVILEGE
 APX$DOMAIN
 APX$GROUP
 
-30.12.2017 22:00:24     Creating: "APXUSR Database Model"
+08.01.2018 02:39:05     Creating: "APXUSR Database Model"
 
 Creating APXUSR DB Model (Tables)
 
 Table "APX$GROUP" created.
 
-Elapsed: 00:00:00.038
+Elapsed: 00:00:00.025
 
 Index "APX$GROUP_UNQ1" created.
 
-Elapsed: 00:00:00.025
+Elapsed: 00:00:00.013
 
 Index "APX$GROUP_UNQ2" created.
 
-Elapsed: 00:00:00.031
+Elapsed: 00:00:00.011
 
 Index "APX$GROUP_UNQ3" created.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.014
 
 Index "APX$GROUP_STATUS_FK_IDX" created.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.011
 
 Index "APX$GROUP_PARENT_FK_IDX" created.
 
-Elapsed: 00:00:00.013
+Elapsed: 00:00:00.009
 
 Index "APX$GROUP_SECLEV" created.
 
-Elapsed: 00:00:00.018
+Elapsed: 00:00:00.012
 
 Index "APX$GROUP_APX_ID" created.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.015
 
 Sequence "APX$GROUP_ID_SEQ" created.
 
-Elapsed: 00:00:00.012
-Elapsed: 00:00:00.049
+Elapsed: 00:00:00.006
+Elapsed: 00:00:00.043
 
 Synonym "APEX_GROUP" created.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.023
 
 1 row inserted.
 
-Elapsed: 00:00:00.021
+Elapsed: 00:00:00.025
 
 1 row inserted.
 
-Elapsed: 00:00:00.006
+Elapsed: 00:00:00.007
 
 1 row inserted.
 
-Elapsed: 00:00:00.006
+Elapsed: 00:00:00.008
 
 1 row inserted.
 
-Elapsed: 00:00:00.005
+Elapsed: 00:00:00.010
 
 Commit complete.
 
@@ -81,15 +81,15 @@ Elapsed: 00:00:00.006
 
 View "APEX_GROUPS" created.
 
-Elapsed: 00:00:00.015
+Elapsed: 00:00:00.020
 
 Synonym "APEX_USER_GROUPS" created.
 
-Elapsed: 00:00:00.007
+Elapsed: 00:00:00.015
 
 Table "APX$DOMAIN" created.
 
-Elapsed: 00:00:00.026
+Elapsed: 00:00:00.033
 
 Index "APX$DOMAIN_UNQ1" created.
 
@@ -97,98 +97,97 @@ Elapsed: 00:00:00.011
 
 Index "APX$DOMAIN_UNQ2" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.011
 
 Index "APX$DOMAIN_UNQ3" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.013
 
 Index "APX$DOMAIN_GROUP_FK_IDX" created.
 
-Elapsed: 00:00:00.010
+Elapsed: 00:00:00.015
 
 Index "APX$DOMAIN_STATUS_FK_IDX" created.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.013
 
 Index "APX$DOMAIN_PARENT_FK_IDX" created.
 
-Elapsed: 00:00:00.026
+Elapsed: 00:00:00.011
 
 Index "APX$DOMAIN_SECLEV" created.
 
-Elapsed: 00:00:00.024
+Elapsed: 00:00:00.010
 
 Index "APX$DOMAIN_APX_ID" created.
 
-Elapsed: 00:00:00.021
+Elapsed: 00:00:00.011
 
 Sequence "APX$DOMAIN_ID_SEQ" created.
 
 Elapsed: 00:00:00.006
-Elapsed: 00:00:00.031
+Elapsed: 00:00:00.053
 
 Synonym "APEX_DOMAIN" created.
 
-Elapsed: 00:00:00.020
+Elapsed: 00:00:00.008
 
 1 row inserted.
 
-Elapsed: 00:00:00.022
+Elapsed: 00:00:00.032
 
 1 row inserted.
-
-Elapsed: 00:00:00.012
-
-1 row inserted.
-
-Elapsed: 00:00:00.009
-
-Commit complete.
 
 Elapsed: 00:00:00.006
 
+1 row inserted.
+
+Elapsed: 00:00:00.008
+
+Commit complete.
+
+Elapsed: 00:00:00.011
+
 View "APEX_DOMAINS" created.
 
-Elapsed: 00:00:00.032
+Elapsed: 00:00:00.025
 
 Synonym "APEX_USER_DOMAINS" created.
 
-Elapsed: 00:00:00.048
+Elapsed: 00:00:00.007
 
 View "APEX_VALID_DOMAINS" created.
 
-Elapsed: 00:00:00.032
-Elapsed: 00:00:00.015
-Elapsed: 00:00:00.022
+Elapsed: 00:00:00.021
+Elapsed: 00:00:00.023
 
 Grant succeeded.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.008
 
 Table "APX$PRIVILEGE" created.
 
-Elapsed: 00:00:00.021
+Elapsed: 00:00:00.027
 
 Index "APX$PRIV_UNQ1" created.
 
-Elapsed: 00:00:00.014
+Elapsed: 00:00:00.013
 
 Index "APX$PRIV_UNQ2" created.
 
-Elapsed: 00:00:00.010
+Elapsed: 00:00:00.016
 
 Index "APX$PRIV_STATUS_FK_IDX" created.
 
-Elapsed: 00:00:00.010
+Elapsed: 00:00:00.007
 
 Index "APX$PRIV_PARENT_FK_IDX" created.
 
-Elapsed: 00:00:00.012
+Elapsed: 00:00:00.010
 
 Index "APX$PRIV_SECLEV" created.
 
-Elapsed: 00:00:00.007
+Elapsed: 00:00:00.008
 
 Index "APX$PRIV_APP_ID" created.
 
@@ -196,65 +195,65 @@ Elapsed: 00:00:00.008
 
 Sequence "APX$PRIV_ID_SEQ" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.010
 Elapsed: 00:00:00.027
 
 Synonym "APEX_PRIVILEGE" created.
 
-Elapsed: 00:00:00.011
+Elapsed: 00:00:00.014
 
 View "APEX_PRIVILEGES" created.
 
-Elapsed: 00:00:00.031
+Elapsed: 00:00:00.029
 
 Synonym "APEX_USER_PRIVILEGES" created.
 
-Elapsed: 00:00:00.010
+Elapsed: 00:00:00.014
 
 Table "APX$ROLE" created.
 
-Elapsed: 00:00:00.020
+Elapsed: 00:00:00.021
 
 Index "APX$ROLE_UNQ1" created.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.019
 
 Index "APX$ROLE_UNQ2" created.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.023
 
 Index "APX$ROLE_DOMAIN_FK_IDX" created.
 
-Elapsed: 00:00:00.007
+Elapsed: 00:00:00.011
 
 Index "APX$ROLE_CTX_FK_IDX" created.
 
-Elapsed: 00:00:00.007
+Elapsed: 00:00:00.010
 
 Index "APX$ROLE_STATUS_FK_IDX" created.
 
-Elapsed: 00:00:00.007
+Elapsed: 00:00:00.010
 
 Index "APX$ROLE_PARENT_FK_IDX" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.009
 
 Index "APX$ROLE_SECLEV" created.
 
-Elapsed: 00:00:00.007
+Elapsed: 00:00:00.009
 
 Index "APX$ROLE_APX_ID" created.
 
-Elapsed: 00:00:00.010
+Elapsed: 00:00:00.011
 
 Sequence "APX$ROLE_ID_SEQ" created.
 
-Elapsed: 00:00:00.009
-Elapsed: 00:00:00.025
+Elapsed: 00:00:00.006
+Elapsed: 00:00:00.021
 
 Synonym "APEX_ROLE" created.
 
-Elapsed: 00:00:00.017
+Elapsed: 00:00:00.020
 
 1 row inserted.
 
@@ -266,63 +265,63 @@ Elapsed: 00:00:00.006
 
 1 row inserted.
 
-Elapsed: 00:00:00.005
-
-1 row inserted.
-
-Elapsed: 00:00:00.005
-
-1 row inserted.
-
 Elapsed: 00:00:00.006
+
+1 row inserted.
+
+Elapsed: 00:00:00.008
 
 1 row inserted.
 
 Elapsed: 00:00:00.011
 
+1 row inserted.
+
+Elapsed: 00:00:00.008
+
 Commit complete.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.008
 
 View "APEX_ROLES" created.
 
-Elapsed: 00:00:00.032
+Elapsed: 00:00:00.029
 
 Synonym "APEX_APP_ROLES" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.007
 
 Table "APX$USER" created.
 
-Elapsed: 00:00:00.023
+Elapsed: 00:00:00.032
 
 Index "APX$USER_UNQ1" created.
 
-Elapsed: 00:00:00.012
+Elapsed: 00:00:00.015
 
 Index "APX$USER_UNQ2" created.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.023
 
 Index "APX$USER_APX_ID" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.007
 
 Index "APX$USER_DOMAIN_FK_IDX" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.017
 
 Index "APX$USER_CTX_FK_IDX" created.
 
-Elapsed: 00:00:00.013
+Elapsed: 00:00:00.011
 
 Index "APX$USER_STATUS_FK_IDX" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.011
 
 Index "APX$USER_DEFROLE_FK_IDX" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.010
 
 Index "APX$USER_PARENT_FK_IDX" created.
 
@@ -330,77 +329,77 @@ Elapsed: 00:00:00.008
 
 Index "APX$USER_SECLEV" created.
 
-Elapsed: 00:00:00.007
+Elapsed: 00:00:00.011
 
 Sequence "APX$USER_ID_SEQ" created.
 
-Elapsed: 00:00:00.006
-Elapsed: 00:00:00.030
+Elapsed: 00:00:00.008
+Elapsed: 00:00:00.036
 
 Synonym "APEX_USER" created.
 
-Elapsed: 00:00:00.010
+Elapsed: 00:00:00.015
 
 View "APEX_USERS" created.
 
-Elapsed: 00:00:00.064
+Elapsed: 00:00:00.060
 
 Synonym "APEX_APP_USERS" created.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.016
 
 Table "APX$USER_REG" created.
 
-Elapsed: 00:00:00.026
+Elapsed: 00:00:00.037
 
 Index "APX$USREG_UNQ1" created.
 
-Elapsed: 00:00:00.011
+Elapsed: 00:00:00.010
 
 Index "APX$USREG_UNQ2" created.
 
-Elapsed: 00:00:00.011
+Elapsed: 00:00:00.007
 
 Index "APX$USREG_UNQ3" created.
 
-Elapsed: 00:00:00.010
+Elapsed: 00:00:00.011
 
 Index "APX$USREG_UNQ4" created.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.012
 
 Index "APX$USRREG_DOMAIN_FK_IDX" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.017
 
 Index "APX$USRREG_CTX_FK_IDX" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.010
 
 Index "APX$USRREG_STATUS_FK_IDX" created.
 
-Elapsed: 00:00:00.012
+Elapsed: 00:00:00.013
 
 Index "APX$USRREG_APXUSR_FK_IDX" created.
 
-Elapsed: 00:00:00.009
+Elapsed: 00:00:00.007
 
 Index "APX$USRREG_ROLE_FK_IDX" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.012
 
 Sequence "APX$USREG_ID_SEQ" created.
 
-Elapsed: 00:00:00.014
-Elapsed: 00:00:00.044
+Elapsed: 00:00:00.006
+Elapsed: 00:00:00.031
 
 Synonym "APEX_USER_REGISTRATION" created.
 
-Elapsed: 00:00:00.056
+Elapsed: 00:00:00.021
 
 Synonym "APEX_USREG" created.
 
-Elapsed: 00:00:00.011
+Elapsed: 00:00:00.016
 
 View "APEX_USER_REGISTRATIONS" created.
 
@@ -408,25 +407,25 @@ Elapsed: 00:00:00.034
 
 View "APEX_USER_REGISTRATIONS_ALL" created.
 
-Elapsed: 00:00:00.099
+Elapsed: 00:00:00.078
 
 Synonym "APEX_USER_ALL_REG" created.
 
-Elapsed: 00:00:00.026
-Elapsed: 00:00:00.023
-Elapsed: 00:00:00.027
+Elapsed: 00:00:00.017
+Elapsed: 00:00:00.024
+Elapsed: 00:00:00.030
 
 1 row inserted.
 
-Elapsed: 00:00:00.050
+Elapsed: 00:00:00.084
 
 1 row inserted.
 
-Elapsed: 00:00:00.011
+Elapsed: 00:00:00.016
 
 Commit complete.
 
-Elapsed: 00:00:00.005
+Elapsed: 00:00:00.015
 
 View "APEX_USER_REG_STATUS" created.
 
@@ -434,53 +433,57 @@ Elapsed: 00:00:00.013
 
 PL/SQL procedure successfully completed.
 
-Elapsed: 00:00:00.021
+Elapsed: 00:00:00.029
 
 Grant succeeded.
 
-Elapsed: 00:00:00.006
+Elapsed: 00:00:00.010
 
 Grant succeeded.
-
-Elapsed: 00:00:00.006
-
-Grant succeeded.
-
-Elapsed: 00:00:00.021
-
-Table "APX$USER_ROLE_MAP" created.
-
-Elapsed: 00:00:00.028
-
-Index "APX$USERROLMAP_STAT" created.
-
-Elapsed: 00:00:00.021
-
-Index "APX$USERROLEMAP_UNQ" created.
 
 Elapsed: 00:00:00.015
 
+Grant succeeded.
+
+Elapsed: 00:00:00.011
+
+Grant succeeded.
+
+Elapsed: 00:00:00.022
+
+Table "APX$USER_ROLE_MAP" created.
+
+Elapsed: 00:00:00.022
+
+Index "APX$USERROLMAP_STAT" created.
+
+Elapsed: 00:00:00.012
+
+Index "APX$USERROLEMAP_UNQ" created.
+
+Elapsed: 00:00:00.020
+
 Sequence "APX$USERROLE_SEQ" created.
 
-Elapsed: 00:00:00.007
-Elapsed: 00:00:00.039
-Elapsed: 00:00:00.034
+Elapsed: 00:00:00.009
+Elapsed: 00:00:00.025
+Elapsed: 00:00:00.025
 
 Synonym "APEX_USER_ROLE_MAP" created.
 
-Elapsed: 00:00:00.014
+Elapsed: 00:00:00.006
 
 View "APEX_USER_ROLES" created.
 
-Elapsed: 00:00:00.112
+Elapsed: 00:00:00.110
 
 Table "APX$BUILTIN" created.
 
-Elapsed: 00:00:00.024
+Elapsed: 00:00:00.027
 
 Index "APX$BUILTIN_UNQ" created.
 
-Elapsed: 00:00:00.013
+Elapsed: 00:00:00.010
 
 Index "APX$BUILTIN_CTX_FK_IDX" created.
 
@@ -488,20 +491,20 @@ Elapsed: 00:00:00.010
 
 Index "APX$BUILTIN_STAT_FK_IDX" created.
 
-Elapsed: 00:00:00.008
+Elapsed: 00:00:00.009
 
 Synonym "APEX_BUILTIN" created.
 
-Elapsed: 00:00:00.006
+Elapsed: 00:00:00.010
 
 Gathering Stats...
 
 PL/SQL procedure successfully completed.
 
-Elapsed: 00:00:01.353
+Elapsed: 00:00:01.539
 
 
-30.12.2017 22:00:29 *** DONE Status (0)
+08.01.2018 02:39:10 *** DONE Status (0)
 
-*** APXUSR Application Modules Install End | Build: 1.0.0_0039.1712302200 | Commit: [master 29bff4c] ***
+*** APXUSR Application Modules Install End | Build: 1.0.0_0042.1801080238 | Commit: [master abf7f50] ***
 

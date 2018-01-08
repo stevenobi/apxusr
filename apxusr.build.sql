@@ -1,6 +1,6 @@
 
 ---------------------------------------------------------------
-       ---- 17/12/30 22:00 Begin of SQL Build APXUSR ----
+       ---- 18/01/08 02:38 Begin of SQL Build APXUSR ----
 
 
 -- SQL Drop File
@@ -76,7 +76,7 @@ drop table       "APX$PRIVILEGE"     purge;
 
 
 prompt APX$DOMAIN
-drop function    "PARSE_DOMAIN_FROM_EMAIL";
+--drop function    "PARSE_DOMAIN_FROM_EMAIL"; -- comes with APX$MAIL
 drop function    "IS_VALID_DOMAIN";
 drop view        "APEX_VALID_DOMAINS";
 drop view        "APEX_DOMAINS";
@@ -129,6 +129,7 @@ prompt Creating &1 DB Model (Tables)
 -- 02.06.2017 SOB added BUILTINs
 -- 06.11.2017 SOB added Scopes, Domains, Groups and Privileges
 -- 17.12.2017 SOB renamed to apx_ and switched Domain Group paradigm
+-- 07.01.2018 SOB moved Email Tables and Functions into Top Level APX Project APX$MAIL
 --
 -----------------------------------------------------------------------------------------------------
 
@@ -149,7 +150,6 @@ prompt Creating &1 DB Model (Tables)
 -- -- drop sequence    "APX$USERSESS_SEQ";
 -- -- drop trigger     "APX$USERSESS_BI_TRG";
 -- -- drop table       "APX$USR_SESSION"  purge;
-
 
 -- drop synonym     "APEX_BUILTIN";
 -- drop table       "APX$BUILTIN"       purge;
@@ -196,7 +196,8 @@ prompt Creating &1 DB Model (Tables)
 -- drop trigger     "APX$PRIV_BIU_TRG";
 -- drop table       "APX$PRIVILEGE"     purge;
 
--- drop function    "PARSE_DOMAIN_FROM_EMAIL";
+
+---- drop function    "PARSE_DOMAIN_FROM_EMAIL"; -- comes with APX$MAIL 2018.01
 -- drop function    "IS_VALID_DOMAIN";
 -- drop view        "APEX_VALID_DOMAINS";
 -- drop view        "APEX_DOMAINS";
@@ -467,21 +468,22 @@ where apex_domain_status = 'VALID';
 
 
 -----------------------------------------------------------------------------------------------------
+-- comes with APX$MAIL
 -- Parse Domain Part from Emai Address
-create function "PARSE_DOMAIN_FROM_EMAIL" (
-    p_address varchar2
-) return varchar2
-as
-l_domain varchar2(1000);
-begin
-    if instr(p_address, '@') > 0 then
-      l_domain := trim(substr(p_address, instr(p_address, '@') +1, length(p_address)));
-    else
-      l_domain := trim(p_address);
-    end if;
-  return (l_domain);
-end;
-/
+-- create function "PARSE_DOMAIN_FROM_EMAIL" (
+--     p_address varchar2
+-- ) return varchar2
+-- as
+-- l_domain varchar2(1000);
+-- begin
+--     if instr(p_address, '@') > 0 then
+--       l_domain := trim(substr(p_address, instr(p_address, '@') +1, length(p_address)));
+--     else
+--       l_domain := trim(p_address);
+--     end if;
+--   return (l_domain);
+-- end;
+-- /
 
 --select parse_domain_from_email( 's.obermeyer@t-online.de') as domain from dual;
 
@@ -501,7 +503,7 @@ C_RETURN_OFFSET pls_integer := -1; -- Default Offset if none specified by p_retu
 begin
     -- check if domain conatins email characters
     if instr(p_domain, '@') > 0 then
-        l_domain := PARSE_DOMAIN_FROM_EMAIL(p_domain);
+        l_domain := "PARSE_DOMAIN_FROM_EMAIL"(p_domain);
     else
         l_domain := p_domain;
     end if;
@@ -1015,7 +1017,7 @@ begin
         into :new.apx_user_domain_id, l_domain
         from "APX$DOMAIN"
         where upper(trim(apx_domain)) =
-        upper(trim(PARSE_DOMAIN_FROM_EMAIL(:new.apx_user_email)))
+        upper(trim("PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email)))
         and apx_domain_status_id = (select apx_status_id
                                     from "APX$STATUS"
                                     where apx_status = 'VALID'
@@ -1034,7 +1036,7 @@ begin
         end;
         if (l_enforce_valid_domain = 0) then
           -- accept user's domain
-          l_domain := PARSE_DOMAIN_FROM_EMAIL(:new.apx_user_email);
+          l_domain := "PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email);
         else
           raise invalid_domain;
         end if;
@@ -1063,7 +1065,7 @@ begin
       select sysdate,
              sysdate + l_token_valid_for_hours / 24,
              systimestamp,
-             APX_GET_TOKEN(l_domain)
+             "APX_GET_TOKEN"(l_domain)
         into
              :new.apx_user_token_created,
              :new.apx_user_token_valid_until,
@@ -1238,7 +1240,7 @@ begin
         select apex_config_item_value
         into l_user_reg_max_attempts
         from "APEX_CONFIGURATION"
-        where APEX_CONFIG_ITEM = 'USER_REGISTRATION_ATTEMPTS';
+        where apex_config_item = 'USER_REGISTRATION_ATTEMPTS';
 
         select apex_config_item_value
         into l_token_valid_for_hours
@@ -1351,7 +1353,7 @@ begin
         select sysdate,
                sysdate + l_token_valid_for_hours / 24,
                systimestamp,
-               APX_GET_TOKEN(l_domain),
+               "APX_GET_TOKEN"(l_domain),
                l_user_status_id,
                :old.apx_user_description || sysdate ||
                ' User Reset after exceeding max registration attempts (Total '||
@@ -1389,15 +1391,15 @@ commit;
 -----------------------------------------------------------------------------------------------------
 -- User Registration Status for Restful Requests
 --
--- determines user registration status by compiling her properties and current status in registration table
+-- determines user registration status by compiling
+-- its properties and current status in registration table
 --
--- s = (u * (t + s)) + (a + w)
+--               s = ((t + s) + (a + w))
 --
--- status = (user_exists [ 0  = no | 1 = yes ] *
---             (token_valid [ 1 = false | 10 = true ] + user_status [ 0 - 3 ]) +
---               (is_app_user [ 0 | 101 ] + is_apex_ws_user [ 0 | 201 ])
+-- status = ( (token_valid [ 1 = false | 10 = true ] + user_status [ 0 - 3 ]) +
+--            (is_app_user [ 0 | 101 ] + is_apex_ws_user [ 0 | 201 ]) )
 --
--- results see below
+-- possible results see below
 --
 --------------------------------------------------------------------------------------------------------------------------------
 create view "APEX_USER_REG_STATUS"
@@ -1456,25 +1458,27 @@ from (
 
 -- Enable APEX_USER_REG_STATUS as REST Object
 --
-DECLARE
-  PRAGMA AUTONOMOUS_TRANSACTION;
-BEGIN
+declare
+  pragma autonomous_transaction;
+begin
 
-    ORDS.ENABLE_OBJECT(p_enabled => TRUE,
+    "ORDS"."ENABLE_SCHEMA";
+
+    "ORDS"."ENABLE_OBJECT"(p_enabled => TRUE,
                        p_schema => 'APXUSR',
                        p_object => 'APEX_USER_REG_STATUS',
                        p_object_type => 'VIEW',
                        p_object_alias => 'apex_user_reg_status',
                        p_auto_rest_auth => TRUE);
 
-    ORDS.ENABLE_OBJECT(p_enabled => TRUE,
+    "ORDS"."ENABLE_OBJECT"(p_enabled => TRUE,
                        p_schema => 'APXUSR',
                        p_object => 'APX$USER_REG',
                        p_object_type => 'TABLE',
                        p_object_alias => 'apex_user_reg',
                        p_auto_rest_auth => TRUE);
 
-    ORDS.ENABLE_OBJECT(p_enabled => TRUE,
+    "ORDS"."ENABLE_OBJECT"(p_enabled => TRUE,
                        p_schema => 'APXUSR',
                        p_object => 'APX$STATUS',
                        p_object_type => 'TABLE',
@@ -1483,13 +1487,14 @@ BEGIN
 
     commit;
 
-END;
+end;
 /
 
 -- needed for ORDS
-grant select on "APX$USER_REG" to "PUBLIC";
-grant select on "APX$STATUS" to "PUBLIC";
-grant select on "APEX_USER_REG_STATUS" to "PUBLIC";
+grant select on "APX$USER_REG"                to "PUBLIC";
+grant select on "APX$STATUS"                  to "PUBLIC";
+grant select on "APEX_USER_REG_STATUS"        to "PUBLIC";
+grant select on "APEX_USER_REGISTRATIONS"     to "PUBLIC";
 
 -----------------------–––––––––––––––––––––---------------------------------–––––––––––––––––––––----------
 -- REST Query to be used in Resource Handler
@@ -1503,7 +1508,7 @@ grant select on "APEX_USER_REG_STATUS" to "PUBLIC";
 -- 1  user exists, token invalid, user new       (1 * (1 + 0)) + 0      =>  register again
 -- 2  user exists, token invalid, user reg       (1 * (1 + 1)) + 0      =>  register again
 -- 3  user_exists, max reg attempts exceeded     (1 * (1 + 2)) + 0      =>  contact support to reset reg attempts
--- 4  user_exists, token invalid, user > reg     (1 * (1 + 3)) + 0      =>  reset password
+-- 4  user_exists, token invalid, status > reg   (1 * (1 + 3)) + 0      =>  reset password
 -- 10 user_exists, token valid (10), user new    (1 * (10 + 0)) + 0     =>  register again
 -- 11 user_exists, token valid, user registered  (1 * (10 + 1)) + 0     =>  confirm registration
 -- 12 user exists, token valid, user > reg       (1 * (10 + 2)) + 0     =>  reset password
@@ -1513,26 +1518,26 @@ grant select on "APEX_USER_REG_STATUS" to "PUBLIC";
 -----------------------------------------------------------------------------------------------------------
 -- -- Rest Query for User Status Code apxusr/ue/{username}
 --
+---- Rest User {username} Status Code
 -- select user_status + valid_domain as user_status
 -- from (
---     select case when user_exists = 0
---                 then 0
---                 else user_status
---            end as user_status,
---            case when user_exists = 0
---                 -- when p_return_as_offset is TRUE and without any more args to is_valid_domain,
---                 -- the offset is determined by the system setting for ENFORCE_VALID_DOMAIN in APX$CFG
---                 -- if you specify an offset you achieve better performance, since that additional lookup is avoided.
---                 then apxusr.is_valid_domain(upper(trim(:USRNAME)), p_return_as_offset => 'TRUE', p_return_offset => -1)
---                 else 0
---            end as valid_domain
+--     select case when user_exists =  0
+--                       then 0
+--                       else user_status
+--                end as user_status,
+--                case when user_exists = 0
+--                -- without any more args to is_valid_domain, the offset is determined by then system setting ENFORCE_VALID_DOMAIN in apx$cfg
+--                then "IS_VALID_DOMAIN"(upper(trim(:USRNAME)), p_return_as_offset => 'TRUE')
+--                else 0
+--                end as valid_domain
 --     from
---     (select count(1)            as user_exists,
---             max(user_status)    as user_status
---      from "APXUSR"."APEX_USER_REG_STATUS"
+--     (select count(1)             as user_exists,
+--                max(user_status) as user_status
+--      from "APEX_USER_REG_STATUS"
 --      where upper(trim(username)) = upper(trim(:USRNAME))
 --     )
---  )
+--  );
+
 
 
 -- returns -1, 0 or status_id (see table above for details)
@@ -1540,11 +1545,15 @@ grant select on "APEX_USER_REG_STATUS" to "PUBLIC";
 -- Sample User yet unknown, but Domain valid Call  {"user_status":0}
 -- https://ol7:8443/ords/apx/apxusr/usr/stefan.obermeyer@t-online.de -- 0 (user does not exist and domain is valid)
 --
+-- Sample User Exists but Max Reg Attempts exceeded Call  {"user_status":3}
+-- https://ol7:8443/ords/apx/apxusr/usr/s.obermeyer@t-online.de -- 3 (user exists, max reg attempts exceeded)
+--
 -- Sample User Exists Call  {"user_status":2}
 -- https://ol7:8443/ords/apx/apxusr/usr/s.obermeyer@t-online.de -- 2 (user exists, token inalid, domain ok - else not in table :-)
 --
--- Sample Error Call   {"user_status":-1}
+-- Sample Invalid Domain Error Call   {"user_status":-1}
 -- https://ol7:8443/ords/apx/apxusr/usr/s.obermeyer@t-online.di  -- -1 (user does not exist and domain invalid)
+
 
 -----------------------------------------------------------------------------------------------------------
 -- User Role Assignement
@@ -1777,6 +1786,6 @@ set pages 0 line 120 define off verify off feed off timing off echo off
 EXIT SQL.SQLCODE;
 
 
-       ---- 17/12/30 22:00  End of SQL Build APXUSR  ----
+       ---- 18/01/08 02:38  End of SQL Build APXUSR  ----
 ---------------------------------------------------------------
 
