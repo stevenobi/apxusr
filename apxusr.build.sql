@@ -212,6 +212,9 @@ prompt Creating &1 DB Model (Tables)
 -- drop trigger     "APX$GROUP_BIU_TRG";
 -- drop table       "APX$GROUP"         purge;
 
+alter table APX$DOMAIN modify APX_DOMAIN_STATUS_ID	number	default 6;
+alter table APX$USER_REG modify apx_user_domain_id number default null;
+alter table APX$USER_REG modify apx_user_status_id number default 14;
 
 --------------------------------------------------------------------------------------
 -- Application Groups
