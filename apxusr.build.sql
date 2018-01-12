@@ -332,8 +332,8 @@ create synonym "APEX_USER_GROUPS" for "APEX_GROUPS";
 create table "APX$DOMAIN" (
 apx_domain_id number not null,
 apx_domain varchar2(64) not null, -- fully qualified domain name (f.e.: mydomain.net)
-apx_domain_name varchar2(64) not null, -- conceptual name like MyDomain
-apx_domain_code varchar2(8) null,
+apx_domain_name varchar2(512) not null, -- conceptual name like MyDomain
+apx_domain_code varchar2(64) null,
 apx_domain_description varchar2(128),
 apx_parent_domain_id number,
 apx_domain_status_id number default 6, -- valid
