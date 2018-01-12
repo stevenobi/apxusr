@@ -1,6 +1,6 @@
 
 ---------------------------------------------------------------
-       ---- 18/01/08 02:38 Begin of SQL Build APXUSR ----
+       ---- 18/01/12 01:02 Begin of SQL Build APXUSR ----
 
 
 -- SQL Drop File
@@ -33,6 +33,7 @@ drop table       "APX$USER_ROLE_MAP" purge;
 
 
 prompt APX$USER_REGISTRATION
+drop procedure   "APX_USER_REGISTRATION";
 drop view        "APEX_USER_REG_STATUS";
 drop view        "APEX_USER_REGISTRATIONS";
 drop synonym     "APEX_USER_REGISTRATION";
@@ -1767,6 +1768,124 @@ create synonym  "APEX_BUILTIN"          for "APX$BUILTIN";
 -- );
 
 
+create procedure "APX_USER_REGISTRATION" (
+     p_mailto                        varchar2
+   , p_username                      varchar2        := null
+   , p_first_name                    varchar2        := null
+   , p_last_name                     varchar2        := null
+   , p_params                        clob            := null
+   , p_values                        clob            := null
+   , p_topic                         varchar2        := null
+   , p_userid                        pls_integer     := null
+   , p_domain_id                     pls_integer     := null
+   , p_token                         varchar2        := null
+   , p_from                          varchar2        := null
+   , p_app_id                        pls_integer     := v('APP_ID')
+   , p_result                        pls_integer     := null
+   , p_debug                         boolean         := null
+   , p_send_mail                     boolean         := null
+
+)
+is
+    -- Local Variables
+    l_mailto                        varchar2(64);
+    l_username                      varchar2(64);
+    l_first_name                    varchar2(64);
+    l_last_name                     varchar2(64);
+    l_params                        varchar2(4000);
+    l_values                        varchar2(4000);
+    l_topic                         varchar2(64);
+    l_userid                        pls_integer;
+    l_domain_id                     pls_integer;
+    l_token                         varchar2(4000);
+    l_from                          varchar2(64);
+    l_app_id                        pls_integer;
+    l_result                        pls_integer;
+    l_debug                         boolean;
+    l_send_mail                     boolean;
+
+    -- Constants
+    C_TOPIC                         constant          varchar2(1000)  := 'REGISTER';
+    C_FROM                          constant          varchar2(1000)  := 's.obermeyer@t-online.de';
+    C_APP_ID                        constant          pls_integer     := 100;
+    C_RESULT                        constant          pls_integer     := 0;
+    C_DEBUG                         constant          boolean         := false;
+    C_SEND_MAIL                     constant          boolean         := true;
+
+begin
+
+   -- Setting Locals Defaults
+    l_mailto                        := p_mailto;
+    l_username                      := p_username;
+    l_first_name                    := p_first_name;
+    l_last_name                     := p_last_name;
+    l_params                        := p_params;
+    l_values                        := p_values;
+    l_topic                         := nvl(p_topic    , C_TOPIC);
+    l_userid                        := p_userid;
+    l_domain_id                     := p_domain_id;
+    l_token                         := p_token;
+    l_from                          := nvl(p_from     , C_FROM);
+    l_app_id                        := nvl(p_app_id   , C_APP_ID);
+    l_result                        := nvl(p_result   , C_RESULT);
+    l_debug                         := nvl(p_debug    , C_DEBUG);
+    l_send_mail                     := nvl(p_send_mail, C_SEND_MAIL);
+
+    insert into "APEX_USER_REGISTRATION" (
+                                          apx_username
+                                        , apx_user_email
+                                        , apx_user_first_name
+                                        , apx_user_last_name
+                                        )
+                                 values (
+                                          l_username
+                                        , l_mailto
+                                        , l_first_name
+                                        , l_last_name
+                                        )
+    returning apx_user_id, apx_username, apx_user_token
+    into l_userid, l_username, l_token;
+
+    -- send confirmation mail if specified
+    if l_send_mail then
+
+        "SEND_MAIL" (
+            p_result      =>  l_result
+          , p_mailto      =>  l_mailto
+          , p_username    =>  l_username
+          , p_topic       =>  l_topic
+          , p_params      =>  l_params
+          , p_values      =>  l_values
+          , p_app_id      =>  l_app_id
+          , p_debug_only  =>  l_debug
+        );
+
+    end if;
+
+
+    if (l_result = 0) then
+        -- set status to registered
+        update "APEX_USER_REGISTRATION"
+        set apx_user_status_id = (select apex_status_id
+                                    from apex_status
+                                   where app_id is null
+                                     and apex_status_context = 'USER'
+                                     and apex_status = 'REGISTERED')
+        where apx_user_id = l_userid;
+
+    end if;
+
+    commit;
+
+exception when dup_val_on_index then
+rollback;
+when others then
+rollback;
+raise;
+end;
+/
+
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Gather Stats for new/all Objects
 --------------------------------------------------------------------------------------
@@ -1786,6 +1905,6 @@ set pages 0 line 120 define off verify off feed off timing off echo off
 EXIT SQL.SQLCODE;
 
 
-       ---- 18/01/08 02:38  End of SQL Build APXUSR  ----
+       ---- 18/01/12 01:02  End of SQL Build APXUSR  ----
 ---------------------------------------------------------------
 
