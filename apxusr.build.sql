@@ -1855,7 +1855,7 @@ begin
           , p_username    =>  l_username
           , p_topic       =>  l_topic
           , p_params      =>  l_params
-          , p_values      =>  l_values
+          , p_values      =>  l_mailto||','||l_token  --  l_values
           , p_app_id      =>  l_app_id
           , p_debug_only  =>  l_debug
         );
