@@ -2180,7 +2180,7 @@ begin
     l_token                         := p_token;
     l_description                   := p_description;
     l_web_password                  := p_web_password;
-    l_web_password_format           := p_web_password_format;
+    l_web_password_format           := nvl(p_web_password_format, C_PASSWORD_FORMAT);
     l_group_ids                     := p_group_ids;
     l_developer_privs               := p_developer_privs;
     l_default_schema                := p_default_schema;
