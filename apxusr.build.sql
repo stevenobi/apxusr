@@ -1,6 +1,6 @@
 
 ---------------------------------------------------------------
-       ---- 18/01/12 01:02 Begin of SQL Build APXUSR ----
+       ---- 18/01/17 01:09 Begin of SQL Build APXUSR ----
 
 
 -- SQL Drop File
@@ -15,6 +15,21 @@ from dual;
 prompt
 prompt Dropping DB Model (Tables)
 prompt
+
+--@"/Users/stefan/Library/Mobile Documents/com~apple~CloudDocs/Projects/APEX/apx/workarea/plsql/packages/apxusr/workarea/model/apxusr_drop.sql"
+
+-------------------------------------------------------------------------------
+-- Apex User, Groups, Domains Tables and Views
+prompt APEX_USER_REGISTRATION
+drop function    "IS_VALID_USER_TOKEN";
+drop function    "IS_VALID_APEX_USER_TOKEN";
+drop function    "IS_VALID_REG_TOKEN";
+drop function    "IS_VALID_TOKEN";
+drop procedure   "APX_CREATE_USER";
+drop procedure   "APX_USER_CONFIRMATION";
+
+drop view        "APEX_WS_USER_ACCOUNT_STATUS";
+
 
 -------------------------------------------------------------------------------
 -- Apex User, Groups, Domains Tables and Views
@@ -149,6 +164,17 @@ prompt Creating &1 DB Model (Tables)
 -- -- drop trigger     "APX$USERSESS_BI_TRG";
 -- -- drop table       "APX$USR_SESSION"  purge;
 
+
+-- drop function    "IS_VALID_USER_TOKEN";
+-- drop function    "IS_VALID_APEX_USER_TOKEN";
+-- drop function    "IS_VALID_REG_TOKEN";
+-- drop function    "IS_VALID_TOKEN";
+-- drop procedure   "APX_CREATE_USER";
+-- drop procedure   "APX_USER_CONFIRMATION";
+
+-- drop view        "APEX_WS_USER_ACCOUNT_STATUS";
+
+
 -- drop synonym     "APEX_BUILTIN";
 -- drop table       "APX$BUILTIN"       purge;
 
@@ -213,9 +239,6 @@ prompt Creating &1 DB Model (Tables)
 -- drop trigger     "APX$GROUP_BIU_TRG";
 -- drop table       "APX$GROUP"         purge;
 
-alter table APX$DOMAIN modify APX_DOMAIN_STATUS_ID	number	default 6;
-alter table APX$USER_REG modify apx_user_domain_id number default null;
-alter table APX$USER_REG modify apx_user_status_id number default 14;
 
 --------------------------------------------------------------------------------------
 -- Application Groups
@@ -332,11 +355,11 @@ create synonym "APEX_USER_GROUPS" for "APEX_GROUPS";
 create table "APX$DOMAIN" (
 apx_domain_id number not null,
 apx_domain varchar2(64) not null, -- fully qualified domain name (f.e.: mydomain.net)
-apx_domain_name varchar2(512) not null, -- conceptual name like MyDomain
-apx_domain_code varchar2(64) null,
+apx_domain_name varchar2(64) not null, -- conceptual name like MyDomain
+apx_domain_code varchar2(8) null,
 apx_domain_description varchar2(128),
 apx_parent_domain_id number,
-apx_domain_status_id number default 6, -- valid
+apx_domain_status_id number default 17,
 apx_domain_group_id number default 1,
 apx_domain_sec_level number default 0,
 apx_domain_context_id number default 0,
@@ -791,8 +814,15 @@ apx_user_phone1 varchar2(64),
 apx_user_phone2 varchar2(64),
 apx_user_adress varchar2(128),
 apx_user_description varchar2(128),
+apx_app_user_id number,
+apex_user_id number,
+apx_user_last_login date,
+apx_user_token_created date,
+apx_user_token_valid_until date,
+apx_user_token_ts timestamp(6) with time zone,
+apx_user_token varchar2(4000),
 apx_user_domain_id number default 0,
-apx_user_status_id number default 7, -- open
+apx_user_status_id number default 7, -- new
 apx_user_sec_level number default 0,
 apx_user_context_id number,
 apx_user_parent_user_id number,
@@ -825,6 +855,12 @@ create or replace trigger "APX$USER_BIU_TRG"
 before insert or update on "APX$USER"
 referencing old as old new as new
 for each row
+declare
+l_domain varchar2(100);
+l_token_valid_for_hours pls_integer;
+l_enforce_valid_domain pls_integer;
+C_DEFAULT_TOKEN_VALID_FOR_HOUR pls_integer := 24;
+invalid_domain exception;
 begin
   if inserting then
     if (:new.apx_user_id is null) then
@@ -837,14 +873,63 @@ begin
         into :new.app_id
         from dual;
     end if;
+    if (:new.app_id is null) then
+        select nvl2(v('FB_FLOW_ID'), v('FB_FLOW_ID'), v('APP_ID'))
+        into :new.app_id
+        from dual;
+    end if;
+    if (nullif(:new.apx_user_status_id, 0) is null) then
+      begin
+        select apx_status_id
+        into :new.apx_user_status_id
+        from "APX$STATUS"
+        where apx_status = 'OPEN'
+        and apx_status_ctx_id  = (select apx_context_id
+                                  from "APX$CTX"
+                                  where apx_context = 'ACCOUNT');
+      exception when no_data_found then
+          :new.apx_user_status_id := 0;
+      end;
+    end if;
+    if (nullif(:new.apx_user_domain_id, 0) is null) then
+      begin
+        select apx_domain_id, apx_domain
+        into :new.apx_user_domain_id, l_domain
+        from "APX$DOMAIN"
+        where upper(trim(apx_domain)) =
+        upper(trim("PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email)))
+        and apx_domain_status_id = (select apx_status_id
+                                    from "APX$STATUS"
+                                    where apx_status = 'VALID'
+                                    and apx_status_ctx_id = (select apx_context_id
+                                                             from "APX$CTX"
+                                                             where apx_context = 'DOMAIN'));
+      exception when no_data_found then
+        begin
+          select count(1)
+          into l_enforce_valid_domain
+          from "APEX_CONFIGURATION"
+          where apex_config_item = 'ENFORCE_VALID_DOMAIN'
+          and apex_config_item_value = 'TRUE';
+        exception when no_data_found then
+            l_enforce_valid_domain := 0;
+        end;
+        if (l_enforce_valid_domain = 0) then
+          -- accept user's domain
+          l_domain := "PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email);
+        else
+          raise invalid_domain;
+        end if;
+      end;
+    end if;
     if (:new.apx_user_context_id is null) then
       begin
         select apx_context_id
         into :new.apx_user_context_id
         from "APX$CTX"
-        where upper(apx_context) = 'USER';
+        where apx_context = 'USER';
         exception when no_data_found then
-        select 0 into :new.apx_user_context_id from dual;
+            :new.apx_user_context_id := 0;
       end;
     end if;
     if (:new.apx_username is null or :new.apx_username = 'AppUser') then
@@ -853,14 +938,16 @@ begin
             select :new.apx_user_first_name||' '||:new.apx_user_last_name
             into :new.apx_username
             from dual;
-        elsif (:new.apx_user_email is not null) then
-            :new.apx_username := :new.apx_user_email;
         end if;
         exception when no_data_found then
-          select 'AppUser '||
-          nvl(:new.apx_user_id, to_number(SYS_GUID(),'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'))
-          into :new.apx_username
-          from dual;
+          if (:new.apx_user_email is not null) then
+            :new.apx_username := :new.apx_user_email;
+          else
+            select 'AppUser '||
+            nvl(:new.apx_user_id, to_number(SYS_GUID(),'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'))
+            into :new.apx_username
+            from dual;
+          end if;
       end;
     end if;
     select sysdate, nvl(v('APX_USER'), user)
@@ -873,6 +960,7 @@ begin
   end if;
 end;
 /
+
 
 --------------------------------------------------------------------------------------
 -- Synonyms on APX$USER
@@ -1080,14 +1168,16 @@ begin
             select :new.apx_user_first_name||' '||:new.apx_user_last_name
             into :new.apx_username
             from dual;
-        elsif (:new.apx_user_email is not null) then
-            :new.apx_username := :new.apx_user_email;
         end if;
         exception when no_data_found then
-          select 'NewAppUser '||
-          nvl(:new.apx_user_id, to_number(SYS_GUID(),'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'))
-          into :new.apx_username
-          from dual;
+          if (:new.apx_user_email is not null) then
+              :new.apx_username := :new.apx_user_email;
+          else
+            select 'NewAppUser '||
+            nvl(:new.apx_user_id, to_number(SYS_GUID(),'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'))
+            into :new.apx_username
+            from dual;
+          end if;
       end;
     end if;
     select sysdate, nvl(v('APX_USER'), user)
@@ -1466,21 +1556,21 @@ begin
     "ORDS"."ENABLE_SCHEMA";
 
     "ORDS"."ENABLE_OBJECT"(p_enabled => TRUE,
-                       p_schema => user,
+                       p_schema => 'APXUSR',
                        p_object => 'APEX_USER_REG_STATUS',
                        p_object_type => 'VIEW',
                        p_object_alias => 'apex_user_reg_status',
                        p_auto_rest_auth => TRUE);
 
     "ORDS"."ENABLE_OBJECT"(p_enabled => TRUE,
-                       p_schema => user,
+                       p_schema => 'APXUSR',
                        p_object => 'APX$USER_REG',
                        p_object_type => 'TABLE',
                        p_object_alias => 'apex_user_reg',
                        p_auto_rest_auth => TRUE);
 
     "ORDS"."ENABLE_OBJECT"(p_enabled => TRUE,
-                       p_schema => user,
+                       p_schema => 'APXUSR',
                        p_object => 'APX$STATUS',
                        p_object_type => 'TABLE',
                        p_object_alias => 'apex_user_status',
@@ -1497,7 +1587,7 @@ grant select on "APX$STATUS"                  to "PUBLIC";
 grant select on "APEX_USER_REG_STATUS"        to "PUBLIC";
 grant select on "APEX_USER_REGISTRATIONS"     to "PUBLIC";
 
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------–––––––––––––––––––––---------------------------------–––––––––––––––––––––----------
 -- REST Query to be used in Resource Handler
 --
 -- possible results:
@@ -1855,7 +1945,7 @@ begin
           , p_username    =>  l_username
           , p_topic       =>  l_topic
           , p_params      =>  l_params
-          , p_values      =>  l_mailto||','||l_token  --  l_values
+          , p_values      =>  l_values
           , p_app_id      =>  l_app_id
           , p_debug_only  =>  l_debug
         );
@@ -1886,6 +1976,600 @@ end;
 /
 
 
+------------------------------------------------------------------------------------------
+-- Is a Token valid in either table?
+create or replace function "IS_VALID_TOKEN" (
+    p_token       in    varchar2
+  , p_table       in    varchar2 := null
+  , p_col         in    varchar2 := null
+  , p_sql         in    clob     := null
+)  return boolean
+is
+l_table      varchar2(200)  := null;
+l_col        varchar2(100)  := null;
+l_token      varchar2(4000) := null;
+l_sql        varchar2(4000) := 'select count(1) from ##TABLE## where ##COL## = ##TOKEN##';
+l_result     pls_integer    := 0;
+l_return     boolean        := false;
+begin
+
+    l_table      := upper(trim(p_table));
+    l_col        := upper(trim(p_col));
+    l_token      := p_token;
+    l_sql        := p_sql;
+
+    l_sql := replace(l_sql, '##TABLE##' , l_table);
+    l_sql := replace(l_sql, '##COL##'   , l_col);
+    l_sql := replace(l_sql, '##TOKEN##' , l_token);
+
+    execute immediate l_sql into l_result;
+
+    if (l_result = 0) then
+        l_return := false;
+    else
+        l_return := true;
+    end if;
+
+    return l_return;
+
+exception when others then
+raise;
+end;
+/
+
+
+-- Exists a Token in APEX_USER_REGISTRATION table?
+create function "IS_VALID_REG_TOKEN" (
+    p_token       in    varchar2
+)  return boolean
+is
+l_table      varchar2(200)  := 'APEX_USER_REGISTRATION';
+l_col        varchar2(100)  := 'APX_USER_TOKEN';
+l_token      varchar2(4000) := null;
+l_return     boolean        := false;
+begin
+    l_token  := p_token;
+    l_return := "IS_VALID_TOKEN"(l_token, l_table, l_col, null);
+    return l_return;
+exception when others then
+return false;
+end;
+/
+
+
+-- Exists a Token in APEX_USER table?
+create or replace function "IS_VALID_APEX_USER_TOKEN" (
+    p_token       in    varchar2
+)  return boolean
+is
+l_table      varchar2(200)  := 'APEX_USER';
+l_col        varchar2(100)  := 'APX_USER_TOKEN';
+l_token      varchar2(4000) := null;
+l_return     boolean        := false;
+begin
+    l_token  := p_token;
+    l_return := "IS_VALID_TOKEN"(l_token, l_table, l_col, null);
+    return l_return;
+exception when others then
+return false;
+end;
+/
+
+
+-- Is Token for User still valid in APEX_USER_REGISTRATION table?
+create or replace function "IS_VALID_USER_TOKEN" (
+     p_username    in    varchar2
+   , p_token       in    varchar2
+)  return boolean
+is
+l_username   varchar2(200)  := null;
+l_token      varchar2(4000) := null;
+l_return     boolean        := false;
+begin
+    l_username   := upper(trim(p_username));
+    l_token      := p_token;
+    for c1 in (select count(1) as token_valid
+               from "APEX_USER_REGISTRATION"
+               where upper(trim(apx_username)) = l_username
+                 and apx_user_token = l_token
+                 and apx_user_token_valid_until <= sysdate) loop
+        l_return := case c1.token_valid when 1 then true end;
+    end loop;
+    return l_return;
+exception when others then
+raise;
+end;
+/
+
+
+-- Create Apex User in Application Table and Apex Workspace if specified
+create procedure "APX_CREATE_USER" (
+      p_username                    in       varchar2
+    , p_result                      in out   pls_integer
+    , p_email_address               in       varchar2        := null
+    , p_first_name                  in       varchar2        := null
+    , p_last_name                   in       varchar2        := null
+    , p_params                      in       clob            := null
+    , p_values                      in       clob            := null
+    , p_topic                       in       varchar2        := null
+    , p_userid                      in       pls_integer     := null
+    , p_domain_id                   in       pls_integer     := null
+    , p_token                       in       varchar2        := null
+    , p_description                 in       varchar2        := null
+    , p_web_password                in       varchar2        := null
+    , p_web_password_format         in       varchar2        := null
+    , p_change_password_on_first_use in      varchar2        := null
+    , p_group_ids                   in       varchar2        := null
+    , p_developer_privs             in       varchar2        := null
+    , p_default_schema              in       varchar2        := null
+    , p_allow_access_to_schemas     in       varchar2        := null
+    , p_account_expiry              in       date            := null
+    , p_account_locked              in       varchar2        := null
+    , p_attribute_01                in       varchar2        := null
+    , p_attribute_02                in       varchar2        := null
+    , p_attribute_03                in       varchar2        := null
+    , p_attribute_04                in       varchar2        := null
+    , p_attribute_05                in       varchar2        := null
+    , p_app_id                      in       pls_integer     := v('APP_ID')
+    , p_debug                       in       boolean         := null
+    , p_send_mail                   in       boolean         := null
+    , p_create_apex_user            in       boolean         := null
+)
+is
+    -- Local Variables
+    l_username                      varchar2(128);
+    l_result                        pls_integer;
+    l_result_code                   pls_integer;
+    l_email_address                 varchar2(128);
+    l_first_name                    varchar2(128);
+    l_last_name                     varchar2(128);
+    l_params                        clob;
+    l_values                        clob;
+    l_topic                         varchar2(64);
+    l_userid                        pls_integer;
+    l_domain_id                     pls_integer;
+    l_token                         varchar2(4000);
+    l_description                   varchar2(1000);
+    l_web_password                  varchar2(1000);
+    l_web_password_format           varchar2(1000);
+    l_group_ids                     varchar2(1000);
+    l_developer_privs               varchar2(1000);
+    l_default_schema                varchar2(1000);
+    l_allow_access_to_schemas       varchar2(1000);
+    l_change_password_on_first_use  varchar2(10);
+    l_account_expiry                date;
+    l_account_locked                varchar2(1000);
+    l_attribute_01                  varchar2(1000);
+    l_attribute_02                  varchar2(1000);
+    l_attribute_03                  varchar2(1000);
+    l_attribute_04                  varchar2(1000);
+    l_attribute_05                  varchar2(1000);
+    l_app_id                        pls_integer;
+    l_debug                         boolean;
+    l_send_mail                     boolean;
+    l_create_apex_user              boolean;
+
+    CREATE_USER_ERROR               exception;
+
+    -- Constants
+    C_TOPIC                         constant          varchar2(1000)  := 'CREATE';
+    C_PASSWORD_FORMAT               constant          varchar2(1000)  := 'CLEAR_TEXT';
+    C_ACCOUNT_LOCKED                constant          varchar2(10)    := 'N';
+    C_ACCOUNT_EXPIRED               constant          varchar2(10)    := TRUNC(SYSDATE);
+    C_CHANGE_PASSWORD_ON_FIRST_USE  constant          varchar2(10)    := 'N';
+    C_APP_ID                        constant          pls_integer     := 100;
+    C_RESULT                        constant          pls_integer     := null;
+    C_DEBUG                         constant          boolean         := false;
+    C_SEND_MAIL                     constant          boolean         := false;
+    C_CREATE_APEX_USER              constant          boolean         := true;
+    C_DEVELOPER_PRIVS               constant          varchar2(1000)  := null;
+    C_ALLOW_ACCESS_TO_SCHEMAS       constant          varchar2(1000)  := null;
+
+begin
+
+   -- Setting Locals Defaults
+    l_email_address                 := p_email_address;
+    l_username                      := p_username;
+    l_first_name                    := p_first_name;
+    l_last_name                     := p_last_name;
+    l_params                        := p_params;
+    l_values                        := p_values;
+    l_topic                         := nvl(p_topic            , C_TOPIC);
+    l_userid                        := p_userid;
+    l_domain_id                     := p_domain_id;
+    l_token                         := p_token;
+    l_description                   := p_description;
+    l_web_password                  := p_web_password;
+    l_web_password_format           := p_web_password_format;
+    l_group_ids                     := p_group_ids;
+    l_developer_privs               := p_developer_privs;
+    l_default_schema                := p_default_schema;
+    l_allow_access_to_schemas       := p_allow_access_to_schemas;
+    l_change_password_on_first_use  := nvl(p_change_password_on_first_use, C_CHANGE_PASSWORD_ON_FIRST_USE);
+    l_account_expiry                := nvl(p_account_expiry   , C_ACCOUNT_EXPIRED);
+    l_account_locked                := nvl(p_account_locked   , C_ACCOUNT_LOCKED);
+    l_attribute_01                  := p_attribute_01;
+    l_attribute_02                  := p_attribute_02;
+    l_attribute_03                  := p_attribute_03;
+    l_attribute_04                  := p_attribute_04;
+    l_attribute_05                  := p_attribute_05;
+    l_app_id                        := nvl(p_app_id           , C_APP_ID);
+    l_result                        := nvl(p_result           , C_RESULT);
+    l_result_code                   := 0;
+    l_debug                         := nvl(p_debug            , C_DEBUG);
+    l_send_mail                     := nvl(p_send_mail        , C_SEND_MAIL);
+    l_create_apex_user              := nvl(p_create_apex_user , C_CREATE_APEX_USER);
+
+    -- create local app user first
+
+    if (l_token is not null) then
+        if ("IS_VALID_USER_TOKEN"(l_username, l_token)) then
+            begin
+                insert into "APEX_USER" (
+                    apx_username,
+                    apx_user_email,
+                    apx_user_default_role_id,
+                    apx_user_code,
+                    apx_user_first_name,
+                    apx_user_last_name,
+                    apx_user_ad_login,
+                    apx_user_host_login,
+                    apx_user_email2,
+                    apx_user_email3,
+                    apx_user_twitter,
+                    apx_user_facebook,
+                    apx_user_linkedin,
+                    apx_user_xing,
+                    apx_user_other_social_media,
+                    apx_user_phone1,
+                    apx_user_phone2,
+                    apx_user_adress,
+                    apx_user_description,
+                    apx_app_user_id,
+                    apex_user_id,
+                    apx_user_last_login,
+                    apx_user_token_created,
+                    apx_user_token_valid_until,
+                    apx_user_token_ts,
+                    apx_user_token,
+                    apx_user_domain_id,
+                    apx_user_status_id,
+                    apx_user_sec_level,
+                    apx_user_context_id,
+                    apx_user_parent_user_id,
+                    app_id)
+                (select
+                    apx_username,
+                    apx_user_email,
+                    apx_user_default_role_id,
+                    apx_user_code,
+                    apx_user_first_name,
+                    apx_user_last_name,
+                    apx_user_ad_login,
+                    apx_user_host_login,
+                    apx_user_email2,
+                    apx_user_email3,
+                    apx_user_twitter,
+                    apx_user_facebook,
+                    apx_user_linkedin,
+                    apx_user_xing,
+                    apx_user_other_social_media,
+                    apx_user_phone1,
+                    apx_user_phone2,
+                    apx_user_adress,
+                    apx_user_description,
+                    apx_app_user_id,
+                    apex_user_id,
+                    null,
+                    apx_user_token_created,
+                    apx_user_token_valid_until,
+                    apx_user_token_ts,
+                    apx_user_token,
+                    apx_user_domain_id,
+                    apx_user_status_id,
+                    apx_user_sec_level,
+                    apx_user_context_id,
+                    apx_user_parent_user_id,
+                    app_id
+                FROM "APEX_USER_REGISTRATION"
+                where apx_user_token = l_token);
+            -- returning apx_user_id, apx_username, apx_user_email
+            -- into l_userid, l_username, l_email_address;
+
+            commit;
+            l_result_code := 0;
+
+            exception when no_data_found then
+                l_result_code := 2;
+                l_result      := 'No User Data for Token found.';
+                raise create_user_error;
+            end;
+        else
+           l_result_code := 1;
+           l_result      := 'Invalid Token';
+           raise create_user_error;
+        end if;
+    else
+        insert into "APEX_USER" (
+                                  apx_username
+                                , apx_user_email
+                                , apx_user_first_name
+                                , apx_user_last_name
+                                , apx_user_description
+                                )
+                            values (
+                                  l_username
+                                , l_email_address
+                                , l_first_name
+                                , l_last_name
+                                , l_description
+                                )
+        returning apx_user_id, apx_username, apx_user_email
+        into l_userid, l_username, l_email_address;
+
+        commit;
+        l_result_code := 0;
+
+    end if;
+
+
+    if l_create_apex_user then
+
+        -- set Apex Environment
+        for c1 in (
+            select workspace_id
+            from apex_applications
+            where application_id = l_app_id ) loop
+            apex_util.set_security_group_id(
+                p_security_group_id => c1.workspace_id
+                );
+        end loop;
+
+        apex_util.create_user (
+              p_user_id                       => l_userid
+            , p_user_name                     => l_username
+            , p_first_name                    => l_first_name
+            , p_last_name                     => l_last_name
+            , p_description                   => l_description
+            , p_email_address                 => l_email_address
+            , p_web_password                  => l_web_password
+            , p_developer_privs               => l_developer_privs
+            , p_default_schema                => l_default_schema
+            , p_allow_access_to_schemas       => l_allow_access_to_schemas
+            , p_change_password_on_first_use  => l_change_password_on_first_use
+            , p_account_expiry                => l_account_expiry
+            , p_account_locked                => l_account_locked
+            , p_attribute_01                  => l_attribute_01
+            , p_attribute_02                  => l_attribute_02
+            , p_attribute_03                  => l_attribute_03
+            , p_attribute_04                  => l_attribute_04
+            , p_attribute_05                  => l_attribute_05
+        );
+
+        commit;
+        l_result_code := 0;
+
+    end if;
+
+    -- send confirmation mail if specified
+    if l_send_mail then
+
+        "SEND_MAIL" (
+            p_result      =>  l_result
+          , p_mailto      =>  l_email_address
+          , p_username    =>  l_username
+          , p_topic       =>  l_topic
+          , p_params      =>  l_params
+          , p_values      =>  l_values
+          , p_app_id      =>  l_app_id
+          , p_debug_only  =>  l_debug
+        );
+
+    end if;
+
+
+    if (l_result_code = 0) then
+        -- set status to registered
+        update "APEX_USER_REGISTRATION"
+        set apx_user_status_id = (select apex_status_id
+                                    from "APEX_STATUS"
+                                   where app_id is null
+                                     and apex_status_context = 'USER'
+                                     and apex_status = 'CREATED'),
+            apx_app_user_id  = l_userid,
+            apex_user_id     = l_userid
+        where apx_user_token = l_token;
+
+    end if;
+
+    commit;
+
+exception when create_user_error then
+    l_result  := l_result_code ||' '||l_result;
+    p_result  := l_result;
+when dup_val_on_index then
+    rollback;
+    l_result  := -1 ||' ERROR: User exists!';
+    p_result  := l_result;
+when others then
+rollback;
+raise;
+end;
+/
+
+
+-- Confirm Registration
+create procedure "APX_USER_CONFIRMATION" (
+     p_mailto                        varchar2
+   , p_username                      varchar2        := null
+   , p_first_name                    varchar2        := null
+   , p_last_name                     varchar2        := null
+   , p_params                        clob            := null
+   , p_values                        clob            := null
+   , p_topic                         varchar2        := null
+   , p_userid                        pls_integer     := null
+   , p_domain_id                     pls_integer     := null
+   , p_token                         varchar2        := null
+   , p_from                          varchar2        := null
+   , p_app_id                        pls_integer     := v('APP_ID')
+   , p_result                        pls_integer     := null
+   , p_debug                         boolean         := null
+   , p_send_mail                     boolean         := null
+   , p_create_user                   boolean         := null
+)
+is
+    -- Local Variables
+    l_mailto                        varchar2(64);
+    l_username                      varchar2(64);
+    l_first_name                    varchar2(64);
+    l_last_name                     varchar2(64);
+    l_params                        varchar2(4000);
+    l_values                        varchar2(4000);
+    l_topic                         varchar2(64);
+    l_userid                        pls_integer;
+    l_domain_id                     pls_integer;
+    l_token                         varchar2(4000);
+    l_from                          varchar2(64);
+    l_app_id                        pls_integer;
+    l_result                        pls_integer;
+    l_debug                         boolean;
+    l_send_mail                     boolean;
+
+    -- Constants
+    C_TOPIC                         constant          varchar2(1000)  := 'REGISTER';
+    C_FROM                          constant          varchar2(1000)  := 's.obermeyer@t-online.de';
+    C_APP_ID                        constant          pls_integer     := 100;
+    C_RESULT                        constant          pls_integer     := 0;
+    C_DEBUG                         constant          boolean         := false;
+    C_SEND_MAIL                     constant          boolean         := true;
+
+begin
+
+   -- Setting Locals Defaults
+    l_mailto                        := p_mailto;
+    l_username                      := p_username;
+    l_first_name                    := p_first_name;
+    l_last_name                     := p_last_name;
+    l_params                        := p_params;
+    l_values                        := p_values;
+    l_topic                         := nvl(p_topic    , C_TOPIC);
+    l_userid                        := p_userid;
+    l_domain_id                     := p_domain_id;
+    l_token                         := p_token;
+    l_from                          := nvl(p_from     , C_FROM);
+    l_app_id                        := nvl(p_app_id   , C_APP_ID);
+    l_result                        := nvl(p_result   , C_RESULT);
+    l_debug                         := nvl(p_debug    , C_DEBUG);
+    l_send_mail                     := nvl(p_send_mail, C_SEND_MAIL);
+
+    insert into "APEX_USER_REGISTRATION" (
+                                          apx_username
+                                        , apx_user_email
+                                        , apx_user_first_name
+                                        , apx_user_last_name
+                                        )
+                                 values (
+                                          l_username
+                                        , l_mailto
+                                        , l_first_name
+                                        , l_last_name
+                                        )
+    returning apx_user_id, apx_username, apx_user_token
+    into l_userid, l_username, l_token;
+
+    -- send confirmation mail if specified
+    if l_send_mail then
+
+        "SEND_MAIL" (
+            p_result      =>  l_result
+          , p_mailto      =>  l_mailto
+          , p_username    =>  l_username
+          , p_topic       =>  l_topic
+          , p_params      =>  l_params
+          , p_values      =>  l_values
+          , p_app_id      =>  l_app_id
+          , p_debug_only  =>  l_debug
+        );
+
+    end if;
+
+
+    if (l_result = 0) then
+        -- set status to registered
+        update "APEX_USER_REGISTRATION"
+        set apx_user_status_id = (select apex_status_id
+                                    from apex_status
+                                   where app_id is null
+                                     and apex_status_context = 'USER'
+                                     and apex_status = 'REGISTERED')
+        where apx_user_id = l_userid;
+
+    end if;
+
+    commit;
+
+exception when dup_val_on_index then
+rollback;
+when others then
+rollback;
+raise;
+end;
+/
+
+
+-----------------------------------------------------------------------
+-- Apex User Account Status
+create view "APEX_WS_USER_ACCOUNT_STATUS"
+as
+with app_ws
+as (
+select  /*+ MATERIALIZE */
+             workspace_id
+           , application_id
+           , application_name
+           , last_updated_by
+           , last_updated_on
+           , session_state_protection
+           , maximum_session_life_seconds
+           , maximum_session_idle_seconds
+from apex_applications
+where application_id = nvl(v('APP_ID'), 110)
+)
+ select   a.application_id
+           , a.application_name
+           , u.workspace_id
+           , u.workspace_name
+           , u.workspace_display_name
+           , u.first_schema_provisioned
+           , u.user_name
+           , u.first_name
+           , a.last_updated_by
+           , a.last_updated_on
+           , a.session_state_protection
+           , a.maximum_session_life_seconds
+           , a.maximum_session_idle_seconds
+           , u.last_name
+           , u.email
+           , u.date_created
+           , u.date_last_updated
+           , u.available_schemas
+           , u.is_admin
+           , u.is_application_developer
+           , u.description
+           , u.password_version
+           , u.account_expiry as last_password_change
+           , u.failed_access_attempts
+           , u.account_locked as account_is_locked
+           , case "APX_IS_APEX_USR_EXPIRED_INT"(u.user_name)
+             when 0 then 'No' else 'Yes' end as  account_is_expired
+          ,  "APX_GET_APEX_USR_DAYS_LEFT"(u.user_name) as account_days_left
+ from  apex_workspace_apex_users u join app_ws a
+ on (u.workspace_id = a.workspace_id);
+
+
+-- select * from APEX_WS_USER_ACCOUNT_STATUS;
+
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Gather Stats for new/all Objects
 --------------------------------------------------------------------------------------
@@ -1905,6 +2589,6 @@ set pages 0 line 120 define off verify off feed off timing off echo off
 EXIT SQL.SQLCODE;
 
 
-       ---- 18/01/12 01:02  End of SQL Build APXUSR  ----
+       ---- 18/01/17 01:09  End of SQL Build APXUSR  ----
 ---------------------------------------------------------------
 
