@@ -1978,7 +1978,7 @@ end;
 
 ------------------------------------------------------------------------------------------
 -- Is a Token valid in either table?
-create or replace function "IS_VALID_TOKEN" (
+create or replace function "IS_TOKEN" (
     p_token       in    varchar2
   , p_table       in    varchar2 := null
   , p_col         in    varchar2 := null
@@ -2029,7 +2029,7 @@ l_token      varchar2(4000) := null;
 l_return     boolean        := false;
 begin
     l_token  := p_token;
-    l_return := "IS_VALID_TOKEN"(l_token, l_table, l_col, null);
+    l_return := "IS_TOKEN"(l_token, l_table, l_col, null);
     return l_return;
 exception when others then
 return false;
@@ -2048,7 +2048,7 @@ l_token      varchar2(4000) := null;
 l_return     boolean        := false;
 begin
     l_token  := p_token;
-    l_return := "IS_VALID_TOKEN"(l_token, l_table, l_col, null);
+    l_return := "IS_TOKEN"(l_token, l_table, l_col, null);
     return l_return;
 exception when others then
 return false;
@@ -2072,7 +2072,7 @@ begin
                from "APEX_USER_REGISTRATION"
                where upper(trim(apx_username)) = l_username
                  and apx_user_token = l_token
-                 and apx_user_token_valid_until <= sysdate) loop
+                 and apx_user_token_valid_until >= sysdate) loop
         l_return := case c1.token_valid when 1 then true end;
     end loop;
     return l_return;
@@ -2085,7 +2085,7 @@ end;
 -- Create Apex User in Application Table and Apex Workspace if specified
 create procedure "APX_CREATE_USER" (
       p_username                    in       varchar2
-    , p_result                      in out   pls_integer
+    , p_result                      in out   varchar2
     , p_email_address               in       varchar2        := null
     , p_first_name                  in       varchar2        := null
     , p_last_name                   in       varchar2        := null
@@ -2118,7 +2118,7 @@ create procedure "APX_CREATE_USER" (
 is
     -- Local Variables
     l_username                      varchar2(128);
-    l_result                        pls_integer;
+    l_result                        varchar2(4000);
     l_result_code                   pls_integer;
     l_email_address                 varchar2(128);
     l_first_name                    varchar2(128);
