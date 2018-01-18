@@ -2276,7 +2276,6 @@ begin
             -- returning apx_user_id, apx_username, apx_user_email
             -- into l_userid, l_username, l_email_address;
 
-            commit;
             l_result_code := 0;
 
             exception when no_data_found then
@@ -2307,13 +2306,12 @@ begin
         returning apx_user_id, apx_username, apx_user_email
         into l_userid, l_username, l_email_address;
 
-        commit;
         l_result_code := 0;
 
     end if;
 
 
-    if l_create_apex_user then
+    if (l_result_code = 0 and l_create_apex_user) then
 
         -- set Apex Environment
         for c1 in (
@@ -2346,13 +2344,12 @@ begin
             , p_attribute_05                  => l_attribute_05
         );
 
-        commit;
         l_result_code := 0;
 
     end if;
 
     -- send confirmation mail if specified
-    if l_send_mail then
+    if (l_result_code = 0 and l_send_mail) then
 
         "SEND_MAIL" (
             p_result      =>  l_result
@@ -2364,6 +2361,8 @@ begin
           , p_app_id      =>  l_app_id
           , p_debug_only  =>  l_debug
         );
+
+    l_result_code := 0;
 
     end if;
 
@@ -2380,9 +2379,12 @@ begin
             apex_user_id     = l_userid
         where apx_user_token = l_token;
 
+    l_result_code := 0;
+
     end if;
 
     commit;
+    p_result  := l_result || ' User Created successfully';
 
 exception when create_user_error then
     l_result  := l_result_code ||' '||l_result;
