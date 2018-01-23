@@ -27,7 +27,7 @@ prompt APPLICATION 110 - User Management
 -- Application Export:
 --   Application:     110
 --   Name:            User Management
---   Date and Time:   22:04 Saturday December 30, 2017
+--   Date and Time:   22:41 Tuesday January 23, 2018
 --   Exported By:     ADMIN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -36,13 +36,13 @@ prompt APPLICATION 110 - User Management
 --
 
 -- Application Statistics:
---   Pages:                      8
---     Items:                    9
+--   Pages:                     10
+--     Items:                   13
 --     Validations:              3
---     Processes:               12
---     Regions:                 11
---     Buttons:                  6
---     Dynamic Actions:         11
+--     Processes:               16
+--     Regions:                 14
+--     Buttons:                  8
+--     Dynamic Actions:         17
 --   Shared Components:
 --     Logic:
 --     Navigation:
@@ -114,7 +114,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171230125857'
+,p_last_upd_yyyymmddhh24miss=>'20180123223957'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -160,6 +160,14 @@ wwv_flow_api.create_list_item(
 ,p_parent_list_item_id=>wwv_flow_api.id(5688509064072503)
 ,p_list_item_current_type=>'COLON_DELIMITED_PAGE_LIST'
 ,p_list_item_current_for_pages=>'200'
+);
+wwv_flow_api.create_list_item(
+ p_id=>wwv_flow_api.id(6078827046530889)
+,p_list_item_display_sequence=>50
+,p_list_item_link_text=>'FormValidation'
+,p_list_item_link_target=>'f?p=&APP_ID.:3:&SESSION.::&DEBUG.'
+,p_list_item_current_type=>'COLON_DELIMITED_PAGE_LIST'
+,p_list_item_current_for_pages=>'3'
 );
 wwv_flow_api.create_list(
  p_id=>wwv_flow_api.id(4955137223726764)
@@ -9096,6 +9104,715 @@ wwv_flow_api.create_page_plug(
 );
 end;
 /
+prompt --application/pages/page_00002
+begin
+wwv_flow_api.create_page(
+ p_id=>2
+,p_user_interface_id=>wwv_flow_api.id(4955200262726764)
+,p_name=>'RegistrationTest'
+,p_page_mode=>'NORMAL'
+,p_step_title=>'RegistrationTest'
+,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
+,p_first_item=>'NO_FIRST_ITEM'
+,p_autocomplete_on_off=>'OFF'
+,p_page_template_options=>'#DEFAULT#'
+,p_dialog_chained=>'Y'
+,p_overwrite_navigation_list=>'N'
+,p_page_is_public_y_n=>'N'
+,p_cache_mode=>'NOCACHE'
+,p_last_updated_by=>'ADMIN'
+,p_last_upd_yyyymmddhh24miss=>'20171231184031'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(5670349270959124)
+,p_plug_name=>'Result'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_plug_template=>wwv_flow_api.id(13799874108068981)
+,p_plug_display_sequence=>10
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_plug_display_point=>'BODY'
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_attribute_01=>'N'
+,p_attribute_02=>'HTML'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(5670402217959125)
+,p_name=>'P2_RESULT'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(5670349270959124)
+,p_prompt=>'Result'
+,p_display_as=>'NATIVE_DISPLAY_ONLY'
+,p_field_template=>wwv_flow_api.id(13844786478068998)
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'Y'
+,p_attribute_02=>'VALUE'
+,p_attribute_04=>'Y'
+);
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(5670236413959123)
+,p_process_sequence=>10
+,p_process_point=>'AFTER_HEADER'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'SendMail'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'declare',
+'l_result pls_integer;',
+'l_app_id pls_integer := v(''APP_ID'');',
+'begin',
+'    send_mail (',
+'        p_to             => ''s.obermeyer@t-online.de'',   -- change to your email address',
+'        p_from           => ''s.obermeyer@t-online.de'',    -- change to a real senders email address',
+'        p_body           => ''Hi There'',',
+'        p_body_html      => ''<html><body><p>Hi There</p></body></html>'',',
+'        p_subject        => SYSDATE || '' Testmail'',',
+'        p_result         => l_result',
+'    );',
+'    apex_util.set_session_state(''P2_RESULT'', case when l_result = 0 then ''Success'' else ''Failure'' end);',
+'end;',
+''))
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
+);
+end;
+/
+prompt --application/pages/page_00003
+begin
+wwv_flow_api.create_page(
+ p_id=>3
+,p_user_interface_id=>wwv_flow_api.id(4955200262726764)
+,p_name=>'FormValidation'
+,p_page_mode=>'NORMAL'
+,p_step_title=>'FormValidation'
+,p_warn_on_unsaved_changes=>'N'
+,p_step_sub_title=>'FormValidation'
+,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
+,p_first_item=>'AUTO_FIRST_ITEM'
+,p_autocomplete_on_off=>'OFF'
+,p_javascript_file_urls=>'#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js'
+,p_javascript_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'///////////////////////////////////////////////////////////////////////////////////////////',
+'// Globals',
+'var form = $(''#wwvFlowForm''); // ID of form to check',
+'var buttonID = ''#REG''; //static ID of register button',
+'var checkField = ''#P3_EMAIL''; // field to validate',
+'var errorField = checkField + ''-error''; // email error field (for form validation)',
+'var url = ''https://ol7:8443/ords/apx/apxusr/usr/'';',
+'var userStatus = null;',
+'',
+'',
+'// Validate',
+'var validator = form.validate({',
+'    // This global normalizer will trim',
+'    // the value of all elements before validatng them.',
+'    normalizer: function(value) {',
+'        return $.trim(value);',
+'    },',
+'    rules: {',
+'        P3_LASTNAME: {',
+'            required: true',
+'        },',
+'        P3_FIRSTNAME: {',
+'            required: true',
+'        },',
+'        P3_EMAIL: {',
+'            required: true,',
+'            email: true',
+'        }',
+'    }',
+'});',
+'',
+'',
+'// set Error Label after Element if not present, else set Label Text',
+'function setErrorLabel(msg, field, label) {',
+'    // console.log(''Setting Label for Message: '' + msg + '' Field: '' + field + '' Label: '' + label);',
+'    var errLabel = ''<label id="'' + label.substr(1, label.length) +',
+'        ''" class="error" for="'' + field.substr(1, field.length) +',
+'        ''" style="display: block;">'' + msg + ''</label>'';',
+'    var errLabelLen = $(label).length;',
+'    // console.log(''Error Len: '' + errLabelLen + ''LabelText '' + errLabel);',
+'    if (errLabelLen === 0) {',
+'        $(errLabel).insertAfter($(''input'' + field));',
+'    } else {',
+'        $(label).text(msg);',
+'        $(label).show();',
+'    }',
+'}',
+'',
+'',
+'// set disabled attribute for register (b)utton = ID via (s)tate = true',
+'function setButtonState(b, s) {',
+'    if (s) {',
+'        $(b).removeAttr("disabled");',
+'    } else {',
+'        $(b).attr("disabled", "disabled");',
+'    }',
+'}',
+'',
+'',
+'// get current User Reg Status as ID and process output',
+'function userStatusValid(value, apiurl) {',
+'    // console.log(''Value In UserStatus Function: '' + value + '' Field: '' + checkField + '' Label: '' + errorField);',
+'    if (value) {',
+'        var val = value;',
+'        // rest api url to get user reg status - returns JSON [ -1 - n ]',
+'        var curl = (apiurl ? apiurl + val : url + val);',
+'        var curl_last = val.substr(val.length - 1);',
+'        if (curl_last !== ".") {',
+'            //var dat = $.get(curl); // cannot async here :-0',
+'            var dat = $.ajax({',
+'                url: curl,',
+'                dataType: ''json'',',
+'                async: false,',
+'                success: function(data) {',
+'                    //stuff to do with data - if called async',
+'                    // console.log(''Response: '' + data);',
+'                }',
+'            });',
+'            var us = dat.responseJSON.user_status;',
+'            //console.log(''User Status JSON: '' + us);',
+'            if (us) {',
+'                userStatus = us;',
+'                if (us != 0) {',
+'                    var msg;',
+'                    if (us < 0) {',
+'                        msg = ''User Domain invalid!'';',
+'                    } else if (us == 3) {',
+'                        msg = ''Maximum Registration Attempts exceeded for User '' + val + ',
+'                              ''.Please contact <a href="#">Support</a>.'';',
+'                    } else if (us == 4 || us == 12 || us > 100) {',
+'                        msg = ''User '' + val + '' exists. Please reset your password.'';',
+'                    } else if (us == 11) {',
+'                        msg = ''User '' + val + '' exists. Please confirm your Registration.'';',
+'                    } else if (us == 1 || us == 2 || us == 10) {',
+'                        msg = ''Your Registration expired. Please register again.'';',
+'                    }',
+'                    // remove validator to not overwrite our error label',
+'                    validator.destroy();',
+'                    setErrorLabel(msg, checkField, errorField);',
+'                }',
+'            }',
+'        }',
+'    }',
+'    return (us === 0 ? true : false);',
+'}',
+'',
+'',
+'// wrapper to check for formValid and userStatus and set button state',
+'function checkInput() {',
+'    var formV = form.valid();',
+'    var val = $(checkField).val();',
+'    // console.log(''Form Valid: '' + formV + '' User '' + val + '' User Status '' + userStatus); ',
+'    if (formV) {',
+'        var userV =  userStatusValid(val)',
+'        // console.log(''UserV: '' + userV);',
+'        if (userV) {',
+'            setButtonState(buttonID, userV);',
+'            return userV;',
+'        } else {',
+'            setButtonState(buttonID, false);',
+'            return false;',
+'        }',
+'    } else {',
+'        setButtonState(buttonID, false);',
+'        return false;',
+'    }',
+'    return false;    ',
+'}',
+'',
+'',
+''))
+,p_javascript_code_onload=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'$(''#REG_CONFIRM'').hide();',
+'',
+'// avoids form submit',
+'jQuery.validator.setDefaults({',
+'    debug: true,',
+'    success: "valid"',
+'});',
+'',
+'',
+'// check key pressed and act',
+'form.on(''keyup keydown keypress'', function(e) {',
+'    var keyCode = e.keyCode || e.which;',
+'    //console.log(''keyCode: '' + keyCode);',
+'    if (keyCode === 13 || keyCode === 9) {',
+'        console.log(''Enter or Tab pressed'');',
+'        // prevent submit on pressing enter key',
+'        (keyCode === 13 ? e.preventDefault() : null);',
+'        checkInput();',
+'    }',
+'});'))
+,p_css_file_urls=>'#WORKSPACE_IMAGES#css/validate/screen.css'
+,p_inline_css=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'#R5690431702074214 > div.t-Login-header > span { color: green; font-size: 72px; }',
+'',
+'.t-Form--labelsAbove .t-Form-fieldContainer .t-Form-inputContainer, .t-Form-fieldContainer--stacked .t-Form-inputContainer {',
+'    padding-top: 0;',
+'    margin-bottom: 16px;',
+'    height: 60px;',
+'}',
+'',
+'#P3_FIRSTNAME-error, #P3_LASTNAME-error, #P3_EMAIL-error {',
+'    position: absolute;',
+'    top: 43px;',
+'    font-size: 98%;}',
+'',
+'.t-Login-buttons {',
+'    padding: 0;',
+'    margin-bottom: 12px;',
+'    margin-top: 42px;',
+'}'))
+,p_step_template=>wwv_flow_api.id(13761578240068968)
+,p_page_template_options=>'#DEFAULT#'
+,p_overwrite_navigation_list=>'N'
+,p_page_is_public_y_n=>'Y'
+,p_cache_mode=>'NOCACHE'
+,p_last_updated_by=>'ADMIN'
+,p_last_upd_yyyymmddhh24miss=>'20180123223957'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(11768843691605095)
+,p_plug_name=>'User Registration Confirmation'
+,p_region_name=>'USRREG_CONFIRM'
+,p_region_css_classes=>'t-success'
+,p_icon_css_classes=>'fa-check-circle'
+,p_region_template_options=>'#DEFAULT#'
+,p_region_attributes=>'style="display:none;"'
+,p_plug_template=>wwv_flow_api.id(13799328938068981)
+,p_plug_display_sequence=>20
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'BODY'
+,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'Successfully Registered.',
+'',
+'Please check Your Email Inbox for a Confirmation Email.',
+'If none is found after a couple of minutes, please also',
+'check your Spam Folder or try register again...',
+'',
+'Thank You...',
+''))
+,p_plug_query_row_template=>1
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_attribute_01=>'N'
+,p_attribute_02=>'TEXT'
+,p_attribute_03=>'Y'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(16696920290101763)
+,p_plug_name=>'User Registration'
+,p_region_name=>'USREG'
+,p_icon_css_classes=>'fa-cog'
+,p_region_template_options=>'#DEFAULT#'
+,p_plug_template=>wwv_flow_api.id(13799328938068981)
+,p_plug_display_sequence=>10
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'BODY'
+,p_plug_query_row_template=>1
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_attribute_01=>'N'
+,p_attribute_02=>'TEXT'
+,p_attribute_03=>'Y'
+);
+wwv_flow_api.create_page_button(
+ p_id=>wwv_flow_api.id(6079519613530900)
+,p_button_sequence=>10
+,p_button_plug_id=>wwv_flow_api.id(11768843691605095)
+,p_button_name=>'FINISH'
+,p_button_action=>'REDIRECT_PAGE'
+,p_button_template_options=>'#DEFAULT#'
+,p_button_template_id=>wwv_flow_api.id(13845333853068998)
+,p_button_is_hot=>'Y'
+,p_button_image_alt=>'Finish'
+,p_button_position=>'BELOW_BOX'
+,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP,101:P101_USERNAME:&P3_EMAIL.'
+);
+wwv_flow_api.create_page_button(
+ p_id=>wwv_flow_api.id(6080259651530906)
+,p_button_sequence=>30
+,p_button_plug_id=>wwv_flow_api.id(16696920290101763)
+,p_button_name=>'REGISTER'
+,p_button_static_id=>'REG'
+,p_button_action=>'DEFINED_BY_DA'
+,p_button_template_options=>'#DEFAULT#'
+,p_button_template_id=>wwv_flow_api.id(13845333853068998)
+,p_button_is_hot=>'Y'
+,p_button_image_alt=>'Register'
+,p_button_position=>'REGION_TEMPLATE_NEXT'
+,p_warn_on_unsaved_changes=>null
+,p_button_cattributes=>'disabled="disabled"'
+);
+wwv_flow_api.create_page_branch(
+ p_id=>wwv_flow_api.id(6088652981530928)
+,p_branch_name=>'Go To Page 1'
+,p_branch_action=>'f?p=&APP_ID.:1:&SESSION.::&DEBUG.:RP,1::&success_msg=#SUCCESS_MSG#'
+,p_branch_point=>'BEFORE_COMPUTATION'
+,p_branch_type=>'REDIRECT_URL'
+,p_branch_sequence=>10
+,p_branch_condition_type=>'NEVER'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(5670572089959126)
+,p_name=>'P3_FIRSTNAME'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(16696920290101763)
+,p_prompt=>'Firstname'
+,p_placeholder=>'Firstname'
+,p_display_as=>'NATIVE_TEXT_FIELD'
+,p_cSize=>40
+,p_cMaxlength=>100
+,p_tag_attributes=>'minlength="2" required'
+,p_field_template=>wwv_flow_api.id(13845150629068998)
+,p_item_icon_css_classes=>'fa-user'
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'N'
+,p_attribute_02=>'N'
+,p_attribute_04=>'TEXT'
+,p_attribute_05=>'BOTH'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(5670664167959127)
+,p_name=>'P3_LASTNAME'
+,p_item_sequence=>20
+,p_item_plug_id=>wwv_flow_api.id(16696920290101763)
+,p_prompt=>'Lastname'
+,p_placeholder=>'Lastname'
+,p_display_as=>'NATIVE_TEXT_FIELD'
+,p_cSize=>40
+,p_cMaxlength=>100
+,p_tag_attributes=>'minlength="2" required'
+,p_field_template=>wwv_flow_api.id(13845150629068998)
+,p_item_icon_css_classes=>'fa-user'
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'N'
+,p_attribute_02=>'N'
+,p_attribute_04=>'TEXT'
+,p_attribute_05=>'BOTH'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(6080644290530907)
+,p_name=>'P3_EMAIL'
+,p_item_sequence=>30
+,p_item_plug_id=>wwv_flow_api.id(16696920290101763)
+,p_prompt=>'E-Mail'
+,p_placeholder=>'E-Mail Adresse'
+,p_display_as=>'NATIVE_TEXT_FIELD'
+,p_cSize=>40
+,p_cMaxlength=>100
+,p_tag_attributes=>'required'
+,p_field_template=>wwv_flow_api.id(13845150629068998)
+,p_item_icon_css_classes=>'fa-user'
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'N'
+,p_attribute_02=>'N'
+,p_attribute_04=>'EMAIL'
+,p_attribute_05=>'BOTH'
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(6087627309530927)
+,p_name=>'CheckEmailOnClickDisabledButton'
+,p_event_sequence=>3
+,p_triggering_element_type=>'JQUERY_SELECTOR'
+,p_triggering_element=>'div.t-Login-buttons'
+,p_bind_type=>'bind'
+,p_bind_event_type=>'click'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(6088152970530927)
+,p_event_id=>wwv_flow_api.id(6087627309530927)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'//(form.valid() ? $(''#REG'').removeAttr(''disabled'') : $(''#REG'').attr(''disabled''));',
+'checkInput();'))
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(6085937204530927)
+,p_name=>'CheckEmailOnClickRegisterButton'
+,p_event_sequence=>5
+,p_triggering_element_type=>'JQUERY_SELECTOR'
+,p_triggering_element=>'#REG'
+,p_bind_type=>'bind'
+,p_bind_event_type=>'click'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(6086490483530927)
+,p_event_id=>wwv_flow_api.id(6085937204530927)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'//(form.valid() ? $(''#REG'').removeAttr(''disabled'') : $(''#REG'').attr(''disabled''));',
+'checkInput();'))
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(6082229635530923)
+,p_name=>'Register'
+,p_event_sequence=>10
+,p_triggering_element_type=>'BUTTON'
+,p_triggering_button_id=>wwv_flow_api.id(6080259651530906)
+,p_bind_type=>'live'
+,p_bind_event_type=>'click'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(6083229120530925)
+,p_event_id=>wwv_flow_api.id(6082229635530923)
+,p_event_result=>'TRUE'
+,p_action_sequence=>5
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'$(''#P3_EMAIL'').attr(''disabled'', ''disabled'');',
+'$(''#REG'').attr(''disabled'', ''disabled'');',
+'$(''#R10618508300570882 > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'')'))
+,p_stop_execution_on_error=>'Y'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(6082718443530925)
+,p_event_id=>wwv_flow_api.id(6082229635530923)
+,p_event_result=>'TRUE'
+,p_action_sequence=>25
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'begin',
+'  apx_user_registration(:P3_EMAIL);',
+'end;  '))
+,p_attribute_02=>'P3_EMAIL'
+,p_stop_execution_on_error=>'Y'
+,p_wait_for_result=>'Y'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(6083736652530926)
+,p_event_id=>wwv_flow_api.id(6082229635530923)
+,p_event_result=>'TRUE'
+,p_action_sequence=>35
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'console.log(''RegDone'');',
+'$(''#R10618508300570882'').delay(1000).fadeOut(400, function(){',
+'    $(''#R5690431702074214'').fadeIn(400);',
+'});'))
+,p_stop_execution_on_error=>'Y'
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(6084139059530926)
+,p_name=>'ResetErrorOnGetFocusEmail'
+,p_event_sequence=>20
+,p_triggering_element_type=>'ITEM'
+,p_triggering_element=>'P3_EMAIL'
+,p_bind_type=>'bind'
+,p_bind_event_type=>'focusin'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(6084689135530926)
+,p_event_id=>wwv_flow_api.id(6084139059530926)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'$(''#P3_EMAIL-error'').fadeOut();',
+'$(''.t-Form-error'').fadeOut();',
+'$(''#P3_EMAIL_CONTAINER > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
+'setButtonState(buttonID, (userStatus === 0 ? true : false));',
+''))
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(5671148487959132)
+,p_name=>'ResetErrorOnGetFocusFirstname'
+,p_event_sequence=>30
+,p_triggering_element_type=>'ITEM'
+,p_triggering_element=>'P3_FIRSTNAME'
+,p_bind_type=>'bind'
+,p_bind_event_type=>'focusin'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(5671231592959133)
+,p_event_id=>wwv_flow_api.id(5671148487959132)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'$(''#P3_FIRSTNAME-error'').fadeOut();',
+'$(''.t-Form-error'').fadeOut();',
+'$(''#P3_FIRSTNAME_CONTAINER > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
+'setButtonState(buttonID, (userStatus === 0 ? true : false));'))
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(5671317560959134)
+,p_name=>'ResetErrorOnGetFocusLastname'
+,p_event_sequence=>40
+,p_triggering_element_type=>'ITEM'
+,p_triggering_element=>'P3_LASTNAME'
+,p_bind_type=>'bind'
+,p_bind_event_type=>'focusin'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(5671436626959135)
+,p_event_id=>wwv_flow_api.id(5671317560959134)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'$(''#P3_LASTNAME-error'').fadeOut();',
+'$(''.t-Form-error'').fadeOut();',
+'$(''#P3_LASTNAME_CONTAINER > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
+'setButtonState(buttonID, (userStatus === 0 ? true : false));'))
+);
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(6081030169530921)
+,p_process_sequence=>15
+,p_process_point=>'AFTER_SUBMIT'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'Register'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'declare',
+'   l_body      clob;',
+'   l_body_html clob;',
+'   l_token     varchar2(1000);',
+'begin',
+'/*',
+'insert into apxusr.apx$app_user_reg (app_user_email, app_id)',
+'values(:P3_EMAIL, :APP_ID);',
+'select app_user_token',
+'into l_token',
+'from apxusr.apx$app_user_reg',
+'where app_user_email = :P3_EMAIL',
+'and app_id = :APP_ID;',
+'',
+'commit;',
+'*/',
+'l_token := apx_get_token(v(''P3_EMAIL''));',
+'for c1 in (',
+'   select workspace_id',
+'     from apex_applications',
+'    where application_id = :p_app_id )',
+'loop',
+'   apex_util.set_security_group_id(p_security_group_id =>',
+'c1.workspace_id);',
+'end loop;',
+'',
+'    l_body := ''To view the content of this message, please use an HTML enabled mail client.'' || utl_tcp.crlf;',
+' ',
+'    l_body_html := ''<html><body>'' || utl_tcp.crlf ||',
+'                   ''<p>Please confirm your registration at <a href="'' ||',
+'                   apex_mail.get_instance_url || ''f?p=''||v(''APP_ID'')||',
+'                   '':103::CONFIRM:NO::USER,TOKEN:''||v(''P3_EMAIL'')||'',''||l_token||''">Registration Confirmation</a> page.</p>'' || utl_tcp.crlf ||',
+'                   ''<p>Sincerely,<br />'' || utl_tcp.crlf ||',
+'                   ''Yo Bro from Next Do''''<br />'' || utl_tcp.crlf ||',
+'                   ''<img src="http://zapt1.staticworld.net/images/article/2013/04/oracle-logo-100033308-gallery.png" alt="Oracle Logo"></p>'' || utl_tcp.crlf ||',
+'                   ''</body></html>''; ',
+'    apex_mail.send (',
+'        p_to        => v(''P3_EMAIL''),   -- change to your email address',
+'        p_from      => ''s.obermeyer@t-online.de'', -- change to a real senders email address',
+'        p_body      => l_body,',
+'        p_body_html => l_body_html,',
+'        p_subj      => ''Registration Confirmation'' );',
+'',
+'end;',
+''))
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
+,p_process_when_type=>'NEVER'
+,p_process_success_message=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'Successfully Registered.',
+'',
+'Please check Your Email Inbox for a Confirmation Email.',
+'If none is found after a couple of minutes, please also',
+'check your Spam Folder or try register again...',
+'',
+'Thank You...',
+''))
+);
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(6081475299530922)
+,p_process_sequence=>20
+,p_process_point=>'BEFORE_HEADER'
+,p_process_type=>'NATIVE_SESSION_STATE'
+,p_process_name=>'ClearPage'
+,p_attribute_01=>'CLEAR_CACHE_FOR_ITEMS'
+,p_attribute_03=>'P3_EMAIL'
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
+,p_process_when=>'REGISTERED'
+,p_process_when_type=>'REQUEST_NOT_EQUAL_CONDITION'
+);
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(6081860916530922)
+,p_process_sequence=>10
+,p_process_point=>'ON_DEMAND'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'RegisterUser'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'declare',
+'   l_body      clob;',
+'   l_body_html clob;',
+'   l_token     varchar2(1000);',
+'begin',
+'raise_application_error(-101, ''In Process'');',
+'/*',
+'insert into apxusr.apx$app_user_reg (app_user_email, app_id)',
+'values(:P3_EMAIL, :APP_ID);',
+'select app_user_token',
+'into l_token',
+'from apxusr.apx$app_user_reg',
+'where app_user_email = :P3_EMAIL',
+'and app_id = :APP_ID;',
+'',
+'commit;',
+'*/',
+'l_token := apx_get_token(v(''P3_EMAIL''));',
+'for c1 in (',
+'   select workspace_id',
+'     from apex_applications',
+'    where application_id = :p_app_id )',
+'loop',
+'   apex_util.set_security_group_id(p_security_group_id =>',
+'c1.workspace_id);',
+'end loop;',
+'',
+'    l_body := ''To view the content of this message, please use an HTML enabled mail client.'' || utl_tcp.crlf;',
+' ',
+'    l_body_html := ''<html><body>'' || utl_tcp.crlf ||',
+'                   ''<p>Please confirm your registration at <a href="'' ||',
+'                   apex_mail.get_instance_url || ''f?p=''||v(''APP_ID'')||',
+'                   '':103::CONFIRM:NO::USER,TOKEN:''||v(''P3_EMAIL'')||'',''||l_token||''">Registration Confirmation</a> page.</p>'' || utl_tcp.crlf ||',
+'                   ''<p>Sincerely,<br />'' || utl_tcp.crlf ||',
+'                   ''Yo Bro from Next Do''''<br />'' || utl_tcp.crlf ||',
+'                   ''<img src="http://zapt1.staticworld.net/images/article/2013/04/oracle-logo-100033308-gallery.png" alt="Oracle Logo"></p>'' || utl_tcp.crlf ||',
+'                   ''</body></html>''; ',
+'    apex_mail.send (',
+'        p_to        => v(''P3_EMAIL''),   -- change to your email address',
+'        p_from      => ''s.obermeyer@t-online.de'', -- change to a real senders email address',
+'        p_body      => l_body,',
+'        p_body_html => l_body_html,',
+'        p_subj      => ''Registration Confirmation'' );',
+'htp.p(''User ''||v(''P3_EMAIL'')||'' successfully registered.'');',
+'end;',
+''))
+,p_process_error_message=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'Error while Registering!',
+'',
+'Please wait a while and try to register again...',
+'',
+'Thank You...'))
+,p_process_when_button_id=>wwv_flow_api.id(6080259651530906)
+,p_process_success_message=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'Successfully Registered.',
+'',
+'Please confirm Your Registration by clicking on the Link',
+'provided in the Confirmation Mail we just send You.',
+'',
+'If none is found after a couple of minutes, please also',
+'check your Spam Folder or try register again...',
+'',
+'Thank You...'))
+);
+end;
+/
 prompt --application/pages/page_00004
 begin
 wwv_flow_api.create_page(
@@ -9444,7 +10161,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171230125857'
+,p_last_upd_yyyymmddhh24miss=>'20180112005857'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5690431702074214)
@@ -9609,7 +10326,7 @@ wwv_flow_api.create_page_da_action(
 ,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'begin',
-'  null;',
+'  apx_user_registration(:P102_EMAIL);',
 'end;  '))
 ,p_attribute_02=>'P102_EMAIL'
 ,p_stop_execution_on_error=>'Y'
