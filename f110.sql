@@ -27,7 +27,7 @@ prompt APPLICATION 110 - User Management
 -- Application Export:
 --   Application:     110
 --   Name:            User Management
---   Date and Time:   22:41 Tuesday January 23, 2018
+--   Date and Time:   21:38 Wednesday January 24, 2018
 --   Exported By:     ADMIN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -37,12 +37,12 @@ prompt APPLICATION 110 - User Management
 
 -- Application Statistics:
 --   Pages:                     10
---     Items:                   13
+--     Items:                   15
 --     Validations:              3
 --     Processes:               16
 --     Regions:                 14
 --     Buttons:                  8
---     Dynamic Actions:         17
+--     Dynamic Actions:         19
 --   Shared Components:
 --     Logic:
 --     Navigation:
@@ -114,7 +114,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180123223957'
+,p_last_upd_yyyymmddhh24miss=>'20180124213321'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -9187,7 +9187,10 @@ wwv_flow_api.create_page(
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'AUTO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
-,p_javascript_file_urls=>'#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js'
+,p_javascript_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js',
+'#WORKSPACE_IMAGES#js/validate/messages_de.min.js',
+''))
 ,p_javascript_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '///////////////////////////////////////////////////////////////////////////////////////////',
 '// Globals',
@@ -9198,24 +9201,58 @@ wwv_flow_api.create_page(
 'var url = ''https://ol7:8443/ords/apx/apxusr/usr/'';',
 'var userStatus = null;',
 '',
+'// avoids form submit',
+'jQuery.validator.setDefaults({',
+'    debug: true,',
+'    success: "valid"',
+'});',
+'',
+'jQuery.validator.addMethod("pwcheck", function(value) {',
+'    return /^[A-Za-z0-9\d=!\-@._*]*$/.test(value) // consists of only these',
+'        &&',
+'        /[A-Z]/.test(value) // has a uppercase letter',
+'        &&',
+'        /[a-z]/.test(value) // has a lowercase letter',
+'        &&',
+'        /\d/.test(value) // has a digit',
+'});',
+'',
 '',
 '// Validate',
 'var validator = form.validate({',
+'    lang : ''de'',',
 '    // This global normalizer will trim',
 '    // the value of all elements before validatng them.',
 '    normalizer: function(value) {',
 '        return $.trim(value);',
 '    },',
 '    rules: {',
-'        P3_LASTNAME: {',
+'        P3_FIRSTNAME: {',
 '            required: true',
 '        },',
-'        P3_FIRSTNAME: {',
+'        P3_LASTNAME: {',
 '            required: true',
 '        },',
 '        P3_EMAIL: {',
 '            required: true,',
 '            email: true',
+'        },',
+'        P3_PASSWORD: {',
+'            required: true,',
+'            pwcheck: true',
+'        },',
+'        P3_PASSWORD_VERIFY: {',
+'            required: true,',
+'            equalTo: "#P3_PASSWORD",',
+'            pwcheck: true',
+'        }',
+'    },',
+'    messages: {',
+'        P3_PASSWORD: {',
+'            pwcheck: ''Bitte mindestens 1 Klein- und Großbuchstabe und eine Zahl.''',
+'        },',
+'        P3_PASSWORD_VERIFY: {',
+'            pwcheck: ''Bitte mindestens 1 Klein- und Großbuchstabe und eine Zahl.''',
 '        }',
 '    }',
 '});',
@@ -9321,14 +9358,8 @@ wwv_flow_api.create_page(
 '',
 ''))
 ,p_javascript_code_onload=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'$(''#R16696920290101763 > div.t-Login-header'').remove();',
 '$(''#REG_CONFIRM'').hide();',
-'',
-'// avoids form submit',
-'jQuery.validator.setDefaults({',
-'    debug: true,',
-'    success: "valid"',
-'});',
-'',
 '',
 '// check key pressed and act',
 'form.on(''keyup keydown keypress'', function(e) {',
@@ -9351,7 +9382,7 @@ wwv_flow_api.create_page(
 '    height: 60px;',
 '}',
 '',
-'#P3_FIRSTNAME-error, #P3_LASTNAME-error, #P3_EMAIL-error {',
+'#P3_PASSWORD-error, #P3_PASSWORD_VERIFY-error, #P3_FIRSTNAME-error, #P3_LASTNAME-error, #P3_EMAIL-error {',
 '    position: absolute;',
 '    top: 43px;',
 '    font-size: 98%;}',
@@ -9367,7 +9398,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180123223957'
+,p_last_upd_yyyymmddhh24miss=>'20180124213321'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(11768843691605095)
@@ -9471,7 +9502,7 @@ wwv_flow_api.create_page_item(
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(5670664167959127)
 ,p_name=>'P3_LASTNAME'
-,p_item_sequence=>20
+,p_item_sequence=>30
 ,p_item_plug_id=>wwv_flow_api.id(16696920290101763)
 ,p_prompt=>'Lastname'
 ,p_placeholder=>'Lastname'
@@ -9488,9 +9519,43 @@ wwv_flow_api.create_page_item(
 ,p_attribute_05=>'BOTH'
 );
 wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(5671623171959137)
+,p_name=>'P3_PASSWORD'
+,p_item_sequence=>40
+,p_item_plug_id=>wwv_flow_api.id(16696920290101763)
+,p_prompt=>'Password'
+,p_placeholder=>'Enter Password'
+,p_display_as=>'NATIVE_PASSWORD'
+,p_cSize=>40
+,p_cMaxlength=>100
+,p_tag_attributes=>'minlength="5" required'
+,p_field_template=>wwv_flow_api.id(13845150629068998)
+,p_item_icon_css_classes=>'fa-key'
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'N'
+,p_attribute_02=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(5671723116959138)
+,p_name=>'P3_PASSWORD_VERIFY'
+,p_item_sequence=>50
+,p_item_plug_id=>wwv_flow_api.id(16696920290101763)
+,p_prompt=>'Verify Password'
+,p_placeholder=>'Verify Password'
+,p_display_as=>'NATIVE_PASSWORD'
+,p_cSize=>40
+,p_cMaxlength=>100
+,p_tag_attributes=>'minlength="5" required'
+,p_field_template=>wwv_flow_api.id(13845150629068998)
+,p_item_icon_css_classes=>'fa-key'
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'N'
+,p_attribute_02=>'Y'
+);
+wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(6080644290530907)
 ,p_name=>'P3_EMAIL'
-,p_item_sequence=>30
+,p_item_sequence=>60
 ,p_item_plug_id=>wwv_flow_api.id(16696920290101763)
 ,p_prompt=>'E-Mail'
 ,p_placeholder=>'E-Mail Adresse'
@@ -9662,6 +9727,50 @@ wwv_flow_api.create_page_da_action(
 '$(''#P3_LASTNAME-error'').fadeOut();',
 '$(''.t-Form-error'').fadeOut();',
 '$(''#P3_LASTNAME_CONTAINER > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
+'setButtonState(buttonID, (userStatus === 0 ? true : false));'))
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(5671808484959139)
+,p_name=>'ResetErrorOnGetFocusPassword'
+,p_event_sequence=>50
+,p_triggering_element_type=>'ITEM'
+,p_triggering_element=>'P3_PASSWORD'
+,p_bind_type=>'bind'
+,p_bind_event_type=>'focusin'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(5671939791959140)
+,p_event_id=>wwv_flow_api.id(5671808484959139)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'$(''#P3_PASSWORD-error'').fadeOut();',
+'$(''.t-Form-error'').fadeOut();',
+'$(''#P3_PASSWORD_CONTAINER > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
+'setButtonState(buttonID, (userStatus === 0 ? true : false));'))
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(5672063763959141)
+,p_name=>'ResetErrorOnGetFocusPasswordVerify'
+,p_event_sequence=>60
+,p_triggering_element_type=>'ITEM'
+,p_triggering_element=>'P3_PASSWORD_VERIFY'
+,p_bind_type=>'bind'
+,p_bind_event_type=>'focusin'
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(5672135403959142)
+,p_event_id=>wwv_flow_api.id(5672063763959141)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'$(''#P3_PASSWORD_VERIFY-error'').fadeOut();',
+'$(''.t-Form-error'').fadeOut();',
+'$(''#P3_PASSWORD_VERIFY_CONTAINER > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
 'setButtonState(buttonID, (userStatus === 0 ? true : false));'))
 );
 wwv_flow_api.create_page_process(
