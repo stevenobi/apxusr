@@ -27,7 +27,7 @@ prompt APPLICATION 110 - User Management
 -- Application Export:
 --   Application:     110
 --   Name:            User Management
---   Date and Time:   19:24 Sunday January 28, 2018
+--   Date and Time:   21:57 Sunday January 28, 2018
 --   Exported By:     ADMIN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -40,9 +40,9 @@ prompt APPLICATION 110 - User Management
 --     Items:                   23
 --     Validations:              3
 --     Processes:               16
---     Regions:                 17
---     Buttons:                  9
---     Dynamic Actions:         19
+--     Regions:                 19
+--     Buttons:                 13
+--     Dynamic Actions:         20
 --   Shared Components:
 --     Logic:
 --     Navigation:
@@ -114,7 +114,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180128191504'
+,p_last_upd_yyyymmddhh24miss=>'20180128215532'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -552,21 +552,11 @@ wwv_flow_api.create_template(
 ,p_name=>'LoginValidate'
 ,p_internal_name=>'LOGINVALIDATE'
 ,p_is_popup=>false
-,p_javascript_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'/////////////////////////////////////////////////',
-'function include(e){var t=document.getElementsByTagName("head")[0],r=document.createElement("script");r.src=e,r.type="text/javascript",t.appendChild(r)}function setErrorLabel(e,t,r){var a=''<label id="''+r.substr(1,r.length)+''" class="error" for="''+t.s'
-||'ubstr(1,t.length)+''" style="display: block;">''+e+"</label>",n=$(r).length;0===n?$(a).insertAfter($("input"+t)):($(r).text(e),$(r).show())}function setButtonState(e,t){t?$(e).removeAttr("disabled"):$(e).attr("disabled","disabled")}function userStatusV'
-||'alid(e,t){if(e){var r=e,a=t?t+r:url+r,n=r.substr(r.length-1);if("."!==n){var s=$.ajax({url:a,dataType:"json",async:!1,success:function(e){}}),i=s.responseJSON.user_status;if(i&&(userStatus=i,0!=i)){var u,l,o;i<0?(l="User Domain invalid!",o="Benutzer '
-||'Domaine ungültig"):3==i?(l="Maximum Registration Attempts exceeded for User "+r+".Please contact our Support.",o="Benutzer "+r+" hat die maximalen Registrierungsversuche überschritten."):4==i||12==i||i>100?(l="User "+r+" exists. Please reset your pas'
-||'sword.",o="Benutzer "+r+" existiert. Bitte setzen Sie Ihr Kennwort zurück."):11==i?(l="User "+r+" exists. Please confirm your Registration.",o="Benutzer "+r+" existiert. Bitte bestätigen Sie Ihre Registrierung."):1!=i&&2!=i&&10!=i||(l="Your Registrat'
-||'ion expired. Please register again.",o="Ihre Registrierung ist abgelaufen. Bitte registrieren Sie sich erneut."),validator.destroy(),u="de"===Lang?o:l,setErrorLabel(u,checkField,errorField)}}}return 0===i}function checkInput(){var e=form.valid(),t=$('
-||'checkField).val();if(e){var r=userStatusValid(t);return r?(setButtonState(buttonID,r),r):(setButtonState(buttonID,!1),!1)}return setButtonState(buttonID,!1),!1}var userStatus=null,host=$v(hostItem),url=host+restUrl,LANG="en",browserLang=$v(browserLan'
-||'gItem),defaultLang=browserLang?browserLang:LANG,Lang=lang?lang:defaultLang;Lang&&Lang!==LANG&&include(VALIDATOR_JS_INCLUDE+"messages_"+Lang+".min.js"),jQuery.validator.setDefaults({debug:!0,success:"valid"}),jQuery.validator.addMethod("pwcheck",funct'
-||'ion(e){return/^[A-Za-z0-9\d=!\-+#.,:@._*]*$/.test(e)&&/[=!\-+#.,:@._*]/.test(e)&&/[a-z]/.test(e)&&/\d/.test(e)});var PWCHECK_MSG="Please enter at least 1 Lower-, Upper- Specialchar and Number.";Lang&&"de"===Lang&&(PWCHECK_MSG="Bitte mind. 1 Klein-, G'
-||'roß-, Sonderzeichen und Zahl.");var validator=form.validate({lang:Lang,normalizer:function(e){return $.trim(e)},rules:{FIRSTNAME:{required:!0},LASTNAME:{required:!0},EMAIL:{required:!0,email:!0},PASSWORD:{required:!0,pwcheck:!0},PASSWORDV:{required:!'
-||'0,equalTo:PASSWORD}},messages:{PASSWORD:{pwcheck:PWCHECK_MSG}}});form.on("keyup keydown keypress",function(e){var t=e.keyCode||e.which;13!==t&&9!==t||(13===t?e.preventDefault():null,checkInput())});',
-'/////////////////////////////////////////////////',
-''))
+,p_javascript_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateRegistrationGlobals.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateRegistration.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateForm.min.js?v=#APEX_VERSION#'))
 ,p_javascript_code_onload=>'apex.theme42.initializePage.appLogin();'
 ,p_header_template=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '<!DOCTYPE html>',
@@ -697,7 +687,7 @@ wwv_flow_api.create_template(
 ,p_reference_id=>6186336386841364
 );
 wwv_flow_api.create_page_tmpl_display_point(
- p_id=>wwv_flow_api.id(6862942537868549)
+ p_id=>wwv_flow_api.id(7061811616139445)
 ,p_page_template_id=>wwv_flow_api.id(6862436861868548)
 ,p_name=>'Content Body'
 ,p_placeholder=>'BODY'
@@ -706,7 +696,7 @@ wwv_flow_api.create_page_tmpl_display_point(
 ,p_max_fixed_grid_columns=>12
 );
 wwv_flow_api.create_page_tmpl_display_point(
- p_id=>wwv_flow_api.id(6863441906868549)
+ p_id=>wwv_flow_api.id(7062313044139445)
 ,p_page_template_id=>wwv_flow_api.id(6862436861868548)
 ,p_name=>'Body Header'
 ,p_placeholder=>'REGION_POSITION_01'
@@ -1172,9 +1162,6 @@ wwv_flow_api.create_template(
 ,p_reference_id=>4196872780661329
 ,p_translate_this_template=>'N'
 );
-end;
-/
-begin
 wwv_flow_api.create_page_tmpl_display_point(
  p_id=>wwv_flow_api.id(6820233336868529)
 ,p_page_template_id=>wwv_flow_api.id(13758655389068968)
@@ -1236,6 +1223,9 @@ wwv_flow_api.create_page_tmpl_display_point(
 ,p_has_grid_support=>false
 ,p_glv_new_row=>true
 );
+end;
+/
+begin
 wwv_flow_api.create_page_tmpl_display_point(
  p_id=>wwv_flow_api.id(6823797991868531)
 ,p_page_template_id=>wwv_flow_api.id(13758655389068968)
@@ -2063,9 +2053,6 @@ wwv_flow_api.create_template(
 ,p_reference_id=>4205756462661332
 ,p_translate_this_template=>'N'
 );
-end;
-/
-begin
 wwv_flow_api.create_page_tmpl_display_point(
  p_id=>wwv_flow_api.id(6843368654868540)
 ,p_page_template_id=>wwv_flow_api.id(13767539071068971)
@@ -2075,6 +2062,9 @@ wwv_flow_api.create_page_tmpl_display_point(
 ,p_glv_new_row=>true
 ,p_max_fixed_grid_columns=>12
 );
+end;
+/
+begin
 wwv_flow_api.create_page_tmpl_display_point(
  p_id=>wwv_flow_api.id(6843846970868540)
 ,p_page_template_id=>wwv_flow_api.id(13767539071068971)
@@ -9368,7 +9358,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180127210634'
+,p_last_upd_yyyymmddhh24miss=>'20180128210043'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(4957066834726765)
@@ -9397,6 +9387,28 @@ wwv_flow_api.create_page_plug(
 ,p_plug_source_type=>'NATIVE_LIST'
 ,p_list_template_id=>wwv_flow_api.id(13840890107068996)
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+);
+wwv_flow_api.create_page_da_event(
+ p_id=>wwv_flow_api.id(5672454940959145)
+,p_name=>'SetMailContent'
+,p_event_sequence=>10
+,p_bind_type=>'bind'
+,p_bind_event_type=>'ready'
+,p_display_when_type=>'NOT_EXISTS'
+,p_display_when_cond=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select 1 from APEX_MAIL_CONTENT',
+'where app_id = v(''APP_ID'');'))
+);
+wwv_flow_api.create_page_da_action(
+ p_id=>wwv_flow_api.id(5672571964959146)
+,p_event_id=>wwv_flow_api.id(5672454940959145)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'Y'
+,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
+,p_attribute_01=>'COPY_MAIL_CONTENT(:APP_ID);'
+,p_stop_execution_on_error=>'N'
+,p_wait_for_result=>'Y'
 );
 end;
 /
@@ -10308,14 +10320,23 @@ wwv_flow_api.create_page(
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'AUTO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
+,p_javascript_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validate/messages_de.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateFormGlobals.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateRegistrationGlobals.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateForm.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateUser.min.js?v=#APEX_VERSION#'))
+,p_css_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'#WORKSPACE_IMAGES#css/validate/screen.css?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#css/validateInput.min.css?v=#APEX_VERSION#'))
 ,p_step_template=>wwv_flow_api.id(13761578240068968)
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20171210143533'
+,p_last_upd_yyyymmddhh24miss=>'20180128213033'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(4955714207726765)
@@ -10331,55 +10352,92 @@ wwv_flow_api.create_page_plug(
 ,p_attribute_02=>'TEXT'
 ,p_attribute_03=>'Y'
 );
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(5672638411959147)
+,p_plug_name=>'Buttons'
+,p_parent_plug_id=>wwv_flow_api.id(4955714207726765)
+,p_region_template_options=>'#DEFAULT#:t-Form--xlarge:margin-top-md:margin-bottom-none'
+,p_plug_template=>wwv_flow_api.id(13778706889068974)
+,p_plug_display_sequence=>10
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'BODY'
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_attribute_01=>'N'
+,p_attribute_02=>'HTML'
+);
+wwv_flow_api.create_page_button(
+ p_id=>wwv_flow_api.id(5672878003959149)
+,p_button_sequence=>10
+,p_button_plug_id=>wwv_flow_api.id(5672638411959147)
+,p_button_name=>'REGISTER'
+,p_button_static_id=>'REGISTER'
+,p_button_action=>'REDIRECT_PAGE'
+,p_button_template_options=>'#DEFAULT#:t-Button--link:t-Button--gapLeft'
+,p_button_template_id=>wwv_flow_api.id(13845333853068998)
+,p_button_is_hot=>'Y'
+,p_button_image_alt=>'Register'
+,p_button_position=>'BODY'
+,p_button_redirect_url=>'f?p=&APP_ID.:102:&SESSION.:REGISTER:&DEBUG.:RP,102:P102_EMAIL:&P101_USERNAME.'
+,p_grid_column_attributes=>'style="float: left; text-align: left;"'
+,p_grid_new_row=>'Y'
+);
+wwv_flow_api.create_page_button(
+ p_id=>wwv_flow_api.id(5672722501959148)
+,p_button_sequence=>20
+,p_button_plug_id=>wwv_flow_api.id(5672638411959147)
+,p_button_name=>'RESETPW'
+,p_button_static_id=>'RESETPW'
+,p_button_action=>'REDIRECT_PAGE'
+,p_button_template_options=>'#DEFAULT#:t-Button--link'
+,p_button_template_id=>wwv_flow_api.id(13845333853068998)
+,p_button_is_hot=>'Y'
+,p_button_image_alt=>'Reset Password'
+,p_button_position=>'BODY'
+,p_button_redirect_url=>'f?p=&APP_ID.:103:&SESSION.:REGISTER:&DEBUG.:RP,102:P102_EMAIL:&P101_USERNAME.'
+,p_grid_column_attributes=>'style="float: right; text-align: right; right: 12px;"'
+,p_grid_new_row=>'N'
+,p_grid_new_column=>'Y'
+);
 wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(4956079193726765)
 ,p_button_sequence=>30
 ,p_button_plug_id=>wwv_flow_api.id(4955714207726765)
 ,p_button_name=>'LOGIN'
 ,p_button_action=>'SUBMIT'
-,p_button_template_options=>'#DEFAULT#'
+,p_button_template_options=>'#DEFAULT#:t-Button--gapBottom'
 ,p_button_template_id=>wwv_flow_api.id(13845333853068998)
 ,p_button_is_hot=>'Y'
 ,p_button_image_alt=>'Log In'
 ,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_alignment=>'LEFT'
-,p_grid_new_grid=>false
-,p_grid_new_row=>'Y'
-,p_grid_new_column=>'Y'
 );
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(4955829254726765)
 ,p_name=>'P101_USERNAME'
+,p_is_required=>true
 ,p_item_sequence=>10
 ,p_item_plug_id=>wwv_flow_api.id(4955714207726765)
-,p_prompt=>'username'
-,p_placeholder=>'username'
+,p_placeholder=>'Please Enter Your Username or Email'
 ,p_display_as=>'NATIVE_TEXT_FIELD'
 ,p_cSize=>40
 ,p_cMaxlength=>100
-,p_label_alignment=>'RIGHT'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_icon_css_classes=>'fa-user'
+,p_field_template=>wwv_flow_api.id(13845150629068998)
 ,p_item_template_options=>'#DEFAULT#'
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'N'
-,p_attribute_03=>'N'
 ,p_attribute_04=>'TEXT'
-,p_attribute_05=>'NONE'
+,p_attribute_05=>'BOTH'
 );
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(4955920897726765)
 ,p_name=>'P101_PASSWORD'
+,p_is_required=>true
 ,p_item_sequence=>20
 ,p_item_plug_id=>wwv_flow_api.id(4955714207726765)
-,p_prompt=>'password'
-,p_placeholder=>'password'
+,p_placeholder=>'Enter Password'
 ,p_display_as=>'NATIVE_PASSWORD'
 ,p_cSize=>40
 ,p_cMaxlength=>100
-,p_label_alignment=>'RIGHT'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_icon_css_classes=>'fa-key'
+,p_field_template=>wwv_flow_api.id(13845150629068998)
 ,p_item_template_options=>'#DEFAULT#'
 ,p_attribute_01=>'Y'
 ,p_attribute_02=>'Y'
@@ -10445,9 +10503,13 @@ wwv_flow_api.create_page(
 ,p_javascript_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js?v=#APEX_VERSION#',
 '#WORKSPACE_IMAGES#js/validate/messages_de.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateFormGlobals.min.js?v=#APEX_VERSION#',
 '#WORKSPACE_IMAGES#js/validateRegistrationGlobals.min.js?v=#APEX_VERSION#',
 '#WORKSPACE_IMAGES#js/validateForm.min.js?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#js/validateRegistration.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateUser.min.js?v=#APEX_VERSION#',
+''))
+,p_javascript_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'',
 ''))
 ,p_javascript_code_onload=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '',
@@ -10483,7 +10545,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180128191504'
+,p_last_upd_yyyymmddhh24miss=>'20180128215532'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5690431702074214)
@@ -10531,6 +10593,53 @@ wwv_flow_api.create_page_plug(
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'TEXT'
 ,p_attribute_03=>'Y'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(12746488383824300)
+,p_plug_name=>'Buttons'
+,p_parent_plug_id=>wwv_flow_api.id(10618508300570882)
+,p_region_template_options=>'#DEFAULT#:t-Form--xlarge:margin-top-md:margin-bottom-none'
+,p_plug_template=>wwv_flow_api.id(13778706889068974)
+,p_plug_display_sequence=>40
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'BODY'
+,p_plug_query_row_template=>1
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_attribute_01=>'N'
+,p_attribute_02=>'HTML'
+);
+wwv_flow_api.create_page_button(
+ p_id=>wwv_flow_api.id(7074528979865155)
+,p_button_sequence=>10
+,p_button_plug_id=>wwv_flow_api.id(12746488383824300)
+,p_button_name=>'CANCEL'
+,p_button_static_id=>'CANCEL'
+,p_button_action=>'REDIRECT_PAGE'
+,p_button_template_options=>'#DEFAULT#:t-Button--link:t-Button--gapLeft'
+,p_button_template_id=>wwv_flow_api.id(13845333853068998)
+,p_button_is_hot=>'Y'
+,p_button_image_alt=>'Cancel'
+,p_button_position=>'BODY'
+,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP,101:P101_USERNAME:&P102_EMAIL.'
+,p_grid_column_attributes=>'style="float: left; text-align: left;"'
+,p_grid_new_row=>'Y'
+);
+wwv_flow_api.create_page_button(
+ p_id=>wwv_flow_api.id(7074150315865155)
+,p_button_sequence=>20
+,p_button_plug_id=>wwv_flow_api.id(12746488383824300)
+,p_button_name=>'RESETREG'
+,p_button_static_id=>'RESETREG'
+,p_button_action=>'REDIRECT_PAGE'
+,p_button_template_options=>'#DEFAULT#:t-Button--link'
+,p_button_template_id=>wwv_flow_api.id(13845333853068998)
+,p_button_is_hot=>'Y'
+,p_button_image_alt=>'Reset Registration'
+,p_button_position=>'BODY'
+,p_button_redirect_url=>'f?p=&APP_ID.:102:&SESSION.:REREGISTER:&DEBUG.:RP,102:P102_EMAIL,P102_FIRSTNAME,P102_LASTNAME:&P102_EMAIL.,&P102_FIRSTNAME.,&P102_LASTNAME.'
+,p_grid_column_attributes=>'style="float: right; text-align: right; right: 12px; display:none;"'
+,p_grid_new_row=>'N'
+,p_grid_new_column=>'Y'
 );
 wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(5691390259074223)
@@ -10700,8 +10809,8 @@ wwv_flow_api.create_page_da_action(
 ,p_execute_on_page_init=>'N'
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'//(form.valid() ? $(''#REG'').removeAttr(''disabled'') : $(''#REG'').attr(''disabled'');',
-'checkInput();'))
+'checkInput();',
+'setReRegButton();'))
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(5692915453074239)
@@ -10719,7 +10828,9 @@ wwv_flow_api.create_page_da_action(
 ,p_action_sequence=>10
 ,p_execute_on_page_init=>'N'
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>'checkInput();'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'checkInput();',
+'setReRegButton();'))
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(5691752677074227)
