@@ -1,0 +1,42 @@
+.t-success {
+  color: green;
+}
+.t-error {
+  color: red;
+}
+
+.t-text {
+  text-align: center;
+  min-height: 180px;
+}
+
+.t-Login-region {
+  border-radius: 16px;
+}
+
+.t-Form-inputContainer input.text_field,
+.t-Form-inputContainer input[type="text"] {
+  border-radius: 6px;
+}
+
+.t-Form-required {
+  position: relative;
+  top: 32px;
+  z-index: 1000;
+  left: 16px;
+}
+
+div.t-Login-header > span {
+  font-size: 72px;
+}
+
+.t-Login-header {
+  padding-bottom: 6px;
+}
+
+.t-Form--labelsAbove .t-Form-fieldContainer .t-Form-inputContainer,
+.t-Form-fieldContainer--stacked .t-Form-inputContainer {
+  padding-top: 0;
+  margin-bottom: 4px;
+  height: 60px;
+}
