@@ -51,10 +51,10 @@ where object_name in (
 );
 
 
- drop table "RAS_DOMAINEN" ;
+ drop table "DOMAINEN" ;
 
---- rename VALID_DOMAINS to RAS_DOMAINEN;
- create table "RAS_DOMAINEN" (
+--- rename VALID_DOMAINS to DOMAINEN;
+ create table "DOMAINEN" (
   "DOMAIN_ID" number not null, 
 	"DOMAIN" varchar2(128), 
   "DOMAIN_OWNER" varchar2(512),
@@ -68,15 +68,15 @@ where object_name in (
   "DELETED" date,
   "DELETED_BY" varchar2(30 byte), 
   constraint "VALID_DOMAINS_PK" primary key ("DOMAIN_ID"),
-  constraint "RAS_GRP_FK" foreign key ("GRUPPEN_ID") references "RAS_GRUPPEN" ("GRUPPEN_ID") on delete set null
+  constraint "GRP_FK" foreign key ("GRUPPEN_ID") references "GRUPPEN" ("GRUPPEN_ID") on delete set null
 );
 
 drop sequence "VALID_DOMAINS_ID_SEQ";
 create sequence "VALID_DOMAINS_ID_SEQ"  increment by 1 start with 69 nocache noorder nocycle;
 
 -- regular before Update Insert Trigger
-create or replace trigger "BFARM_VALID_DOMAINS_BIU_TRG" 
-before insert or update on "RAS_DOMAINEN"
+create or replace trigger "VALID_DOMAINS_BIU_TRG" 
+before insert or update on "DOMAINEN"
 referencing old as old new as new
 for each row
 begin
@@ -97,21 +97,21 @@ begin
 end;
 /
 
-drop trigger "BFARM_VALID_DOMAINS_BD_TRG" ;
+drop trigger "VALID_DOMAINS_BD_TRG" ;
 
-create or replace trigger "BFARM_VALID_DOMAINS_BD_TRG" 
-before delete on "RAS_DOMAINEN"
+create or replace trigger "VALID_DOMAINS_BD_TRG" 
+before delete on "DOMAINEN"
 referencing old as old new as new
 for each row
   declare
   pragma autonomous_transaction;
   begin
-    UPDATE  "BFARM_APEX_APP_USER"
+    UPDATE  "APEX_APP_USER"
     SET APP_USER_STATUS_ID = (select app_status_id 
-                                                  from "BFARM_APEX_APP_STATUS" 
+                                                  from "APEX_APP_STATUS" 
                                                   where app_status = 'LOCKED' )
     WHERE domain_id = :old.domain_id;
-    UPDATE  "RAS_DOMAINEN"
+    UPDATE  "DOMAINEN"
     SET DELETED = sysdate,
            DELETED_BY = nvl(v('APP_USER'), user)
     where DOMAIN_ID = :old.domain_id;
@@ -120,7 +120,7 @@ for each row
   end;
 /
 
-create or replace view "RAS_DOMAINS"
+create or replace view "DOMAINS"
 as 
   select 
   domain_id,
@@ -134,10 +134,10 @@ as
   created_by,
   deleted,
   deleted_by
-from "RAS_DOMAINEN"
+from "DOMAINEN"
 order by 1;
 
---INSERT INTO "RAS_DOMAINEN" (
+--INSERT INTO "DOMAINEN" (
 --    DOMAIN_ID,
 --    DOMAIN,
 --    DOMAIN_OWNER,
@@ -160,20 +160,20 @@ order by 1;
 --
 --commit;
 
-DROP SEQUENCE "RAS_DOMAINS_ID_SEQ";
+DROP SEQUENCE "DOMAINS_ID_SEQ";
 
-CREATE SEQUENCE  "RAS_DOMAINS_ID_SEQ"  INCREMENT BY 1 START WITH 70 NOCACHE  NOORDER  NOCYCLE ;
+CREATE SEQUENCE  "DOMAINS_ID_SEQ"  INCREMENT BY 1 START WITH 70 NOCACHE  NOORDER  NOCYCLE ;
 
-CREATE SEQUENCE  "RAS_INTERN"."APX$APP_USERS_ID_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;
+CREATE SEQUENCE  "INTERN"."APX$APP_USERS_ID_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;
 
-CREATE OR REPLACE TRIGGER "BFARM_VALID_DOMAINS_BIU_TRG" 
-before insert or update on "RAS_DOMAINEN"
+CREATE OR REPLACE TRIGGER "VALID_DOMAINS_BIU_TRG" 
+before insert or update on "DOMAINEN"
 referencing old as old new as new
 for each row
 begin
   if inserting then
     if (:new.domain_id is null) then
-        select ras_domains_id_seq.nextval
+        select domains_id_seq.nextval
         into :new.domain_id
         from dual;
     end if;
@@ -189,24 +189,24 @@ end;
 /
 
 
-create or replace view "RAS_DOMAIN_GRUPPEN"
+create or replace view "DOMAIN_GRUPPEN"
 as 
   select 
   r.DOMAIN_ID,
   r.DOMAIN,
   r.DOMAIN_CODE,
   r.DOMAIN_OWNER,
-  r.DOMAIN_GROUP_ID as RAS_GRUPPEN_ID,
-  g.INFO_GRUPPE as RAS_GRUPPE,
-  g.INFO_GRUPPE_CODE as RAS_GRUPPEN_CODE
-from "RAS_DOMAINEN" r left outer join "RAS_GRUPPEN" g
+  r.DOMAIN_GROUP_ID as GRUPPEN_ID,
+  g.INFO_GRUPPE as GRUPPE,
+  g.INFO_GRUPPE_CODE as GRUPPEN_CODE
+from "DOMAINEN" r left outer join "GRUPPEN" g
 on (r.DOMAIN_GROUP_ID = g.GRUPPEN_ID);
 
 
 
 alter table AMF_VORGANG modify AMF_MELDUNG_STATUS default 1;
-alter table BFARM_APEX_APP_USER add APP_USER_DOMAIN_ID number;
-alter table BFARM_APEX_APP_USER add constraint "APP_USER_DOMAIN_FK" foreign key (APP_USER_DOMAIN_ID) references  "RAS_DOMAINEN"(domain_id);
+alter table APEX_APP_USER add APP_USER_DOMAIN_ID number;
+alter table APEX_APP_USER add constraint "APP_USER_DOMAIN_FK" foreign key (APP_USER_DOMAIN_ID) references  "DOMAINEN"(domain_id);
 
 
 
@@ -237,21 +237,21 @@ alter table AMF_VORGANG add ART_DER_ZUSTAENDIGKEIT varchar2(200);
 alter table AMF_VORGANG add ART_DER_ZUSTAENDIGKEIT_SONST varchar2(1000);
 
 
-create or replace trigger "BFARM_APEX_APP_USER_BIU_TRG"
-before insert or update on "BFARM_APEX_APP_USER"
+create or replace trigger "APEX_APP_USER_BIU_TRG"
+before insert or update on "APEX_APP_USER"
 referencing old as old new as new
 for each row
 begin
   if inserting then
     if (:new.app_user_id is null) then
-        select bfarm_apex_app_user_id_seq.nextval
+        select apex_app_user_id_seq.nextval
         into :new.app_user_id
         from dual;
     end if;
     if (:new.app_user_domain_id is null or :new.app_user_group_id is null) then
         select d.domain_id, d.domain_group_id
         into :new.app_user_domain_id, :new.app_user_group_id
-        from "RAS_DOMAINEN" d
+        from "DOMAINEN" d
         where lower(trim(d.domain)) = lower(substr(:new.app_user_email, instr(:new.app_user_email, '@') +1));
     end if;
     select sysdate, nvl(v('APP_USER'), user)
@@ -266,16 +266,16 @@ end;
 /
 
 
-update "BFARM_APEX_APP_USER" u set u.app_user_domain_id = 
+update "APEX_APP_USER" u set u.app_user_domain_id = 
 (select d.domain_id 
-from "RAS_DOMAINEN" d 
+from "DOMAINEN" d 
 where lower(d.domain) = lower(substr(u.app_user_email, instr(u.app_user_email, '@') +1))
 );
 
 commit;
 
 --- Status View New
-create or replace view "BFARM_APEX_STATUS"
+create or replace view "APEX_STATUS"
 as 
   select 
   app_id,
@@ -288,12 +288,12 @@ as
   created_by,
   modified,
   modified_by
-from "BFARM_APEX_APP_STATUS"
+from "APEX_APP_STATUS"
 where app_id = nvl(v('APP_ID'), app_id)
 order by 1, 3;
 
 
-create or replace view "BFARM_APEX_STATUS_DEFAULT"
+create or replace view "APEX_STATUS_DEFAULT"
 as 
   select 
   app_id,
@@ -306,13 +306,13 @@ as
   created_by,
   modified,
   modified_by
-from "BFARM_APEX_APP_STATUS"
+from "APEX_APP_STATUS"
 where app_id = nvl(v('APP_ID'), app_id)
 and is_default = 1
 order by 1, 3;
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_ALL_USERS"
+CREATE OR REPLACE VIEW "APEX_ALL_USERS"
   AS 
   select distinct
   u.APP_ID as APP_ID, 
@@ -326,7 +326,7 @@ CREATE OR REPLACE VIEW "BFARM_APEX_ALL_USERS"
   ar.APP_ROLENAME as DEFAULT_ROLE, 
   u.APP_USER_PARENT_USER_ID, 
   (select au.app_username  
-  from "BFARM_APEX_APP_USER" au 
+  from "APEX_APP_USER" au 
   where au.app_user_id = u.app_user_parent_user_id) as parent_username, 
   max(rm.app_role_id) over (partition by rm.app_user_id) as max_security_level,  
   min(rm.app_role_id) over (partition by rm.app_user_id) as min_security_level, 
@@ -337,23 +337,23 @@ CREATE OR REPLACE VIEW "BFARM_APEX_ALL_USERS"
   u.MODIFIED_BY,
   u.DELETED,
   u.DELETED_BY
-from "BFARM_APEX_APP_USER" u  
-left outer join  "BFARM_APEX_ACCOUNT_STATUS" a 
+from "APEX_APP_USER" u  
+left outer join  "APEX_ACCOUNT_STATUS" a 
 on (u.APP_USER_STATUS_ID = a.status_id 
    and u.APP_ID = a.APP_ID) 
-left outer join  "BFARM_APEX_ROLES" ar 
+left outer join  "APEX_ROLES" ar 
 on (ar.APP_ROLE_ID = u.APP_USER_DEFAULT_ROLE_ID 
     and ar.APP_ID = u.APP_ID) 
-left outer join "BFARM_APEX_APP_USER_ROLE_MAP" rm 
+left outer join "APEX_APP_USER_ROLE_MAP" rm 
 on (u.APP_USER_ID = rm.APP_USER_ID 
     and u.APP_ID = rm.APP_ID)
 ;
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_ALL_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_ALL_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_APPLICATION_USERS"
+CREATE OR REPLACE VIEW "APEX_APPLICATION_USERS"
 AS 
   select APP_ID,
   APP_USER_ID,
@@ -376,13 +376,13 @@ AS
   MODIFIED_BY,
   DELETED,
   DELETED_BY
-from "BFARM_APEX_ALL_USERS"
+from "APEX_ALL_USERS"
 where APP_ID = nvl(v('APP_ID'), app_id)
 order by 2 desc
 ;
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APPLICATION_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_APPLICATION_USERS" TO "APEX_ADMIN";
 
 
 alter table DOKUMENTE add DELETED date;
@@ -392,7 +392,7 @@ alter table BOB_LAENDER_ROW_ERGAENZUNGEN add DELETED date;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add DELETED_BY varchar2(30);
 
 
-create or replace procedure "BFARM_RAS_SOFT_DELETE" (
+create or replace procedure "SOFT_DELETE" (
 p_table in varchar2,
 p_id number,
 p_msg in varchar2 :=' k�nnen nicht gel�scht werden!',
@@ -403,25 +403,25 @@ l_status_id pls_integer;
 l_msg varchar2(1000);
 begin
     select app_status_id into l_status_id
-    from "BFARM_APEX_APP_STATUS"
+    from "APEX_APP_STATUS"
     where app_status = upper(nvl(p_new_status, 'LOCKED'));
-    if (upper(p_table) = 'BFARM_APEX_APP_USER') then
+    if (upper(p_table) = 'APEX_APP_USER') then
         l_msg := 'Benutzer'||p_msg;
         commit;
-        update  "BFARM_APEX_APP_USER"
+        update  "APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
         where APP_USER_ID = p_id;
-    elsif  (upper(p_table) = 'RAS_DOMAINEN') then
+    elsif  (upper(p_table) = 'DOMAINEN') then
         l_msg := 'Domainen'||p_msg;
         commit;
-        update  "BFARM_APEX_APP_USER"
+        update  "APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
         where app_user_domain_id  = p_id;
-        update "RAS_DOMAINEN"
+        update "DOMAINEN"
         set deleted = sysdate,
               deleted_by     = nvl(v('APP_USER'), user)
         where domain_id = p_id;
@@ -462,113 +462,113 @@ end;
 
 /*
 
-begin "BFARM_RAS_SOFT_DELETE" ('BFARM_APEX_APP_USER', 4); end;
+begin "SOFT_DELETE" ('APEX_APP_USER', 4); end;
 /
 
-begin "BFARM_RAS_SOFT_DELETE" ('RAS_DOMAINEN', 70); end;
+begin "SOFT_DELETE" ('DOMAINEN', 70); end;
 /
 
-begin "BFARM_RAS_SOFT_DELETE" ('AMF_VORGANG', 73); end;
+begin "SOFT_DELETE" ('AMF_VORGANG', 73); end;
 /
 
-delete from bfarm_apex_app_user where app_user_id = 4; -- testuser
-delete from RAS_DOMAINEN where domain_id = 70; -- testuser
+delete from apex_app_user where app_user_id = 4; -- testuser
+delete from DOMAINEN where domain_id = 70; -- testuser
 
 */
 
 
 -- Dokumente Soft Delete Trigger
---drop  trigger "BFARM_DOKUMENTE_BD_TRG";
+--drop  trigger "DOKUMENTE_BD_TRG";
 
-create or replace trigger "BFARM_DOKUMENTE_BD_TRG" 
+create or replace trigger "DOKUMENTE_BD_TRG" 
 before delete on "DOKUMENTE"
 referencing old as old new as new
 for each row
   declare
   pragma autonomous_transaction;
   begin
-      "BFARM_RAS_SOFT_DELETE" ('DOKUMENTE', :old.id_vorgang);
+      "SOFT_DELETE" ('DOKUMENTE', :old.id_vorgang);
   end;
 /
 
 
 -- Dokumente Soft Delete Trigger
---drop  trigger "BFARM_BOBLR_DOKUMENTE_BD_TRG";
+--drop  trigger "BOBLR_DOKUMENTE_BD_TRG";
 
-create or replace trigger "BFARM_BOBLR_DOKUMENTE_BD_TRG" 
+create or replace trigger "BOBLR_DOKUMENTE_BD_TRG" 
 before delete on "BOB_LAENDER_ROW_DOKUMENTE"
 referencing old as old new as new
 for each row
   declare
   pragma autonomous_transaction;
   begin
-      "BFARM_RAS_SOFT_DELETE" ('BOB_LAENDER_ROW_DOKUMENTE', :old.id_vorgang);
+      "SOFT_DELETE" ('BOB_LAENDER_ROW_DOKUMENTE', :old.id_vorgang);
   end;
 /
 
 -- Dokumente Soft Delete Trigger
---drop  trigger "BFARM_BOBLR_DOKUMENTE_BD_TRG";
+--drop  trigger "BOBLR_DOKUMENTE_BD_TRG";
 
-create or replace trigger "BFARM_BOBLR_ERGAENZ_BD_TRG" 
+create or replace trigger "BOBLR_ERGAENZ_BD_TRG" 
 before delete on "BOB_LAENDER_ROW_ERGAENZUNGEN"
 referencing old as old new as new
 for each row
   declare
   pragma autonomous_transaction;
   begin
-      "BFARM_RAS_SOFT_DELETE" ('BOB_LAENDER_ROW_ERGAENZUNGEN', :old.id_vorgang);
+      "SOFT_DELETE" ('BOB_LAENDER_ROW_ERGAENZUNGEN', :old.id_vorgang);
   end;
 /
 
 -- Domain Soft Delete Trigger
---drop  trigger "BFARM_VALID_DOMAINS_BD_TRG";
+--drop  trigger "VALID_DOMAINS_BD_TRG";
 
-create or replace trigger "BFARM_VALID_DOMAINS_BD_TRG" 
-before delete on "RAS_DOMAINEN"
+create or replace trigger "VALID_DOMAINS_BD_TRG" 
+before delete on "DOMAINEN"
 referencing old as old new as new
 for each row
   declare
   pragma autonomous_transaction;
   begin
-      "BFARM_RAS_SOFT_DELETE" ('RAS_DOMAINEN', :old.domain_id);
+      "SOFT_DELETE" ('DOMAINEN', :old.domain_id);
   end;
 /
 
 
 -- User Soft Delete Trigger
---drop trigger "BFARM_USER_BD_TRG" ;
+--drop trigger "USER_BD_TRG" ;
 
-create or replace trigger "BFARM_USER_BD_TRG" 
-before delete on "BFARM_APEX_APP_USER"
+create or replace trigger "USER_BD_TRG" 
+before delete on "APEX_APP_USER"
 referencing old as old new as new
 for each row
 declare
   pragma autonomous_transaction;
 begin
-  "BFARM_RAS_SOFT_DELETE" ('BFARM_APEX_APP_USER', :old.app_user_id);
+  "SOFT_DELETE" ('APEX_APP_USER', :old.app_user_id);
 end;
 /
 
 
 -- RAS Meldung Soft Delete Trigger
---drop  trigger "BFARM_AMF_MELDUNG_BD_TRG";
+--drop  trigger "AMF_MELDUNG_BD_TRG";
 
-create or replace trigger "BFARM_AMF_MELDUNG_BD_TRG" 
+create or replace trigger "AMF_MELDUNG_BD_TRG" 
 before delete on "AMF_VORGANG"
 referencing old as old new as new
 for each row
 declare
   pragma autonomous_transaction;
 begin
-      "BFARM_RAS_SOFT_DELETE" ('AMF_VORGANG', :old.id_vorgang);
+      "SOFT_DELETE" ('AMF_VORGANG', :old.id_vorgang);
 end;
 /
 
 
 -- User Soft Delete Trigger
-drop trigger "BFARM_AMF_STATUS_TRG" ;
+drop trigger "AMF_STATUS_TRG" ;
 
-create or replace trigger "BFARM_AMF_STATUS_TRG" 
+create or replace trigger "AMF_STATUS_TRG" 
 before update of AMF_MELDUNG_STATUS on "AMF_VORGANG"
 referencing old as old new as new
 for each row
@@ -584,9 +584,9 @@ end;
 /
 
 
-drop trigger "BFARM_AMF_DEL_TRG" ;
+drop trigger "AMF_DEL_TRG" ;
 
-create or replace trigger "BFARM_AMF_DEL_TRG" 
+create or replace trigger "AMF_DEL_TRG" 
 before update of DELETED, DELETED_BY on "AMF_VORGANG"
 referencing old as old new as new
 for each row
@@ -614,12 +614,12 @@ commit;
 alter table dokumente add user_id number;  
 alter table dokumente add domain_id number;  
   
-alter table dokumente add constraint "DOK_USER_ID_FK" foreign key(user_id) references BFARM_APEX_APP_USER(app_user_id);  
-alter table dokumente add constraint "DOK_DOMAIN_ID_FK" foreign key(domain_id) references RAS_DOMAINEN(domain_id);
+alter table dokumente add constraint "DOK_USER_ID_FK" foreign key(user_id) references APEX_APP_USER(app_user_id);  
+alter table dokumente add constraint "DOK_DOMAIN_ID_FK" foreign key(domain_id) references DOMAINEN(domain_id);
 
-drop view "RAS_ALLE_DOKUMENTE";
+drop view "ALLE_DOKUMENTE";
 
-create view "RAS_ALLE_DOKUMENTE"
+create view "ALLE_DOKUMENTE"
 as
 SELECT 
   ID,
@@ -636,7 +636,7 @@ SELECT
   DELETED,
   DELETED_BY,
   USER_ID,
-  RAS_MELDER_ID
+  MELDER_ID
 FROM DOKUMENTE
 union all
 SELECT 
@@ -654,10 +654,10 @@ SELECT
   DELETED,
   DELETED_BY,
   USER_ID,
-  RAS_MELDER_ID
+  MELDER_ID
 FROM BOB_LAENDER_ROW_DOKUMENTE ;
 
-select * from ras_alle_dokumente
+select * from alle_dokumente
 where ID_VORGANG=87 and ID = 10;
 
 
@@ -678,7 +678,7 @@ SELECT
   DELETED_BY,
   USER_ID,
   DOMAIN_ID
-FROM "RAS_ALLE_DOKUMENTE";
+FROM "ALLE_DOKUMENTE";
 
 SELECT 
   ID_VORGANG,
@@ -712,7 +712,7 @@ from "MIME_TYPES" b join "MIME_ICONS" a
 on (a.icon_id = b.icon_id);
 
 
-  GRANT SELECT ON "BFARM_APEX_ADMIN"."MIME_TYPE_ICONS" TO PUBLIC;
+  GRANT SELECT ON "APEX_ADMIN"."MIME_TYPE_ICONS" TO PUBLIC;
 
 with 
 "VORGANG" as (
@@ -750,13 +750,13 @@ SELECT
 --  ms.  MASSNAHME_UMGESETZT_AM,
 --  e.CREATED as erstellt,
 --  e.MODIFIED as zuletzt_geaendert
-FROM "RAS_MELDESTELLEN" m LEFT OUTER JOIN "VORGANG" v
+FROM "MELDESTELLEN" m LEFT OUTER JOIN "VORGANG" v
 ON (1 = 1)
 LEFT OUTER JOIN "MASSN" ma
 ON ( );
 
 
-create or replace view "BFARM_APEX_ALL_USERS"
+create or replace view "APEX_ALL_USERS"
 as 
   select distinct
   u.APP_ID as APP_ID, 
@@ -774,7 +774,7 @@ as
   rg.INFO_GRUPPE as GRUPPE,
   u.APP_USER_PARENT_USER_ID, 
   (select au.app_username  
-  from "BFARM_APEX_APP_USER" au 
+  from "APEX_APP_USER" au 
   where au.app_user_id = u.app_user_parent_user_id) as parent_username, 
   max(rm.app_role_id) over (partition by rm.app_user_id) as max_security_level,  
   min(rm.app_role_id) over (partition by rm.app_user_id) as min_security_level, 
@@ -787,26 +787,26 @@ as
   u.MODIFIED_BY,
   u.DELETED,
   u.DELETED_BY
-from "BFARM_APEX_APP_USER" u  
-left outer join  "BFARM_APEX_ACCOUNT_STATUS" a 
+from "APEX_APP_USER" u  
+left outer join  "APEX_ACCOUNT_STATUS" a 
 on (u.APP_USER_STATUS_ID = a.status_id 
    and u.APP_ID = a.APP_ID) 
-left outer join  "BFARM_APEX_ROLES" ar 
+left outer join  "APEX_ROLES" ar 
 on (ar.APP_ROLE_ID = u.APP_USER_DEFAULT_ROLE_ID 
     and ar.APP_ID = u.APP_ID) 
-left outer join  "RAS_DOMAINEN" vd 
+left outer join  "DOMAINEN" vd 
 on (vd.DOMAIN_ID = u.APP_USER_DOMAIN_ID)
-left outer join  "RAS_GRUPPEN" rg 
+left outer join  "GRUPPEN" rg 
 on (rg.GRUPPEN_ID = u.APP_USER_GROUP_ID)
-left outer join "BFARM_APEX_APP_USER_ROLE_MAP" rm 
+left outer join "APEX_APP_USER_ROLE_MAP" rm 
 on (u.APP_USER_ID = rm.APP_USER_ID 
     and u.APP_ID = rm.APP_ID);
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_ALL_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_ALL_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_SYS_BUILTINS"
+CREATE OR REPLACE FORCE VIEW "INTERN"."APEX_APP_SYS_BUILTINS"
 AS 
   select  
   b.APP_ID, 
@@ -819,7 +819,7 @@ AS
   b.IS_PUBLIC, 
   b.IS_DEFAULT, 
   'USER' as APP_BUILTIN_TYPE 
-FROM "BFARM_APEX_SYS_BUILTINS" b join "BFARM_APEX_USERS" u 
+FROM "APEX_SYS_BUILTINS" b join "APEX_USERS" u 
 on (b.APP_USER_ID = u.APP_USER_ID) 
 where b.APP_USER_ID is not null 
   and b.APP_ID = v('APP_ID') 
@@ -835,14 +835,14 @@ select
   b.IS_PUBLIC, 
   b.IS_DEFAULT, 
   'ROLE' as APP_BUILTIN_TYPE 
-FROM "BFARM_APEX_SYS_BUILTINS" b join "BFARM_APEX_ROLES" r 
+FROM "APEX_SYS_BUILTINS" b join "APEX_ROLES" r 
 on (b.APP_ROLE_ID = r.APP_ROLE_ID) 
 where b.APP_ROLE_ID is not null 
   and b.APP_ID = v('APP_ID')
 ;
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_USERS"
+CREATE OR REPLACE VIEW "APEX_USERS"
 AS 
   select 
   APP_ID,
@@ -858,16 +858,16 @@ AS
   USER_DEFAULT_SECURITY_LEVEL as DEFAULT_SECURITY_LEVEL,
   USER_MAX_SECURITY_LEVEL as MAX_SECURITY_LEVEL,
   USER_MIN_SECURITY_LEVEL as MIN_SECURITY_LEVEL
-from "BFARM_APEX_APPLICATION_USERS"
+from "APEX_APPLICATION_USERS"
 order by 1, 2
 ;
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_USERS" TO "APEX_ADMIN";
 
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_APPLICATION_USERS"
+CREATE OR REPLACE VIEW "APEX_APPLICATION_USERS"
 AS 
   select APP_ID,
   APP_USER_ID,
@@ -894,27 +894,27 @@ AS
   MODIFIED_BY,
   DELETED,
   DELETED_BY
-from "BFARM_APEX_ALL_USERS"
+from "APEX_ALL_USERS"
 where APP_ID = nvl(v('APP_ID'), app_id)
 order by 2 desc;
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APPLICATION_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_APPLICATION_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE VIEW "BFARM_APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
+CREATE OR REPLACE VIEW "APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
 select app_builtin_name as "APP_USERNAME", 'APPLICATION_BUILTIN_ADMIN_USER' as "APPLICATION_ROLE" 
-from "BFARM_APEX_APP_SYS_BUILTINS" 
+from "APEX_APP_SYS_BUILTINS" 
 where   app_builtin_type = 'USER' 
 and is_admin = 1;
 
-CREATE OR REPLACE VIEW "BFARM_APEX_APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
+CREATE OR REPLACE VIEW "APEX_APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
 select app_builtin_name as "APP_USERNAME", 'APPLICATION_BUILTIN_ADMIN_USER' as "APPLICATION_ROLE" 
-from "BFARM_APEX_APP_SYS_BUILTINS" 
+from "APEX_APP_SYS_BUILTINS" 
 where   app_builtin_type = 'USER' 
 and is_admin = 1;
 
 
-create or replace view "BFARM_APEX_APP_SYS_ROLES"
+create or replace view "APEX_APP_SYS_ROLES"
 as 
   select
   APP_BUILTIN_ID,
@@ -923,12 +923,12 @@ as
   APP_USER_ID,
   APP_BUILTIN_NAME as APP_ROLENAME,
   APP_BUILTIN_CODE as APP_ROLE_CODE
-from "BFARM_APEX_APP_SYS_BUILTINS"
+from "APEX_APP_SYS_BUILTINS"
 where APP_BUILTIN_TYPE = 'ROLE';
 
-GRANT SELECT ON "BFARM_APEX_APP_SYS_ROLES" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "APEX_APP_SYS_ROLES" TO "APEX_ADMIN";
 
-create or replace view "BFARM_APEX_APP_SYS_USERS"
+create or replace view "APEX_APP_SYS_USERS"
 as 
   select
   APP_BUILTIN_ID,
@@ -937,13 +937,13 @@ as
   APP_USER_ID,
   APP_BUILTIN_NAME as APP_USERNAME,
   APP_BUILTIN_CODE as APP_USER_CODE
-from "BFARM_APEX_APP_SYS_BUILTINS"
+from "APEX_APP_SYS_BUILTINS"
 where APP_BUILTIN_TYPE = 'USER';
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APP_SYS_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_APP_SYS_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_ALL_USERS"
+CREATE OR REPLACE VIEW "APEX_ALL_USERS"
 AS 
   select distinct
   u.APP_ID as APP_ID, 
@@ -961,7 +961,7 @@ AS
   rg.INFO_GRUPPE as GRUPPE,
   u.APP_USER_PARENT_USER_ID, 
   (select au.app_username  
-  from "BFARM_APEX_APP_USER" au 
+  from "APEX_APP_USER" au 
   where au.app_user_id = u.app_user_parent_user_id) as parent_username, 
   max(rm.app_role_id) over (partition by rm.app_user_id) as max_security_level,  
   min(rm.app_role_id) over (partition by rm.app_user_id) as min_security_level, 
@@ -974,25 +974,25 @@ AS
   u.MODIFIED_BY,
   u.DELETED,
   u.DELETED_BY
-from "BFARM_APEX_APP_USER" u  
-left outer join  "BFARM_APEX_ACCOUNT_STATUS" a 
+from "APEX_APP_USER" u  
+left outer join  "APEX_ACCOUNT_STATUS" a 
 on (u.APP_USER_STATUS_ID = a.status_id 
    and u.APP_ID = a.APP_ID) 
-left outer join  "BFARM_APEX_ROLES" ar 
+left outer join  "APEX_ROLES" ar 
 on (ar.APP_ROLE_ID = u.APP_USER_DEFAULT_ROLE_ID 
     and ar.APP_ID = u.APP_ID) 
-left outer join  "RAS_DOMAINEN" vd 
+left outer join  "DOMAINEN" vd 
 on (vd.DOMAIN_ID = u.APP_USER_DOMAIN_ID)
-left outer join  "RAS_GRUPPEN" rg 
+left outer join  "GRUPPEN" rg 
 on (rg.GRUPPEN_ID = u.APP_USER_GROUP_ID)
-left outer join "BFARM_APEX_APP_USER_ROLE_MAP" rm 
+left outer join "APEX_APP_USER_ROLE_MAP" rm 
 on (u.APP_USER_ID = rm.APP_USER_ID 
     and u.APP_ID = rm.APP_ID);
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_ALL_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_ALL_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE FORCE VIEW "BFARM_APEX_APPLICATION_USERS"
+CREATE OR REPLACE FORCE VIEW "APEX_APPLICATION_USERS"
 AS 
   select APP_ID,
   APP_USER_ID,
@@ -1019,30 +1019,30 @@ AS
   MODIFIED_BY,
   DELETED,
   DELETED_BY
-from "BFARM_APEX_ALL_USERS"
+from "APEX_ALL_USERS"
 where APP_ID = nvl(v('APP_ID'), app_id)
 order by 1, 2;
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APPLICATION_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_APPLICATION_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE VIEW "RAS_DOMAIN_GRUPPEN"
+CREATE OR REPLACE VIEW "DOMAIN_GRUPPEN"
 AS 
 SELECT 
   r.DOMAIN_ID,
   r.DOMAIN,
   r.DOMAIN_CODE,
   r.DOMAIN_OWNER,
-  r.DOMAIN_GROUP_ID as RAS_GRUPPEN_ID,
-  g.INFO_GRUPPE as RAS_GRUPPE,
-  g.INFO_GRUPPE_CODE as RAS_GRUPPEN_CODE
-FROM "RAS_DOMAINEN" r LEFT OUTER JOIN "RAS_GRUPPEN" g
+  r.DOMAIN_GROUP_ID as GRUPPEN_ID,
+  g.INFO_GRUPPE as GRUPPE,
+  g.INFO_GRUPPE_CODE as GRUPPEN_CODE
+FROM "DOMAINEN" r LEFT OUTER JOIN "GRUPPEN" g
 ON (r.DOMAIN_GROUP_ID = g.GRUPPEN_ID)
 ORDER BY 1;
 
 
-create or replace view "RAS_DOMAINS"
+create or replace view "DOMAINS"
 as 
   select 
   rd.domain_id,
@@ -1057,11 +1057,11 @@ as
   rd.created_by,
   rd.deleted,
   rd.deleted_by
-from "RAS_DOMAINEN" rd LEFT OUTER JOIN "BFARM_APEX_STATUS" s
+from "DOMAINEN" rd LEFT OUTER JOIN "APEX_STATUS" s
 on (rd.status_id = s.status_id)
 order by 1;
 
-create or replace view "RAS_VALID_DOMAINS"
+create or replace view "VALID_DOMAINS"
 as 
 select DOMAIN_ID,
   DOMAIN,
@@ -1075,18 +1075,18 @@ select DOMAIN_ID,
   CREATED_BY,
   DELETED,
   DELETED_BY
-FROM "RAS_DOMAINS" 
+FROM "DOMAINS" 
 WHERE STATUS = 'VALID';
 
 
-create or replace view "BFARM_APEX_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") 
+create or replace view "APEX_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") 
 as 
-select app_username, application_role from "BFARM_APPLICATION_ADMINS"
+select app_username, application_role from "APPLICATION_ADMINS"
 union
-select user_name, application_role from "BFARM_WORKSPACE_ADMINS";
+select user_name, application_role from "WORKSPACE_ADMINS";
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_ADMINS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_ADMINS" TO "APEX_ADMIN";
 
 
 SELECT BEZEICHNUNG as d,
@@ -1094,46 +1094,46 @@ SELECT BEZEICHNUNG as d,
 FROM "AMF_VORGANG" ;
 
 
-alter table "BFARM_APEX_APP_USER" drop column DOMAIN_ID;
+alter table "APEX_APP_USER" drop column DOMAIN_ID;
 
-alter table "BFARM_APEX_APP_USER" add APP_USER_DOMAIN_ID number;
-alter table "BFARM_APEX_APP_USER" add APP_USER_GROUP_ID number;
+alter table "APEX_APP_USER" add APP_USER_DOMAIN_ID number;
+alter table "APEX_APP_USER" add APP_USER_GROUP_ID number;
 
-alter table "BFARM_APEX_APP_USER" add constraint "APP_USER_DOMAIN_FK" foreign key (APP_USER_DOMAIN_ID) references RAS_DOMAINEN (domain_id);
-alter table "BFARM_APEX_APP_USER" add constraint "APP_USER_GROUP_FK" foreign key (APP_USER_GROUP_ID) references RAS_GRUPPEN (gruppen_id);
+alter table "APEX_APP_USER" add constraint "APP_USER_DOMAIN_FK" foreign key (APP_USER_DOMAIN_ID) references DOMAINEN (domain_id);
+alter table "APEX_APP_USER" add constraint "APP_USER_GROUP_FK" foreign key (APP_USER_GROUP_ID) references GRUPPEN (gruppen_id);
 
 
-update BFARM_APEX_APP_USER u
+update APEX_APP_USER u
 set u.app_user_domain_id = (
 select d.domain_id
-from RAS_DOMAINEN d
+from DOMAINEN d
 where d.domain = substr(u.app_user_email, instr(u.app_user_email, '@')+1)
 );
 
-update BFARM_APEX_APP_USER u
+update APEX_APP_USER u
 set u.app_user_group_id = (
 select d.domain_group_id
-from RAS_DOMAINEN d
+from DOMAINEN d
 where d.domain = substr(u.app_user_email, instr(u.app_user_email, '@')+1)
 );
 
 commit;
 
 
-create or replace trigger "BFARM_APEX_APP_USER_BIU_TRG"
-before insert or update on "BFARM_APEX_APP_USER"
+create or replace trigger "APEX_APP_USER_BIU_TRG"
+before insert or update on "APEX_APP_USER"
 referencing old as old new as new
 for each row
 begin
   if inserting then
     if (:new.app_user_id is null) then
-        select bfarm_apex_app_user_id_seq.nextval
+        select apex_app_user_id_seq.nextval
         into :new.app_user_id
         from dual;
     end if;
     if (:new.app_user_domain_id is null or :new.app_user_group_id is null) then
         select d.domain_id, d.domain_group_id into :new.app_user_domain_id, :new.app_user_group_id
-        from "RAS_DOMAINEN" d
+        from "DOMAINEN" d
         where lower(trim(d.domain)) =lower(substr(:new.app_user_email, instr(:new.app_user_email, '@') +1));
     end if;
     select sysdate, nvl(v('APP_USER'), user)
@@ -1147,16 +1147,16 @@ begin
 end;
 /
 
-alter table RAS_DOMAINEN add domain_group_id number;
-alter table RAS_DOMAINEN add domain_bundesland_id number;
-alter table RAS_DOMAINEN add constraint  "RAS_DOMAIN_GRP_FK" foreign key(domain_group_id) references "RAS_GRUPPEN"(gruppen_id) on delete set null;
-alter table RAS_DOMAINEN add constraint  "RAS_DOMAIN_BL_FK" foreign key(domain_bundesland_id) references "BUNDESLAENDER"(bundesland_id) on delete set null;
+alter table DOMAINEN add domain_group_id number;
+alter table DOMAINEN add domain_bundesland_id number;
+alter table DOMAINEN add constraint  "DOMAIN_GRP_FK" foreign key(domain_group_id) references "GRUPPEN"(gruppen_id) on delete set null;
+alter table DOMAINEN add constraint  "DOMAIN_BL_FK" foreign key(domain_bundesland_id) references "BUNDESLAENDER"(bundesland_id) on delete set null;
 
 
 
 
 
-create or replace view "BFARM_RAS_USERS"
+create or replace view "USERS"
 as
 select 
   usr.app_user_id,
@@ -1166,16 +1166,16 @@ select
   usr.app_user_account_status,
   usr.domain_code,
   usr.gruppen_code
-from "BFARM_APEX_APPLICATION_USERS" usr
+from "APEX_APPLICATION_USERS" usr
 where usr.app_user_email = (select u.APP_USER_EMAIL 
-                                            from "BFARM_APEX_APPLICATION_USERS" u
+                                            from "APEX_APPLICATION_USERS" u
                                             where upper(trim(u.app_username)) = 
                                                        upper(trim(nvl(v('APP_USER'), usr.app_username))))
 and usr.app_user_account_status = 'OPEN'
 ;
 
 
-create or replace view "RAS_INTERN"."BFARM_APEX_ALL_USERS" 
+create or replace view "INTERN"."APEX_ALL_USERS" 
 as 
   select distinct
   u.APP_ID as APP_ID, 
@@ -1193,7 +1193,7 @@ as
   rg.INFO_GRUPPE as GRUPPE,
   u.APP_USER_PARENT_USER_ID, 
   (select au.app_username  
-  from "BFARM_APEX_APP_USER" au 
+  from "APEX_APP_USER" au 
   where au.app_user_id = u.app_user_parent_user_id) as parent_username, 
   max(rm.app_role_id) over (partition by rm.app_user_id) as max_security_level,  
   min(rm.app_role_id) over (partition by rm.app_user_id) as min_security_level, 
@@ -1206,28 +1206,28 @@ as
   u.MODIFIED_BY,
   u.DELETED,
   u.DELETED_BY
-from "BFARM_APEX_APP_USER" u  
-left outer join  "BFARM_APEX_ACCOUNT_STATUS" a 
+from "APEX_APP_USER" u  
+left outer join  "APEX_ACCOUNT_STATUS" a 
 on (u.APP_USER_STATUS_ID = a.status_id 
    and u.APP_ID = a.APP_ID) 
-left outer join  "BFARM_APEX_ROLES" ar 
+left outer join  "APEX_ROLES" ar 
 on (ar.APP_ROLE_ID = u.APP_USER_DEFAULT_ROLE_ID 
     and ar.APP_ID = u.APP_ID) 
-left outer join  "RAS_DOMAINS" vd 
+left outer join  "DOMAINS" vd 
 on (vd.DOMAIN_ID = u.APP_USER_DOMAIN_ID)
-left outer join  "RAS_GRUPPEN" rg 
+left outer join  "GRUPPEN" rg 
 on (rg.GRUPPEN_ID = u.APP_USER_GROUP_ID)
-left outer join "BFARM_APEX_APP_USER_ROLE_MAP" rm 
+left outer join "APEX_APP_USER_ROLE_MAP" rm 
 on (u.APP_USER_ID = rm.APP_USER_ID 
     and u.APP_ID = rm.APP_ID);
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_ALL_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_ALL_USERS" TO "APEX_ADMIN";
 
 
 
 
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_SYS_BUILTINS"
+CREATE OR REPLACE FORCE VIEW "INTERN"."APEX_APP_SYS_BUILTINS"
 AS 
   select  
   b.APP_ID, 
@@ -1240,7 +1240,7 @@ AS
   b.IS_PUBLIC, 
   b.IS_DEFAULT, 
   'USER' as APP_BUILTIN_TYPE 
-FROM "BFARM_APEX_SYS_BUILTINS" b join "BFARM_APEX_USERS" u 
+FROM "APEX_SYS_BUILTINS" b join "APEX_USERS" u 
 on (b.APP_USER_ID = u.APP_USER_ID) 
 where b.APP_USER_ID is not null 
   and b.APP_ID = v('APP_ID') 
@@ -1256,14 +1256,14 @@ select
   b.IS_PUBLIC, 
   b.IS_DEFAULT, 
   'ROLE' as APP_BUILTIN_TYPE 
-FROM "BFARM_APEX_SYS_BUILTINS" b join "BFARM_APEX_ROLES" r 
+FROM "APEX_SYS_BUILTINS" b join "APEX_ROLES" r 
 on (b.APP_ROLE_ID = r.APP_ROLE_ID) 
 where b.APP_ROLE_ID is not null 
   and b.APP_ID = v('APP_ID')
 ;
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_USERS"
+CREATE OR REPLACE VIEW "APEX_USERS"
 AS 
   select 
   APP_ID,
@@ -1279,16 +1279,16 @@ AS
   USER_DEFAULT_SECURITY_LEVEL as DEFAULT_SECURITY_LEVEL,
   USER_MAX_SECURITY_LEVEL as MAX_SECURITY_LEVEL,
   USER_MIN_SECURITY_LEVEL as MIN_SECURITY_LEVEL
-from "BFARM_APEX_APPLICATION_USERS"
+from "APEX_APPLICATION_USERS"
 order by 1, 2
 ;
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_USERS" TO "APEX_ADMIN";
 
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_APPLICATION_USERS"
+CREATE OR REPLACE VIEW "APEX_APPLICATION_USERS"
 AS 
   select APP_ID,
   APP_USER_ID,
@@ -1315,28 +1315,28 @@ AS
   MODIFIED_BY,
   DELETED,
   DELETED_BY
-from "BFARM_APEX_ALL_USERS"
+from "APEX_ALL_USERS"
 where APP_ID = nvl(v('APP_ID'), app_id)
 order by 2 desc;
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APPLICATION_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_APPLICATION_USERS" TO "APEX_ADMIN";
 
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
+CREATE OR REPLACE FORCE VIEW "INTERN"."APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
 select app_builtin_name as "APP_USERNAME", 'APPLICATION_BUILTIN_ADMIN_USER' as "APPLICATION_ROLE" 
-from "BFARM_APEX_APP_SYS_BUILTINS" 
+from "APEX_APP_SYS_BUILTINS" 
 where   app_builtin_type = 'USER' 
 and is_admin = 1
 ;
 
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
+CREATE OR REPLACE FORCE VIEW "INTERN"."APEX_APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
 select app_builtin_name as "APP_USERNAME", 'APPLICATION_BUILTIN_ADMIN_USER' as "APPLICATION_ROLE" 
-from "BFARM_APEX_APP_SYS_BUILTINS" 
+from "APEX_APP_SYS_BUILTINS" 
 where   app_builtin_type = 'USER' 
 and is_admin = 1
 ;
 
-  CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_SYS_ROLES" ("APP_BUILTIN_ID", "APP_BUILTIN_PARENT_ID", "APP_ID", "APP_USER_ID", "APP_ROLENAME", "APP_ROLE_CODE") AS 
+  CREATE OR REPLACE FORCE VIEW "INTERN"."APEX_APP_SYS_ROLES" ("APP_BUILTIN_ID", "APP_BUILTIN_PARENT_ID", "APP_ID", "APP_USER_ID", "APP_ROLENAME", "APP_ROLE_CODE") AS 
   select
   APP_BUILTIN_ID,
   APP_BUILTIN_PARENT_ID,
@@ -1344,13 +1344,13 @@ and is_admin = 1
   APP_USER_ID,
   APP_BUILTIN_NAME as APP_ROLENAME,
   APP_BUILTIN_CODE as APP_ROLE_CODE
-from "BFARM_APEX_APP_SYS_BUILTINS"
+from "APEX_APP_SYS_BUILTINS"
 where APP_BUILTIN_TYPE = 'ROLE'
 ;
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APP_SYS_ROLES" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_APP_SYS_ROLES" TO "APEX_ADMIN";
 
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_SYS_USERS" ("APP_BUILTIN_ID", "APP_BUILTIN_PARENT_ID", "APP_ID", "APP_USER_ID", "APP_USERNAME", "APP_USER_CODE") AS 
+CREATE OR REPLACE FORCE VIEW "INTERN"."APEX_APP_SYS_USERS" ("APP_BUILTIN_ID", "APP_BUILTIN_PARENT_ID", "APP_ID", "APP_USER_ID", "APP_USERNAME", "APP_USER_CODE") AS 
   select
   APP_BUILTIN_ID,
   APP_BUILTIN_PARENT_ID,
@@ -1358,19 +1358,19 @@ CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_SYS_USERS" ("APP_BUILT
   APP_USER_ID,
   APP_BUILTIN_NAME as APP_USERNAME,
   APP_BUILTIN_CODE as APP_USER_CODE
-from "BFARM_APEX_APP_SYS_BUILTINS"
+from "APEX_APP_SYS_BUILTINS"
 where APP_BUILTIN_TYPE = 'USER';
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APP_SYS_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_APP_SYS_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") 
+CREATE OR REPLACE FORCE VIEW "INTERN"."APEX_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") 
 AS 
-select app_username, application_role from "BFARM_APPLICATION_ADMINS"
+select app_username, application_role from "APPLICATION_ADMINS"
 union
-select user_name, application_role from "BFARM_WORKSPACE_ADMINS";
+select user_name, application_role from "WORKSPACE_ADMINS";
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_ADMINS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "INTERN"."APEX_ADMINS" TO "APEX_ADMIN";
 
 
 SELECT ID_VORGANG,
@@ -1381,10 +1381,10 @@ SELECT MELDENDE_BEHOERDE FROM BOB_LAENDER_ROW_MASSNAHMEN;
 
 SELECT DOMAIN_ID,
             DOMAIN
-FROM RAS_DOMAINEN ;
+FROM DOMAINEN ;
 
 
-CREATE OR REPLACE VIEW "RAS_BUNDESLAENDER"
+CREATE OR REPLACE VIEW "BUNDESLAENDER"
 AS 
   select 
   bundesland_id,
@@ -1399,15 +1399,15 @@ from "BUNDESLAENDER";
 
 alter table BOB_LAENDER_ROW_DOKUMENTE add domain_id number;
 alter table BOB_LAENDER_ROW_DOKUMENTE add constraint "DOKU_ERGAENZ_DOMAIN_ID_FK" foreign key (domain_id)
-references "RAS_DOMAINEN" (domain_id);
+references "DOMAINEN" (domain_id);
 
 alter table BOB_LAENDER_ROW_MASSNAHMEN add domain_id number;
 alter table BOB_LAENDER_ROW_MASSNAHMEN add constraint "DOKU_MASSN_DOMAIN_ID_FK" foreign key (domain_id)
-references "RAS_DOMAINEN" (domain_id);
+references "DOMAINEN" (domain_id);
 
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add domain_id number;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add constraint "DOKU_ERGAENZN_DOMAIN_ID_FK" foreign key (domain_id)
-references "RAS_DOMAINEN" (domain_id);
+references "DOMAINEN" (domain_id);
 
 
 drop index BLR_ERGAENZ_DOMAIN_ID_ID;
@@ -1425,16 +1425,16 @@ create index BLR_DOKU_USER_ID_IDX on BOB_LAENDER_ROW_DOKUMENTE (user_id);
 alter table BOB_LAENDER_ROW_MASSNAHMEN modify user_id number;
 alter table BOB_LAENDER_ROW_MASSNAHMEN drop constraint "BOB_MASSN_MELDER_ID_FK";
 alter table BOB_LAENDER_ROW_MASSNAHMEN add constraint "BLR_MASSNAHME_USER_ID_FK" foreign key (user_id)
-references "BFARM_APEX_APP_USER" (app_user_id);
+references "APEX_APP_USER" (app_user_id);
 
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN modify user_id number;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN drop constraint BOB_ERGAENZ_USER_ID_FK;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add constraint "ERGAENZ_BOB_LNDR_ROW_USER_ID" foreign key (user_id)
-references "BFARM_APEX_APP_USER" (app_user_id);
+references "APEX_APP_USER" (app_user_id);
 
 alter table BOB_LAENDER_ROW_DOKUMENTE add domain_id number;
 alter table BOB_LAENDER_ROW_DOKUMENTE add constraint "DOKU_ERGAENZ_DOMAIN_ID_FK" foreign key (domain_id)
-references "RAS_DOMAINEN" (domain_id);
+references "DOMAINEN" (domain_id);
 
 update BOB_LAENDER_ROW_DOKUMENTE set domain_id = 1;
 
@@ -1443,11 +1443,11 @@ commit;
 
 alter table BOB_LAENDER_ROW_MASSNAHMEN add domain_id number;
 alter table BOB_LAENDER_ROW_MASSNAHMEN add constraint "DOKU_MASSN_DOMAIN_ID_FK" foreign key (domain_id)
-references "RAS_DOMAINEN" (domain_id);
+references "DOMAINEN" (domain_id);
 
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add domain_id number;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add constraint "DOKU_ERGAENZN_DOMAIN_ID_FK" foreign key (domain_id)
-references "RAS_DOMAINEN" (domain_id);
+references "DOMAINEN" (domain_id);
 
 
 drop index BLR_ERGAENZ_DOMAIN_ID_ID;
@@ -1465,12 +1465,12 @@ create index BLR_DOKU_USER_ID_IDX on BOB_LAENDER_ROW_DOKUMENTE (user_id);
 alter table BOB_LAENDER_ROW_MASSNAHMEN modify user_id number;
 alter table BOB_LAENDER_ROW_MASSNAHMEN drop constraint "BOB_MASSN_MELDER_ID_FK";
 alter table BOB_LAENDER_ROW_MASSNAHMEN add constraint "BLR_MASSNAHME_USER_ID_FK" foreign key (user_id)
-references "BFARM_APEX_APP_USER" (app_user_id);
+references "APEX_APP_USER" (app_user_id);
 
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN modify user_id number;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN drop constraint BOB_ERGAENZ_USER_ID_FK;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add constraint "ERGAENZ_BOB_LNDR_ROW_USER_ID" foreign key (user_id)
-references "BFARM_APEX_APP_USER" (app_user_id);
+references "APEX_APP_USER" (app_user_id);
 
 
 SELECT ID,
@@ -1493,27 +1493,27 @@ FROM "BOB_LAENDER_ROW_ERGAENZUNGEN";
 
  select BLR_ERGAENZUNGEN_SEQ.nextval from dual;
 
---CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."RAS_MELDESTELLEN" ("GRP", "BEHOERDEN_ID", "BEHOERDE", "CODE", "DISPLAY_NAME", "RAS_GRUPPEN_ID", "RAS_GRUPPE", "RAS_GRUPPEN_CODE", "DOMAIN") AS 
+--CREATE OR REPLACE FORCE VIEW "INTERN"."MELDESTELLEN" ("GRP", "BEHOERDEN_ID", "BEHOERDE", "CODE", "DISPLAY_NAME", "GRUPPEN_ID", "GRUPPE", "GRUPPEN_CODE", "DOMAIN") AS 
 with "RASGRP" as (
 SELECT DOMAIN_ID,
   DOMAIN,
   DOMAIN_CODE,
   DOMAIN_OWNER,
-  RAS_GRUPPEN_ID,
-  RAS_GRUPPE,
-  RAS_GRUPPEN_CODE
-FROM "RAS_DOMAIN_GRUPPEN" 
+  GRUPPEN_ID,
+  GRUPPE,
+  GRUPPEN_CODE
+FROM "DOMAIN_GRUPPEN" 
 )
   SELECT 1 as GRP, 
   b.BEHOERDEN_ID, 
   b.BUNDESBEHOERDE as BEHOERDE,
   b.BUNDESBEHOERDE_CODE as CODE,
   b.BUNDESBEHOERDE_CODE as DISPLAY_NAME,
-  g.RAS_GRUPPEN_ID,
-  g.RAS_GRUPPE,
-  g.RAS_GRUPPEN_CODE,
+  g.GRUPPEN_ID,
+  g.GRUPPE,
+  g.GRUPPEN_CODE,
   g.DOMAIN
-FROM"RASGRP" g LEFT JOIN  "RAS_BUNDESOBERBEHOERDEN" b 
+FROM"RASGRP" g LEFT JOIN  "BUNDESOBERBEHOERDEN" b 
 ON (b.BUNDESBEHOERDE_CODE = G.DOMAIN_CODE)
 UNION
 SELECT 2 as GRP, 
@@ -1521,9 +1521,9 @@ SELECT 2 as GRP,
   b.BUNDESBEHOERDE as BEHOERDE,
   b.BUNDESBEHOERDE_CODE as CODE,
   b.BUNDESBEHOERDE_CODE||' - '||b.BUNDESBEHOERDE as DISPLAY_NAME,
-  g.RAS_GRUPPEN_ID,
-  g.RAS_GRUPPE,
-  g.RAS_GRUPPEN_CODE,
+  g.GRUPPEN_ID,
+  g.GRUPPE,
+  g.GRUPPEN_CODE,
   g.DOMAIN  
 FROM "RASGRP" g LEFT JOIN  "BUNDESBEHOERDEN" b 
 ON (b.BUNDESBEHOERDE_CODE = G.DOMAIN_CODE)
@@ -1533,29 +1533,29 @@ SELECT 3 as GRP,
   b.BUNDESLAND,
   b.BUNDESLAND_CODE as CODE,
   b.BUNDESLAND_CODE ||' - ' ||b.BUNDESLAND as DISPLAY_NAME,
-  min(g.RAS_GRUPPEN_ID) over(),
-  min(g.RAS_GRUPPE) over(),
+  min(g.GRUPPEN_ID) over(),
+  min(g.GRUPPE) over(),
   'BL',
   null  
-FROM "RASGRP" g LEFT JOIN  "RAS_BUNDESLAENDER" b
-ON ('BL' = G.RAS_GRUPPEN_CODE);
+FROM "RASGRP" g LEFT JOIN  "BUNDESLAENDER" b
+ON ('BL' = G.GRUPPEN_CODE);
 
 
 
-create or replace view "RAS_DOMAIN_GRUPPEN"
+create or replace view "DOMAIN_GRUPPEN"
 as 
   select 
   r.domain_id,
   r.domain,
   r.domain_code,
   r.domain_owner,
-  r.domain_group_id as RAS_GRUPPEN_ID,
-  nvl(r.domain_bundesland_id, 0) as RAS_BL_ID,
-  nvl(bl.bundesland, g.info_gruppe) as RAS_BUNDESLAND,
-  nvl(bl.bundesland_code,  r.domain_code) as RAS_BL_CODE,
-  g.info_gruppe  as RAS_GRUPPE,
-  g.info_gruppe_code as RAS_GRUPPEN_CODE
-from "RAS_DOMAINEN" r left outer join "RAS_GRUPPEN" g
+  r.domain_group_id as GRUPPEN_ID,
+  nvl(r.domain_bundesland_id, 0) as BL_ID,
+  nvl(bl.bundesland, g.info_gruppe) as BUNDESLAND,
+  nvl(bl.bundesland_code,  r.domain_code) as BL_CODE,
+  g.info_gruppe  as GRUPPE,
+  g.info_gruppe_code as GRUPPEN_CODE
+from "DOMAINEN" r left outer join "GRUPPEN" g
 on (r.domain_group_id = g.gruppen_id)
 left outer join "BUNDESLAENDER" bl
 on (r.domain_bundesland_id = bl.bundesland_id)
@@ -1594,7 +1594,7 @@ alter table BOB_LAENDER_ROW_DOKUMENTE add MELDENDE_STELLE_CODE varchar2(200);
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add MELDENDE_STELLE_CODE varchar2(200);
 
 
---CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_RAS_USERS"
+--CREATE OR REPLACE FORCE VIEW "INTERN"."USERS"
 --AS 
   select 
   usr.app_user_id,
@@ -1604,32 +1604,32 @@ alter table BOB_LAENDER_ROW_ERGAENZUNGEN add MELDENDE_STELLE_CODE varchar2(200);
   usr.app_user_account_status,
   usr.domain_code,
   usr.gruppen_code,
- (select nvl(DOMAIN_BUNDESLAND_ID, 0) from RAS_DOMAINEN where domain_code = usr.domain_code)
-from "BFARM_APEX_APPLICATION_USERS" usr
+ (select nvl(DOMAIN_BUNDESLAND_ID, 0) from DOMAINEN where domain_code = usr.domain_code)
+from "APEX_APPLICATION_USERS" usr
 where usr.app_user_email = (select u.APP_USER_EMAIL 
-                                            from "BFARM_APEX_APPLICATION_USERS" u
+                                            from "APEX_APPLICATION_USERS" u
                                             where upper(trim(u.app_username)) = 
                                                        upper(trim(nvl(v('APP_USER'), usr.app_username))))
 and usr.app_user_account_status = 'OPEN';
 
 
-select ras_bl_code 
-from RAS_DOMAIN_GRUPPEN
+select bl_code 
+from DOMAIN_GRUPPEN
 where domain_code = (select domain_code
-from BFARM_RAS_USERS
+from USERS
 where upper(trim(app_username)) = upper(trim(:APP_USER)));
 
 alter table BOB_LAENDER_ROW_DOKUMENTE modify melder_id number;
 alter table BOB_LAENDER_ROW_DOKUMENTE add constraint "BOB_MELDER_ID_FK" foreign key (melder_id)
-references "RAS_MELDER" (ras_melder_id);
+references "MELDER" (melder_id);
 
 alter table BOB_LAENDER_ROW_MASSNAHMEN modify melder_id number;
 alter table BOB_LAENDER_ROW_MASSNAHMEN add constraint "BOB_MASSN_MELDER_ID_FK" foreign key (melder_id)
-references "RAS_MELDER" (ras_melder_id);
+references "MELDER" (melder_id);
 
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN modify melder_id number;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add constraint "BOB_ERGAENZ_MELDER_ID_FK" foreign key (melder_id)
-references "RAS_MELDER" (ras_melder_id);
+references "MELDER" (melder_id);
 
 
 update BOB_LAENDER_ROW_ERGAENZUNGEN set melder_id = 1;
@@ -1638,18 +1638,18 @@ update BOB_LAENDER_ROW_DOKUMENTE set melder_id = 1;
 
 commit;
 
-alter table BFARM_APEX_APP_USER drop constraint APP_USER_MELDER_ID;
-alter table BFARM_APEX_APP_USER add constraint "APEXAPPUSER_MELDER_ID" foreign key (app_user_melder_id) references RAS_MELDER(ras_melder_id);
+alter table APEX_APP_USER drop constraint APP_USER_MELDER_ID;
+alter table APEX_APP_USER add constraint "APEXAPPUSER_MELDER_ID" foreign key (app_user_melder_id) references MELDER(melder_id);
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- RAS Malder (alle Beteiligten)
-drop table "RAS_MELDER" purge;
+drop table "MELDER" purge;
 
-create table "RAS_MELDER"
+create table "MELDER"
 as
-select rownum as RAS_MELDER_ID, BEHOERDEN_ID as RAS_MELDEBEHORDE_ID, BEHOERDE as RAS_MELDER, CODE as RAS_MELDER_CODE, 
-           DISPLAY_NAME as RAS_DISPLAY_NAME, BEHOERDEN_GRUPPEN_ID as RAS_GRUPPEN_ID, GRP as SORT_SEQ
+select rownum as MELDER_ID, BEHOERDEN_ID as MELDEBEHORDE_ID, BEHOERDE as MELDER, CODE as MELDER_CODE, 
+           DISPLAY_NAME as DISPLAY_NAME, BEHOERDEN_GRUPPEN_ID as GRUPPEN_ID, GRP as SORT_SEQ
 from (
  SELECT case when BUNDESBEHOERDE_CODE 
   in ('BFARM' , 'PEI', 'BVL', 'BMEL') 
@@ -1664,7 +1664,7 @@ from (
   then 1
   else 5
   end as BEHOERDEN_GRUPPEN_ID
-FROM "RAS_BUNDESOBERBEHOERDEN"
+FROM "BUNDESOBERBEHOERDEN"
 UNION
 SELECT 3 as GRP,
   BUNDESLAND_ID,
@@ -1672,33 +1672,33 @@ SELECT 3 as GRP,
   BUNDESLAND_CODE as CODE,
   BUNDESLAND_CODE ||' - ' ||BUNDESLAND as DISPLAY_NAME,
   2 as BEHOERDEN_GRUPPEN_ID
-FROM "RAS_BUNDESLAENDER"
+FROM "BUNDESLAENDER"
 ) 
 order by grp, behoerden_id;
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- Views auf RAS_MELDER
-create or replace view "RAS_DOMAIN_GRUPPEN"
+-- Views auf MELDER
+create or replace view "DOMAIN_GRUPPEN"
 as 
   select 
-  d.domain_id as ras_domain_id,
-  d.domain as ras_domain,
-  d.domain_code as ras_domain_code,
-  d.domain_owner as ras_domain_owner,
-  g.ras_gruppe_code,  
-  g.ras_gruppe as ras_gruppe,
-  m.ras_melder  as ras_melder,
-  d.domain_melder_id as ras_melder_id,
-  m.ras_gruppen_id as ras_melder_gruppen_id
-from "RAS_DOMAINEN" d left outer join "RAS_MELDER" m
-on (d.domain_melder_id = m.ras_melder_id)
-left outer join "RAS_GRUPPEN" g
-on (m.ras_gruppen_id = g.gruppen_id)
+  d.domain_id as domain_id,
+  d.domain as domain,
+  d.domain_code as domain_code,
+  d.domain_owner as domain_owner,
+  g.gruppe_code,  
+  g.gruppe as gruppe,
+  m.melder  as melder,
+  d.domain_melder_id as melder_id,
+  m.gruppen_id as melder_gruppen_id
+from "DOMAINEN" d left outer join "MELDER" m
+on (d.domain_melder_id = m.melder_id)
+left outer join "GRUPPEN" g
+on (m.gruppen_id = g.gruppen_id)
 order by 1;
 
 
-create or replace view "RAS_DOMAINS"
+create or replace view "DOMAINS"
 as 
   select 
   rd.domain_id,
@@ -1707,67 +1707,67 @@ as
   rd.domain_code,
   case rd.dns_not_resolved when 0 then 'Ja' else 'Nein' end as dns_gueltig,
   s.status,
-  m.ras_melder  as ras_behoerde,
-  m.ras_gruppen_id as ras_melder_gruppen_id,
+  m.melder  as behoerde,
+  m.gruppen_id as melder_gruppen_id,
   rd.modified,
   rd.modified_by,
   rd.created,
   rd.created_by,
   rd.deleted,
   rd.deleted_by
-from "RAS_DOMAINEN" rd LEFT OUTER JOIN "BFARM_APEX_STATUS" s
+from "DOMAINEN" rd LEFT OUTER JOIN "APEX_STATUS" s
 on (rd.status_id = s.status_id)
- left outer join "RAS_MELDER" m
-on (rd.domain_melder_id = m.ras_melder_id)
+ left outer join "MELDER" m
+on (rd.domain_melder_id = m.melder_id)
 order by 1;
 
 
-create or replace view "RAS_MELDEGRUPPEN"
+create or replace view "MELDEGRUPPEN"
 as 
 select
-  m.ras_melder_id,
-  m.ras_meldebehorde_id,
-  m.ras_melder,
-  m.ras_melder_code,
-  m.ras_display_name,
-  m.ras_gruppen_id,
-  g.ras_gruppe,
-  g.ras_gruppe_code,
+  m.melder_id,
+  m.meldebehorde_id,
+  m.melder,
+  m.melder_code,
+  m.display_name,
+  m.gruppen_id,
+  g.gruppe,
+  g.gruppe_code,
   m.sort_seq,
   m.app_id
-from "RAS_MELDER" m left outer join "RAS_GRUPPEN" g
-on (m.ras_gruppen_id = g.gruppen_id);
+from "MELDER" m left outer join "GRUPPEN" g
+on (m.gruppen_id = g.gruppen_id);
 
  
- CREATE OR REPLACE VIEW "RAS_MELDEDOMAINEN"
+ CREATE OR REPLACE VIEW "MELDEDOMAINEN"
  as
 select
-  m.ras_melder_id,
-  m.ras_melder,
-  m.ras_melder_code,
-  m.ras_display_name,
-  g.ras_gruppe,
-  g.ras_gruppe_code,
+  m.melder_id,
+  m.melder,
+  m.melder_code,
+  m.display_name,
+  g.gruppe,
+  g.gruppe_code,
   d.domain,
   d.domain_code,
   m.app_id,
-  m.ras_meldebehorde_id,
-  m.ras_gruppen_id,
+  m.meldebehorde_id,
+  m.gruppen_id,
   g.gruppen_id,
   m.sort_seq,
   m.created,
   m.created_by,
   m.modified,
   m.modified_by
-FROM   "RAS_MELDER" m left outer join "RAS_GRUPPEN" g
-on (m.ras_gruppen_id   = g.gruppen_id)
-right outer join "RAS_DOMAINEN" d
-on (d.domain_melder_id = m.ras_melder_id)
-order by m.sort_seq, m.app_id, m.ras_melder_id;
+FROM   "MELDER" m left outer join "GRUPPEN" g
+on (m.gruppen_id   = g.gruppen_id)
+right outer join "DOMAINEN" d
+on (d.domain_melder_id = m.melder_id)
+order by m.sort_seq, m.app_id, m.melder_id;
 
 
 
-create or replace view "BFARM_APEX_ALL_USERS"
+create or replace view "APEX_ALL_USERS"
 as 
   select distinct
   u.app_id as app_id, 
@@ -1781,46 +1781,46 @@ as
   ar.app_rolename as default_role,
   vd.domain_code,
   vd.domain,
-  m.ras_melder_code as meldegruppen_code,
-  m.ras_melder as meldegruppe,
-  g.ras_gruppe as ras_gruppe,
-  g.ras_gruppe_code as ras_gruppe_code,
+  m.melder_code as meldegruppen_code,
+  m.melder as meldegruppe,
+  g.gruppe as gruppe,
+  g.gruppe_code as gruppe_code,
   u.app_user_parent_user_id, 
   (select au.app_username  
-  from "BFARM_APEX_APP_USER" au 
+  from "APEX_APP_USER" au 
   where au.app_user_id = u.app_user_parent_user_id) as parent_username, 
   max(rm.app_role_id) over (partition by rm.app_user_id) as max_security_level,  
   min(rm.app_role_id) over (partition by rm.app_user_id) as min_security_level, 
   u.app_user_code, 
   vd.domain_id,
-  m.ras_melder_id,
-  g.gruppen_id as ras_gruppe_id,
+  m.melder_id,
+  g.gruppen_id as gruppe_id,
   u.created, 
   u.created_by, 
   u.modified, 
   u.modified_by,
   u.deleted,
   u.deleted_by
-from "BFARM_APEX_APP_USER" u  
-left outer join  "BFARM_APEX_ACCOUNT_STATUS" a 
+from "APEX_APP_USER" u  
+left outer join  "APEX_ACCOUNT_STATUS" a 
 on (u.app_user_status_id = a.status_id 
    and u.app_id = a.app_id) 
-left outer join  "BFARM_APEX_ROLES" ar 
+left outer join  "APEX_ROLES" ar 
 on (ar.app_role_id = u.app_user_default_role_id 
     and ar.app_id = u.app_id) 
-left outer join  "RAS_DOMAINEN" vd 
+left outer join  "DOMAINEN" vd 
 on (vd.domain_id = u.app_user_domain_id)
-left outer join  "RAS_MELDER" m 
-on (m.ras_melder_id = u.app_user_melder_id)
-left outer join "RAS_GRUPPEN" g
-on (m.ras_gruppen_id = g.gruppen_id)
-left outer join "BFARM_APEX_APP_USER_ROLE_MAP" rm 
+left outer join  "MELDER" m 
+on (m.melder_id = u.app_user_melder_id)
+left outer join "GRUPPEN" g
+on (m.gruppen_id = g.gruppen_id)
+left outer join "APEX_APP_USER_ROLE_MAP" rm 
 on (u.app_user_id = rm.app_user_id 
       and u.app_id = rm.app_id)
 order by 1, 2;
 
 
-create or replace view "BFARM_APEX_APPLICATION_USERS"
+create or replace view "APEX_APPLICATION_USERS"
 as 
   select APP_ID,
   APP_USER_ID,
@@ -1835,8 +1835,8 @@ as
   DOMAIN,
   MELDEGRUPPE,
   MELDEGRUPPEN_CODE,
-  RAS_GRUPPE_CODE, 
-  RAS_GRUPPE,
+  GRUPPE_CODE, 
+  GRUPPE,
   APP_USER_ACCOUNT_STATUS,
   APP_USER_PARENT_USER_ID,
   PARENT_USERNAME,
@@ -1844,21 +1844,21 @@ as
   MAX_SECURITY_LEVEL as USER_MAX_SECURITY_LEVEL,
   MIN_SECURITY_LEVEL as USER_MIN_SECURITY_LEVEL,  
   DOMAIN_ID,
-  RAS_MELDER_ID,
-  RAS_GRUPPE_ID,
+  MELDER_ID,
+  GRUPPE_ID,
   CREATED,
   CREATED_BY,
   MODIFIED,
   MODIFIED_BY,
   DELETED,
   DELETED_BY
-from "BFARM_APEX_ALL_USERS"
+from "APEX_ALL_USERS"
 where APP_ID = nvl(v('APP_ID'), app_id)
 order by 1, 2;
 
 
 
-create or replace view "BFARM_RAS_USERS"
+create or replace view "USERS"
 as 
   select 
   usr.app_user_id,
@@ -1870,12 +1870,12 @@ as
   usr.domain,
   usr.meldegruppen_code,
   usr.meldegruppe,
-  usr.ras_gruppe_code, 
-  usr.ras_gruppe,
+  usr.gruppe_code, 
+  usr.gruppe,
   usr.domain_id,
-  usr.ras_melder_id,
-  usr.ras_gruppe_id
-from "BFARM_APEX_APPLICATION_USERS" usr
+  usr.melder_id,
+  usr.gruppe_id
+from "APEX_APPLICATION_USERS" usr
 where usr.app_user_account_status = 'OPEN';
 
 
@@ -1912,37 +1912,37 @@ SELECT
   m.CODE ,
   m.BEHOERDE,
   (select count(*) from BOB_LAENDER_ROW_DOKUMENTE where 
-FROM "RAS_MELDESTELLEN" m LEFT OUTER JOIN "VORGANG" v
+FROM "MELDESTELLEN" m LEFT OUTER JOIN "VORGANG" v
 ON (1 = 1)
 LEFT OUTER JOIN "MASSN" ma
 ON ( )
 ;
 
 
-create or replace view "RAS_RUECKMELDUNG_STATS"
+create or replace view "RUECKMELDUNG_STATS"
 as
 -- docs
-select 'DOKUMENTE' as note_type, count(1) as num_notes, d.id_vorgang, g.ras_melder_id
-from BOB_LAENDER_ROW_DOKUMENTE d JOIN RAS_DOMAIN_GRUPPEN g
-on (d.domain_id = g.ras_domain_id)
+select 'DOKUMENTE' as note_type, count(1) as num_notes, d.id_vorgang, g.melder_id
+from BOB_LAENDER_ROW_DOKUMENTE d JOIN DOMAIN_GRUPPEN g
+on (d.domain_id = g.domain_id)
 where d.deleted is null
-group by d.id_vorgang, g.ras_melder_id
+group by d.id_vorgang, g.melder_id
 union --notes
-select 'ANMERKUNGEN' as mtype, count(1) as num_notes, d.id_vorgang, g.ras_melder_id
-from BOB_LAENDER_ROW_ERGAENZUNGEN d JOIN RAS_DOMAIN_GRUPPEN g
-on (d.domain_id = g.ras_domain_id)
+select 'ANMERKUNGEN' as mtype, count(1) as num_notes, d.id_vorgang, g.melder_id
+from BOB_LAENDER_ROW_ERGAENZUNGEN d JOIN DOMAIN_GRUPPEN g
+on (d.domain_id = g.domain_id)
 where d.deleted is null
-group by d.id_vorgang, g.ras_melder_id
+group by d.id_vorgang, g.melder_id
 union --notes
-select 'MASSNAHMEN' as mtype, count(1) as num_notes, d.id_vorgang, g.ras_melder_id
-from BOB_LAENDER_ROW_MASSNAHMEN d JOIN RAS_DOMAIN_GRUPPEN g
-on (d.domain_id = g.ras_domain_id)
+select 'MASSNAHMEN' as mtype, count(1) as num_notes, d.id_vorgang, g.melder_id
+from BOB_LAENDER_ROW_MASSNAHMEN d JOIN DOMAIN_GRUPPEN g
+on (d.domain_id = g.domain_id)
 where d.deleted is null
-group by d.id_vorgang, g.ras_melder_id;
+group by d.id_vorgang, g.melder_id;
 
 
 
-create or replace view "RAS_RUECKMELDUNG_STATISTIK"
+create or replace view "RUECKMELDUNG_STATISTIK"
 as
 with
 rueckmeldungen
@@ -1951,64 +1951,64 @@ select
   note_type,
   num_notes,
   id_vorgang,
-  ras_melder_id
-from "RAS_RUECKMELDUNG_STATS"
+  melder_id
+from "RUECKMELDUNG_STATS"
 )
 select 
-  m.ras_melder_id,
-  m.ras_meldebehorde_id,
+  m.melder_id,
+  m.meldebehorde_id,
   v.id_vorgang,
-  m.ras_display_name,
+  m.display_name,
   (select r.num_notes from "RUECKMELDUNGEN" r
-   where r.ras_melder_id = m.ras_melder_id
+   where r.melder_id = m.melder_id
        and r.id_vorgang     = v.id_vorgang
        and r.note_type = 'MASSNAHMEN') as anzahl_massnahmen,
   (select r.num_notes from "RUECKMELDUNGEN" r
-   where r.ras_melder_id = m.ras_melder_id
+   where r.melder_id = m.melder_id
        and r.id_vorgang     = v.id_vorgang
        and r.note_type = 'ANMERKUNGEN') as anzahl_anmerkungen,
   (select r.num_notes from "RUECKMELDUNGEN" r
-   where r.ras_melder_id = m.ras_melder_id
+   where r.melder_id = m.melder_id
        and r.id_vorgang     = v.id_vorgang
        and r.note_type = 'DOKUMENTE') as anzahl_dokumente,       
-  m.ras_gruppen_id,
-  g.ras_gruppe,
-  g.ras_gruppe_code,
-  m.ras_melder,
-  m.ras_melder_code,
+  m.gruppen_id,
+  g.gruppe,
+  g.gruppe_code,
+  m.melder,
+  m.melder_code,
   m.sort_seq,
   m.app_id,
   m.created,
   m.created_by,
   m.modified,
   m.modified_by
-from "RAS_MELDER" m left outer join "AMF_VORGANG" v
+from "MELDER" m left outer join "AMF_VORGANG" v
 on (1 = 1)
-left outer join "RAS_GRUPPEN" g
-on (m.RAS_GRUPPEN_ID = g.GRUPPEN_ID)
+left outer join "GRUPPEN" g
+on (m.GRUPPEN_ID = g.GRUPPEN_ID)
 order by 3;
 
 
 
-SELECT RAS_MELDER_ID,
-  RAS_MELDEBEHORDE_ID,
+SELECT MELDER_ID,
+  MELDEBEHORDE_ID,
   ID_VORGANG,
-  RAS_DISPLAY_NAME,
+  DISPLAY_NAME,
   ANZAHL_MASSNAHMEN,
   ANZAHL_ANMERKUNGEN,
   ANZAHL_DOKUMENTE,
-  RAS_GRUPPEN_ID,
-  RAS_GRUPPE,
-  RAS_GRUPPE_CODE,
-  RAS_MELDER,
-  RAS_MELDER_CODE,
+  GRUPPEN_ID,
+  GRUPPE,
+  GRUPPE_CODE,
+  MELDER,
+  MELDER_CODE,
   SORT_SEQ,
   APP_ID,
   CREATED,
   CREATED_BY,
   MODIFIED,
   MODIFIED_BY
-FROM RAS_RUECKMELDUNG_STATISTIK ;
+FROM RUECKMELDUNG_STATISTIK ;
 
 SELECT ID,
   ID_VORGANG,
@@ -2031,8 +2031,8 @@ FROM BOB_LAENDER_ROW_DOKUMENTE ;
 
 
 begin begin  select "MASSNAHME_ID",to_char("MASSNAHME_UMGESETZT_AM", :p$_format_mask1),"MASSNAHME_BEMERKUNG","ID_VORGANG","ID","MASSNAHME_UMGESETZT","MELDENDE_BEHOERDE","USER_ID","DOMAIN_ID" into wwv_flow.g_column_values(1),wwv_flow.g_column_values(2),wwv_flow.g_column_values(3),wwv_flow.g_column_values(4),wwv_flow.g_column_values(5),wwv_flow.g_column_values(6),wwv_flow.g_column_values(7),wwv_flow.g_column_values(8),wwv_flow.g_column_values(9) 
-from "RAS_INTERN"."BOB_LAENDER_ROW_MASSNAHMEN" 
-where "ID" = :p_rowid and DOMAIN_ID = :LOGIN_RAS_DOMAIN_ID; end;
+from "INTERN"."BOB_LAENDER_ROW_MASSNAHMEN" 
+where "ID" = :p_rowid and DOMAIN_ID = :LOGIN_DOMAIN_ID; end;
 end;
 
 
@@ -2046,21 +2046,21 @@ http://testapex.bfarm.de:8080/apex/f?p=100002:38:12259384022904::NO:RP,38:P38_ID
 #P120_DATEIINHALT_DISPLAY_CONTAINER > div.t-Form-inputContainer.col.col-9 { width: 75%; }
 
 
-trigger "BFARM_APEX_APP_USER_BIU_TRG"
-before insert or update on "BFARM_APEX_APP_USER"
+trigger "APEX_APP_USER_BIU_TRG"
+before insert or update on "APEX_APP_USER"
 referencing old as old new as new
 for each row
 begin
   if inserting then
     if (:new.app_user_id is null) then
-        select bfarm_apex_app_user_id_seq.nextval
+        select apex_app_user_id_seq.nextval
         into :new.app_user_id
         from dual;
     end if;
     if (:new.app_user_domain_id is null or :new.app_user_melder_id is null) then
         select d.domain_id, d.domain_melder_id 
         into :new.app_user_domain_id, :new.app_user_melder_id
-        from "RAS_DOMAINEN" d
+        from "DOMAINEN" d
         where lower(trim(d.domain)) =lower(substr(:new.app_user_email, instr(:new.app_user_email, '@') +1));
     end if;
     select sysdate, nvl(v('APP_USER'), user)
@@ -2077,34 +2077,34 @@ end;
 
 select d.domain_id, d.domain_melder_id 
         --into :new.app_user_domain_id, :new.app_user_melder_id
-        from "RAS_DOMAINEN" d
+        from "DOMAINEN" d
         where lower(trim(d.domain)) =lower(substr(:app_user_email, instr(:app_user_email, '@') +1));
         
-         select bfarm_apex_app_user_id_seq.nextval from dual;
+         select apex_app_user_id_seq.nextval from dual;
          
-drop sequence bfarm_apex_app_user_id_seq;         
+drop sequence apex_app_user_id_seq;         
 
-create sequence bfarm_apex_app_user_id_seq start with 100 increment by 1 nocache noorder nocycle;         
+create sequence apex_app_user_id_seq start with 100 increment by 1 nocache noorder nocycle;         
 
 
-create index BLR_DOKU_RAS_MELDER_ID_IDX on BOB_LAENDER_ROW_DOKUMENTE(ras_melder_id);
+create index BLR_DOKU_MELDER_ID_IDX on BOB_LAENDER_ROW_DOKUMENTE(melder_id);
 create index BLR_DOKU_DEL_IDX on BOB_LAENDER_ROW_DOKUMENTE(deleted);
 
 drop index BLR_ERGAENZ_DOMAIN_ID_IDX;
-create index BLR_ERGAENZ_RAS_MELDER_ID_IDX on BOB_LAENDER_ROW_ERGAENZUNGEN(ras_melder_id);
+create index BLR_ERGAENZ_MELDER_ID_IDX on BOB_LAENDER_ROW_ERGAENZUNGEN(melder_id);
 create index BLR_ERGAENZ_DEL_IDX on BOB_LAENDER_ROW_ERGAENZUNGEN(deleted);
 
 drop index BLR_MASSN_DOMAIN_ID_IDX;
-create index BLR_MASSN_RAS_MELDER_ID_IDX on  BOB_LAENDER_ROW_MASSNAHMEN(ras_melder_id);
+create index BLR_MASSN_MELDER_ID_IDX on  BOB_LAENDER_ROW_MASSNAHMEN(melder_id);
 create index BLR_MASSN_DEL_IDX on  BOB_LAENDER_ROW_MASSNAHMEN(deleted);
 
-create index BFARM_APEX_USER_DOMAIN_ID_IDX on BFARM_APEX_APP_USER(APP_USER_DOMAIN_ID);
-create index BFARM_APEX_USER_MELDER_ID_IDX on BFARM_APEX_APP_USER(APP_USER_MELDER_ID);
+create index APEX_USER_DOMAIN_ID_IDX on APEX_APP_USER(APP_USER_DOMAIN_ID);
+create index APEX_USER_MELDER_ID_IDX on APEX_APP_USER(APP_USER_MELDER_ID);
 
 create index AMF_VORGANG_DEL_IDX on AMF_VORGANG(deleted);
 
-create index RAS_DOK_DEL_IDX on DOKUMENTE(deleted);
-create index RAS_DOM_DEL_IDX on RAS_DOMAINEN (deleted);
+create index DOK_DEL_IDX on DOKUMENTE(deleted);
+create index DOM_DEL_IDX on DOMAINEN (deleted);
 
 
 
@@ -2120,7 +2120,7 @@ end;
     max-width: 100%;
 }
 
-#RAS_DOK {  
+#DOK {  
   border: 1px solid #f4f4f4;
   padding: 12px;
 }
@@ -2128,8 +2128,8 @@ end;
 
 td > p { font-size: 13px; line-height: 0.2 };
 
-select ras_gruppe_code
-from BFARM_RAS_USERS
+select gruppe_code
+from USERS
 where upper(trim(app_username)) = upper(trim(:APP_USER));
 
 
@@ -2142,37 +2142,37 @@ SELECT APP_USER_ID,
   DOMAIN,
   MELDEGRUPPEN_CODE,
   MELDEGRUPPE,
-  RAS_GRUPPE_CODE,
-  RAS_GRUPPE,
+  GRUPPE_CODE,
+  GRUPPE,
   DOMAIN_ID,
-  RAS_MELDER_ID,
-  RAS_GRUPPE_ID
-FROM BFARM_RAS_USERS ;
+  MELDER_ID,
+  GRUPPE_ID
+FROM USERS ;
 
-SELECT RAS_MELDER_ID,
-  RAS_MELDER,
-  RAS_MELDER_CODE,
-  RAS_DISPLAY_NAME,
-  RAS_GRUPPE,
-  RAS_GRUPPE_CODE,
+SELECT MELDER_ID,
+  MELDER,
+  MELDER_CODE,
+  DISPLAY_NAME,
+  GRUPPE,
+  GRUPPE_CODE,
   DOMAIN,
   DOMAIN_CODE,
   APP_ID,
-  RAS_MELDEBEHORDE_ID,
-  RAS_GRUPPEN_ID,
+  MELDEBEHORDE_ID,
+  GRUPPEN_ID,
   GRUPPEN_ID,
   SORT_SEQ,
   CREATED,
   CREATED_BY,
   MODIFIED,
   MODIFIED_BY
-FROM RAS_MELDEDOMAINEN ;
+FROM MELDEDOMAINEN ;
 
 
 SELECT 
   e.ID,
   e.ID_VORGANG,
-  nvl(e.MELDENDE_BEHOERDE, :LOGIN_RAS_DOMAIN) as MELDENDE_BEHOERDE,
+  nvl(e.MELDENDE_BEHOERDE, :LOGIN_DOMAIN) as MELDENDE_BEHOERDE,
   dbms_lob.getlength(e.DATEIINHALT)||' Bytes' as DATEIGROESSE,
   e.DATEINAME,
   e.DOKUMENTEN_INHALT,
@@ -2183,7 +2183,7 @@ SELECT
 FROM "BOB_LAENDER_ROW_DOKUMENTE" e left outer join "MIME_TYPE_ICONS" i
 ON (e.MIMETYPE = I.MIME_TYPE)
 WHERE e.ID_VORGANG = :P125_ID_VORGANG
-AND e.RAS_MELDER_ID = :P125_RAS_MELDER_ID
+AND e.MELDER_ID = :P125_MELDER_ID
 AND e.DELETED is null;
 
 select * from BOB_LAENDER_ROW_DOKUMENTE where id_vorgang = 94;
@@ -2199,7 +2199,7 @@ SELECT
   BEZEICHNUNG,
   MELDENDE_STELLE,
   EINGANGSDATUM,
-  RAS_FALL,
+  FALL,
   AM_NAME,
   AM_PU,
   AM_CHRG_ORIG,
@@ -2229,7 +2229,7 @@ ORDER BY EINGANGSDATUM desc
 
 
 select d.domain_id
-from "RAS_DOMAINEN" d
+from "DOMAINEN" d
 where lower(trim(d.domain)) = lower(substr(:new.app_user_email, instr(:new.app_user_email, '@') +1));
 
 select * from USER_ROLE_PRIVS;
@@ -2237,9 +2237,9 @@ select * from USER_ROLE_PRIVS;
 select count(*) from user_objects where status != 'VALID';
 
 -- old
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_USERNAME_FORMAT" ("USERNAME_FORMAT") AS 
+CREATE OR REPLACE FORCE VIEW "INTERN"."APEX_APP_USERNAME_FORMAT" ("USERNAME_FORMAT") AS 
   select app_setting_value as username_format
-from "BFARM_APEX_APP_SETTINGS"
+from "APEX_APP_SETTINGS"
 where app_id = v('APP_ID') 
 and app_setting_category = 'AUTHENTICATION'
 and app_setting_name = 'USERNAME_FORMAT'
@@ -2251,13 +2251,13 @@ CREATE OR REPLACE FORCE VIEW "APEX_USERNAME_FORMAT" ("USERNAME_FORMAT") AS
 from "APEX_CONFIGURATION"
 where apex_config_item = 'USERNAME_FORMAT';
 
-create or replace view "BFARM_APEX_APP_USERNAME_FORMAT" ("USERNAME_FORMAT") 
+create or replace view "APEX_APP_USERNAME_FORMAT" ("USERNAME_FORMAT") 
 as 
 select USERNAME_FORMAT
 from "APEX_USERNAME_FORMAT";
 
 -- old
-  CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APPLICATION" ("WORKSPACE_ID", "WORKSPACE", "APPLICATION_ID", "OWNER", "APPLICATION_NAME", "COMPATIBILITY_MODE", "HOME_LINK", "HOME_LINK_APEX", "LOGIN_URL", "THEME_NUMBER", "ALIAS", "PAGES", "APPLICATION_ITEMS", "LAST_UPDATED_BY", "LAST_UPDATED_ON", "AUTHENTICATION_SCHEMES", "AUTHENTICATION_SCHEME_TYPE", "AUTHORIZATION_SCHEMES", "AUTHORIZATION_SCHEME") AS 
+  CREATE OR REPLACE FORCE VIEW "INTERN"."APEX_APPLICATION" ("WORKSPACE_ID", "WORKSPACE", "APPLICATION_ID", "OWNER", "APPLICATION_NAME", "COMPATIBILITY_MODE", "HOME_LINK", "HOME_LINK_APEX", "LOGIN_URL", "THEME_NUMBER", "ALIAS", "PAGES", "APPLICATION_ITEMS", "LAST_UPDATED_BY", "LAST_UPDATED_ON", "AUTHENTICATION_SCHEMES", "AUTHENTICATION_SCHEME_TYPE", "AUTHORIZATION_SCHEMES", "AUTHORIZATION_SCHEME") AS 
   SELECT WORKSPACE_ID,
   WORKSPACE,
   APPLICATION_ID,
@@ -2277,11 +2277,11 @@ from "APEX_USERNAME_FORMAT";
   AUTHENTICATION_SCHEME_TYPE,
   AUTHORIZATION_SCHEMES,
   AUTHORIZATION_SCHEME
-FROM "BFARM_APEX_ALL_APPLICATIONS"
+FROM "APEX_ALL_APPLICATIONS"
 WHERE APPLICATION_ID = v('APP_ID');
 
 -- new
-create or replace view "BFARM_APEX_APPLICATION" 
+create or replace view "APEX_APPLICATION" 
 as 
   select workspace_id,
   workspace,
@@ -2310,7 +2310,7 @@ where application_id = nvl(v('APP_ID'), application_id);
   application_id,
   owner,
   application_name
-  from "BFARM_APEX_APPLICATION" ;
+  from "APEX_APPLICATION" ;
 
 
 declare
@@ -2327,7 +2327,7 @@ begin
     then 'Oracle Datenbank'    
     end
 --  into l_auth_type
-FROM "BFARM_APEX_APPLICATION" 
+FROM "APEX_APPLICATION" 
 where AUTHENTICATION_SCHEME_TYPE in ('Application Express Accounts', 'LDAP Directory', 'Database Accounts');
 --return l_auth_type;
 exception when no_data_found then
@@ -2336,20 +2336,20 @@ end;
 /
 
 select application_name
-from "BFARM_APEX_APPLICATION";
+from "APEX_APPLICATION";
 
-select * from  "BFARM_APEX_APPLICATION" ;
+select * from  "APEX_APPLICATION" ;
 
 
-select * from "BFARM_APEX_APPLICATION" ;
+select * from "APEX_APPLICATION" ;
 
-select owner, object_type from all_objects where object_name = 'BFARM_APEX_APP_USERNAME_FORMAT';
+select owner, object_type from all_objects where object_name = 'APEX_APP_USERNAME_FORMAT';
 
 select username_format
-from "BFARM_APEX_APP_USERNAME_FORMAT";
+from "APEX_APP_USERNAME_FORMAT";
 
 select upper(username_format)
-from "BFARM_APEX_APP_USERNAME_FORMAT";
+from "APEX_APP_USERNAME_FORMAT";
 
 
 select user_status + valid_domain as user_status
@@ -2407,7 +2407,7 @@ DROP TABLE "AMF_VORGANG" cascade constraints;
 	"STUFENPLANBEAUFTRAG" VARCHAR2(200 BYTE), 
 	"RISIKO_STELLUNGNAHME" DATE, 
 	"CHARGEN_MAENGEL" NUMBER, 
-	"RAS_FALL" NUMBER, 
+	"FALL" NUMBER, 
 	"AM_NAME" VARCHAR2(200 BYTE), 
 	"AM_ZNR" VARCHAR2(200 BYTE), 
 	"AM_PU" VARCHAR2(200 BYTE), 
@@ -2452,84 +2452,84 @@ CREATE SEQUENCE  "AMF_VORGANG_SEQ"  MINVALUE 1 MAXVALUE 999999999999999999999999
 
 -- INSERTING into AMF_VORGANG
 SET DEFINE OFF;
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('93','DE345675423','Testfall1','BFARM',to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','7',null,'<p>viel zu sagen gibt es hier nicht</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('93','DE345675423','Testfall1','BFARM',to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','7',null,'<p>viel zu sagen gibt es hier nicht</p>
 ',to_date('21.12.2017 11:50:46','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('04.12.2017 15:31:15','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,'ASTAPECT-KODEIN',null,'ASTA Medica GmbH','Blo2','Bla1',to_date('01.12.2022 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.08.2018 00:00:00','DD.MM.YYYY HH24:MI:SS'),'6','Verpackung',null,'Codeinphosphat-Hemihydrat, Ephedrinhydrochlorid, Sulfogaiacol',null,null,'Hessen','0000371','3000621','1','�rtlicher Vertreter',null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('59','DE2345678','Test','BFARM',to_date('25.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('25.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('25.07.2017 10:35:20','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('60','DE1324','NENEEN','BFARM',to_date('25.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('25.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('25.07.2017 10:47:48','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('61','fzfhzj','cgh','BFARM',to_date('25.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('25.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('25.07.2017 14:40:01','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('62','DE879','TestBez','BW - Baden-Wuerttemberg',to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('26.07.2017 11:51:07','DD.MM.YYYY HH24:MI:SS'),'MMULIKITA',null,null,null,null,null,null,null,'Avamigran N',null,'AWD.pharma GmbH',null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('63','DE12345','Fall 3','BFARM',to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('26.07.2017 14:03:52','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('64','xxy','Xeplion','BFARM',to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('26.07.2017 14:07:30','DD.MM.YYYY HH24:MI:SS'),'MWITTSTOCK',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('87','DE00007','Test','BFARM',to_date('02.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('02.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','10',null,'<p>Bemerk</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('59','DE2345678','Test','BFARM',to_date('25.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('25.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('25.07.2017 10:35:20','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('60','DE1324','NENEEN','BFARM',to_date('25.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('25.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('25.07.2017 10:47:48','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('61','fzfhzj','cgh','BFARM',to_date('25.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('25.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('25.07.2017 14:40:01','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('62','DE879','TestBez','BW - Baden-Wuerttemberg',to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('26.07.2017 11:51:07','DD.MM.YYYY HH24:MI:SS'),'MMULIKITA',null,null,null,null,null,null,null,'Avamigran N',null,'AWD.pharma GmbH',null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('63','DE12345','Fall 3','BFARM',to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('26.07.2017 14:03:52','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('64','xxy','Xeplion','BFARM',to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('26.07.2017 14:07:30','DD.MM.YYYY HH24:MI:SS'),'MWITTSTOCK',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('87','DE00007','Test','BFARM',to_date('02.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('02.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','10',null,'<p>Bemerk</p>
 ',to_date('05.12.2017 15:31:39','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('02.11.2017 11:16:28','DD.MM.YYYY HH24:MI:SS'),'ADMIN','hshshs','hshshs',null,'hshshsh',null,'1','1','Aspirin Nasenspray',null,'Bayer Vital GmbH','Aspirin Nasenspray 400ml','Aspirin N�senspray 400ml',to_date('01.09.2018 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.09.2018 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,'2','Oxymetazolinhydrochlorid','APEX_PUBLIC_USER',to_date('05.12.2017 15:31:39','DD.MM.YYYY HH24:MI:SS'),null,'2137607','8011204','2',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('47','DE12345','Harvoni 3','BFARM',to_date('19.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('19.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,null,'<p>die Inspektoren sind nicht miteinander verwandt, sondern kommen aus demselben Dorf!</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('47','DE12345','Harvoni 3','BFARM',to_date('19.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('19.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,null,'<p>die Inspektoren sind nicht miteinander verwandt, sondern kommen aus demselben Dorf!</p>
 ',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('19.07.2017 18:33:08','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN','Unterm�ller-Krainersohn','Unterkrainer-M�llersohn',null,'Neo Goodheart',to_date('10.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'1','1','Harvoni 90 mg/400 mg','EU/1/14/958/002','Gilead Sciences International Limited',null,'GHERT32DE',null,to_date('01.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'6','alles total falsch!','3',null,null,null,'Landeskriminalamt Oberbayern',null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('48','DE3456','TAPESTRY','BFARM',to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('19.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,null,'<p>so was hat die Welt noch nicht gesehen.</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('48','DE3456','TAPESTRY','BFARM',to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('19.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,null,'<p>so was hat die Welt noch nicht gesehen.</p>
 ',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('19.07.2017 18:50:54','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN','Unterm�ller','Huber',null,'Sr. Rodrig�z',to_date('10.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'1','0','Harvoni 90 mg/400 mg','EU/1/14/958/002','Gilead Sciences International Limited','HSFRDE34','HGDSER34',to_date('01.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,'2','Ledipasvir, Sofosbuvir',null,null,'Landeskriminalamt Niedersachsen','2711769','8030549','1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('88','5665475','657457','543245',to_date('07.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('07.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('07.11.2017 20:19:49','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('89','DE1239780','Norditalien','BFARM',to_date('08.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('08.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,null,null,to_date('11.12.2017 17:34:02','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('08.11.2017 14:59:43','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,'Harvoni','EU/1/14/958/002','Gilead Sciences International Limited',null,null,to_date('01.12.2018 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,null,'Ledipasvir, Sofosbuvir',null,null,null,'2711769','8030549','1','Zulassungsinhaber',null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('14','DE123456','Harvoni','BFARM - Bundesinstitut f�r Arzneimittel und Medizinprodukte (BfArM)',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('18.07.2017 19:22:36','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('15','DE34567','Cement','BVL - Bundesamt f�r Verbraucherschutz und Lebensmittelsicherheit (BVL)',to_date('15.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 15:28:33','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('18.07.2017 19:25:38','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('16','DE3455677','Chaos in Hamburg','BKA - Bundeskriminalamt',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','2','17','<p>Voll die <strong><u>Bemerkung!!!</u></strong></p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('88','5665475','657457','543245',to_date('07.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('07.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('07.11.2017 20:19:49','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('89','DE1239780','Norditalien','BFARM',to_date('08.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('08.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,null,null,to_date('11.12.2017 17:34:02','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('08.11.2017 14:59:43','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,'Harvoni','EU/1/14/958/002','Gilead Sciences International Limited',null,null,to_date('01.12.2018 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.11.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,null,'Ledipasvir, Sofosbuvir',null,null,null,'2711769','8030549','1','Zulassungsinhaber',null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('14','DE123456','Harvoni','BFARM - Bundesinstitut f�r Arzneimittel und Medizinprodukte (BfArM)',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('18.07.2017 19:22:36','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('15','DE34567','Cement','BVL - Bundesamt f�r Verbraucherschutz und Lebensmittelsicherheit (BVL)',to_date('15.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 15:28:33','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('18.07.2017 19:25:38','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('16','DE3455677','Chaos in Hamburg','BKA - Bundeskriminalamt',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','2','17','<p>Voll die <strong><u>Bemerkung!!!</u></strong></p>
 ',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('18.07.2017 19:27:25','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN','Oberm�ller','Unterkrainer',null,'Mr. Smith',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'1','1','Harvoni 90 mg/400 mg Filmtabletten - OP28','EU/1/14/958/001','Milinda GmbH',null,'DETRAE123',null,to_date('31.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,'3',null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('17','DE2345','Aspirin','BFARM - Bundesinstitut f�r Arzneimittel und Medizinprodukte (BfArM)',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,'17','<p>Bemrk</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('17','DE2345','Aspirin','BFARM - Bundesinstitut f�r Arzneimittel und Medizinprodukte (BfArM)',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,'17','<p>Bemrk</p>
 ',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('18.07.2017 19:31:52','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN','Oberm�ller','Unterkrainer',null,'Mr. Smith',to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'1','1','Harvoni 90 mg/400 mg Filmtabletten - OP28','EU/1/14/958/001','Gilead Sciences International Limited',null,'SEFER3453',null,to_date('01.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,'1',null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('18','DE234556','Harvoni','BFARM - Bundesinstitut f�r Arzneimittel und Medizinprodukte (BfArM)',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','3','18','<p>Bemrrk</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('18','DE234556','Harvoni','BFARM - Bundesinstitut f�r Arzneimittel und Medizinprodukte (BfArM)',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','3','18','<p>Bemrrk</p>
 ',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('18.07.2017 19:36:05','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN','Oberm�ller','UNterkrainer',null,'Mr. Smith',to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'1','1','Harvoni 90 mg/400 mg Filmtabletten - OP28','EU/1/14/958/001','Milinda GmbH',null,'BFER23',null,to_date('01.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,'3',null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('19','DE23456','NHEHEHE','BFARM - Bundesinstitut f�r Arzneimittel und Medizinprodukte (BfArM)',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','2','17',null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('18.07.2017 19:40:03','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN','Oberm�ller','UNterkrainer',null,'Smith',null,'1','1','Harvoni 90 mg/400 mg Filmtabletten - OP28','EU/1/14/958/001','Milinda GmbH','JDJDJDJ','GSGSSG',to_date('01.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,'1',null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('20','DE12345','BAGAGA','BFARM',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,'3','<p>Bemerkl</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('19','DE23456','NHEHEHE','BFARM - Bundesinstitut f�r Arzneimittel und Medizinprodukte (BfArM)',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','2','17',null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('18.07.2017 19:40:03','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN','Oberm�ller','UNterkrainer',null,'Smith',null,'1','1','Harvoni 90 mg/400 mg Filmtabletten - OP28','EU/1/14/958/001','Milinda GmbH','JDJDJDJ','GSGSSG',to_date('01.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,'1',null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('20','DE12345','BAGAGA','BFARM',to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('18.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,'3','<p>Bemerkl</p>
 ',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('18.07.2017 19:44:42','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN','Oberm�ller','Unterbayer',null,'M�ller',to_date('10.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'1','1','Harvoni 90 mg/400 mg Filmtabletten - OP28','EU/1/14/958/001','Gilead Sciences International Limited','HFHFH','BGGER45',to_date('01.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,'3',null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('50','454634356','Test','Test',to_date('20.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('20.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('20.07.2017 09:05:31','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,'Aspirin Nasenspray',null,'Bayer Vital GmbH',null,null,null,null,null,null,null,'Oxymetazolinhydrochlorid',null,null,null,'2137607','8011204','1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('51','DE222','Test','BFARM',to_date('20.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('20.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('20.07.2017 09:32:30','DD.MM.YYYY HH24:MI:SS'),'MMULIKITA',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('49','DE1239','Test','BFARM',to_date('20.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('20.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,'<p>Status der Verifizierung angelegt</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('50','454634356','Test','Test',to_date('20.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('20.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('20.07.2017 09:05:31','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,'Aspirin Nasenspray',null,'Bayer Vital GmbH',null,null,null,null,null,null,null,'Oxymetazolinhydrochlorid',null,null,null,'2137607','8011204','1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('51','DE222','Test','BFARM',to_date('20.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('20.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('20.07.2017 09:32:30','DD.MM.YYYY HH24:MI:SS'),'MMULIKITA',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('49','DE1239','Test','BFARM',to_date('20.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('20.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,'<p>Status der Verifizierung angelegt</p>
 ',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('20.07.2017 08:51:18','DD.MM.YYYY HH24:MI:SS'),'MMULIKITA','Lisa M�ller','Max Mustermensch',null,null,null,'1','0','CODEINE UND ASPIRIN UND PHENACETIN TABLETTEN',null,'Holsten Pharma GmbH',null,null,null,null,'6','Testf�lschung','2','Acetylsalicyls�ure (Ph.Eur.), Codeinphosphat-Hemihydrat, Phenacetin',null,null,null,'0912712','3001738','1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('53','1234','Test Fall','BKA - Bundeskriminalamt',to_date('21.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('21.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('21.07.2017 11:06:20','DD.MM.YYYY HH24:MI:SS'),'MMULIKITA',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('54','DE12345','Neuer Fall','BFARM',to_date('30.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('21.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('24.07.2017 10:43:36','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('55','DE3425','Ganz Neuer Fall','BFARM',to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('24.07.2017 13:38:20','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('56','DE12233','Ganz Neuer Fall','BFARM',to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 15:15:23','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('24.07.2017 14:49:50','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('57','DE2343343','Ganz Ganz Neuer Fall','BFARM',to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('24.07.2017 15:15:29','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('58','GERER','HDHDH','BFARM',to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('24.07.2017 17:29:30','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('83','123','TestKlose','BFARM',to_date('19.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('19.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','12',null,'<p>ecdfsd</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('53','1234','Test Fall','BKA - Bundeskriminalamt',to_date('21.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('21.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('21.07.2017 11:06:20','DD.MM.YYYY HH24:MI:SS'),'MMULIKITA',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('54','DE12345','Neuer Fall','BFARM',to_date('30.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('21.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('24.07.2017 10:43:36','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('55','DE3425','Ganz Neuer Fall','BFARM',to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('24.07.2017 13:38:20','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('56','DE12233','Ganz Neuer Fall','BFARM',to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 15:15:23','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('24.07.2017 14:49:50','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('57','DE2343343','Ganz Ganz Neuer Fall','BFARM',to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('24.07.2017 15:15:29','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('58','GERER','HDHDH','BFARM',to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('24.07.2017 17:29:30','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('83','123','TestKlose','BFARM',to_date('19.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('19.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','12',null,'<p>ecdfsd</p>
 ',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('19.09.2017 14:56:39','DD.MM.YYYY HH24:MI:SS'),'TKLOSE','frgase','sefg',null,'esggvdfs',null,null,'1','Aspirine Direkt','vdsfbv','cvsef','sergxcvyed','fresfagfe',null,null,null,null,'2','Acetylsalicyls�ure (Ph.Eur.)',null,null,'Bayern','2140249','3216120','1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('67','DE1','Diebstahl IT','BB - Brandenburg',to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,'<p>fhhfsdhdsflsdlhdfsljhsjlh&ouml;.</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('67','DE1','Diebstahl IT','BB - Brandenburg',to_date('24.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,'<p>fhhfsdhdsflsdlhdfsljhsjlh&ouml;.</p>
 ',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('26.07.2017 15:12:10','DD.MM.YYYY HH24:MI:SS'),'TKLOSE','Dr. mmm','dddd',null,'ddd; jujj; zhhh',null,null,'1','diverse','EU/1/11/672/002','diverse','xx5','xx5',to_date('01.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'6','unbekannt','2','diverse',null,null,'Bezirksregierung D�sseldorf','2750363','8090132','1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('75','0815','Testf�lschung','Apotheke zur F�lschung',to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('31.07.2017 15:56:36','DD.MM.YYYY HH24:MI:SS'),'NPAESCHKE',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('85','5',null,null,to_date('27.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('27.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('27.09.2017 13:10:33','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('86','DE2017-001','QD2017-149/H/Sprycel/ falsification','EMA',to_date('28.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('29.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'36',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('29.09.2017 17:02:57','DD.MM.YYYY HH24:MI:SS'),'GOMLOR',null,null,null,null,null,null,'1','Sprycel','EU/1/06/363/003','Abacus',null,'AAK7575',to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.10.2018 00:00:00','DD.MM.YYYY HH24:MI:SS'),'4',null,'3',null,null,null,'Bayern',null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('90','DE000999','Testfaelschung','BFARM',to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('04.12.2017 10:46:57','DD.MM.YYYY HH24:MI:SS'),'ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('91','DE0123454','Testfall','BFARM',to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','9',null,'<p>Bemerk</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('75','0815','Testf�lschung','Apotheke zur F�lschung',to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('31.07.2017 15:56:36','DD.MM.YYYY HH24:MI:SS'),'NPAESCHKE',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('85','5',null,null,to_date('27.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('27.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('27.09.2017 13:10:33','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('86','DE2017-001','QD2017-149/H/Sprycel/ falsification','EMA',to_date('28.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('29.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'36',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('29.09.2017 17:02:57','DD.MM.YYYY HH24:MI:SS'),'GOMLOR',null,null,null,null,null,null,'1','Sprycel','EU/1/06/363/003','Abacus',null,'AAK7575',to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.10.2018 00:00:00','DD.MM.YYYY HH24:MI:SS'),'4',null,'3',null,null,null,'Bayern',null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('90','DE000999','Testfaelschung','BFARM',to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('04.12.2017 10:46:57','DD.MM.YYYY HH24:MI:SS'),'ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('91','DE0123454','Testfall','BFARM',to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','9',null,'<p>Bemerk</p>
 ',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('04.12.2017 10:54:37','DD.MM.YYYY HH24:MI:SS'),'ADMIN',null,null,null,null,null,null,null,'ASPIRIN-PHENACETIN-CODEIN',null,'Delta Distribution GmbH',null,null,to_date('01.12.2018 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.12.2018 00:00:00','DD.MM.YYYY HH24:MI:SS'),'1',null,null,'Acetylsalicyls�ure (Ph.Eur.), Codeinphosphat-Hemihydrat, Phenacetin',null,null,null,'0612513','3000288','1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('92','DE12345678','Test','BFARM',to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','12',null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('04.12.2017 11:23:04','DD.MM.YYYY HH24:MI:SS'),'ADMIN',null,null,null,null,null,null,null,'Aspirine Direkt',null,'kohlpharma GmbH',null,null,null,null,'6',null,null,'Acetylsalicyls�ure (Ph.Eur.)',null,null,null,'2140249','3216120','1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('11','Harvoni','Harvoni','Regierungspr�sidium Oberbayern',to_date('07.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('07.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','2','1','m�glicherweise gef�lschte Tabletten in Apotheke entdeckt anhand von Farbabweichung entdeckt(wei� statt ockerfarben)',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('07.07.2017 13:16:04','DD.MM.YYYY HH24:MI:SS'),'NPAESCHKE',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('1','NEU12345DEF','Harvoni�','BfArM',to_date('12.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('12.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','8','3','Die gef�lschten Tabletten sind nicht wie �blich orange, sondern wei� und sollten keinesfalls eingenommen werden.',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('28.06.2017 19:06:16','DD.MM.YYYY HH24:MI:SS'),'RAS_INTERN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('2','NEU12341DE','Lore Ipsum (c)','LKA',to_date('07.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'68',null,'1','Where does it come from?
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('92','DE12345678','Test','BFARM',to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('04.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','12',null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('04.12.2017 11:23:04','DD.MM.YYYY HH24:MI:SS'),'ADMIN',null,null,null,null,null,null,null,'Aspirine Direkt',null,'kohlpharma GmbH',null,null,null,null,'6',null,null,'Acetylsalicyls�ure (Ph.Eur.)',null,null,null,'2140249','3216120','1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('11','Harvoni','Harvoni','Regierungspr�sidium Oberbayern',to_date('07.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('07.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','2','1','m�glicherweise gef�lschte Tabletten in Apotheke entdeckt anhand von Farbabweichung entdeckt(wei� statt ockerfarben)',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('07.07.2017 13:16:04','DD.MM.YYYY HH24:MI:SS'),'NPAESCHKE',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('1','NEU12345DEF','Harvoni�','BfArM',to_date('12.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('12.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','8','3','Die gef�lschten Tabletten sind nicht wie �blich orange, sondern wei� und sollten keinesfalls eingenommen werden.',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('28.06.2017 19:06:16','DD.MM.YYYY HH24:MI:SS'),'INTERN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('2','NEU12341DE','Lore Ipsum (c)','LKA',to_date('07.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'68',null,'1','Where does it come from?
 Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.
-And everything else is FAKE NEWS!',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('28.06.2017 19:06:16','DD.MM.YYYY HH24:MI:SS'),'RAS_INTERN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('84','2',null,null,to_date('27.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('27.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('27.09.2017 09:17:57','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,'dewdf',null,null,null,null,to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('21','1','Test von Herrn Klose','Italien',to_date('19.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('19.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('19.07.2017 08:53:29','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('94','DE1234567','Testfall','BFARM',to_date('05.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('05.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','7',null,null,to_date('15.12.2017 14:33:35','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('05.12.2017 18:05:36','DD.MM.YYYY HH24:MI:SS'),'ADMIN',null,null,null,null,null,null,null,'CALCIDURAN 100',null,'ASTA Medica GmbH','CALCIDU-01B','CALCID-B001',to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,null,'Calciumhydrogenphosphat, Colecalciferol-Cholesterol',null,null,null,'0000342','3000621','1','Freitext','Unbekannte Zust�ndigkeit');
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('9','NEUNEU1234','Neu','BVL',to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,'1','<p>alles neu war gestern</p>
+And everything else is FAKE NEWS!',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('28.06.2017 19:06:16','DD.MM.YYYY HH24:MI:SS'),'INTERN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('84','2',null,null,to_date('27.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('27.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('27.09.2017 09:17:57','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,'dewdf',null,null,null,null,to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('21','1','Test von Herrn Klose','Italien',to_date('19.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('19.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('19.07.2017 08:53:29','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('94','DE1234567','Testfall','BFARM',to_date('05.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('05.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','7',null,null,to_date('15.12.2017 14:33:35','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('05.12.2017 18:05:36','DD.MM.YYYY HH24:MI:SS'),'ADMIN',null,null,null,null,null,null,null,'CALCIDURAN 100',null,'ASTA Medica GmbH','CALCIDU-01B','CALCID-B001',to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,null,'Calciumhydrogenphosphat, Colecalciferol-Cholesterol',null,null,null,'0000342','3000621','1','Freitext','Unbekannte Zust�ndigkeit');
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('9','NEUNEU1234','Neu','BVL',to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('03.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,'1','<p>alles neu war gestern</p>
 ',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('03.07.2017 15:17:25','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,'Harvoni 90 mg/400 mg Filmtabletten - OP(3x28)','EU/1/14/958/002','Gilead Sciences International Limited',null,null,null,null,null,null,null,'Ledipasvir, Sofosbuvir',null,null,null,'2711769','8030549','1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('95','QD2017-0001','AVACAN BW','BW - Baden-Wuerttemberg',to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','7',null,null,to_date('15.12.2017 17:19:22','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('11.12.2017 11:25:31','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,'AVACAN',null,'ASTA Medica GmbH',null,null,to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'3',null,null,'Camylofindihydrochlorid',null,null,null,'0000299','3000621','1','Zulassungsinhaber',null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('96','RAS2017-007','TEST01','BE - Berlin',to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,'<p>Bemerkungen zu dem Fall</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('95','QD2017-0001','AVACAN BW','BW - Baden-Wuerttemberg',to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','7',null,null,to_date('15.12.2017 17:19:22','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('11.12.2017 11:25:31','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,'AVACAN',null,'ASTA Medica GmbH',null,null,to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'3',null,null,'Camylofindihydrochlorid',null,null,null,'0000299','3000621','1','Zulassungsinhaber',null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('96','RAS2017-007','TEST01','BE - Berlin',to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,'<p>Bemerkungen zu dem Fall</p>
 ',to_date('11.12.2017 16:28:23','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('11.12.2017 12:27:36','DD.MM.YYYY HH24:MI:SS'),'JDUSSA',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('99','QD2017-183','Arzneimittel Xermelo 250 mg Filmtabletten der Firma Ipsen Innovation in FR - (expiry date and lot number inversion) - StN AT','EMA',to_date('08.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('12.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,null,'<p>Wird bearbeitet!</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('99','QD2017-183','Arzneimittel Xermelo 250 mg Filmtabletten der Firma Ipsen Innovation in FR - (expiry date and lot number inversion) - StN AT','EMA',to_date('08.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('12.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,null,'<p>Wird bearbeitet!</p>
 ',to_date('14.12.2017 10:52:54','DD.MM.YYYY HH24:MI:SS'),'JDUSSA',to_date('12.12.2017 08:19:33','DD.MM.YYYY HH24:MI:SS'),'JDUSSA',null,null,null,null,null,null,null,'EMEND 80 mg Hartkapseln - OP(5x1)','EU/1/03/262/003','Merck Sharp','XY-21555','XY-20147',to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'1',null,null,'Aprepitant',null,null,null,'2702452','3316407','1','Zulassungsinhaber',null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('100','DE000100','Testfall34','BMEL',to_date('22.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('22.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','9',null,null,to_date('22.12.2017 09:38:56','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('22.12.2017 09:35:30','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,'Echter Warthaer Balsam',null,'Berg-Apotheke Othfresen','NRTAE2','NRET45',to_date('01.06.2020 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.02.2021 00:00:00','DD.MM.YYYY HH24:MI:SS'),'3',null,null,'Alantwurzelstock, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Aloe, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Benzoe, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Bitterkleebl�tter, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Campher, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Enzianwurzel, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Galgantwurzelstock, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Johanniskraut, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Kalmuswurzelstock, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Meisterwurzwurzelstock, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Myrrhe, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Rhabarberwurzel, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Sassafraswurzelholz, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Schwertlilienwurzelstock, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Tausendg�ldenkraut, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Weihrauch, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Zaunr�be, FE mit Ethanol/Ethanol-Wasser (%-Angaben)',null,null,'Landeskriminalamt Niedersachsen','0000738','0091824','1','Zulassungsinhaber',null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('8','CGN4711','K�lle','erwr',to_date('29.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('29.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','4','1','jhsdjfhsdjkfhsdjfh',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('29.06.2017 13:19:44','DD.MM.YYYY HH24:MI:SS'),'MMULIKITA',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('76','DE12345','Neu','BFARM',to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','12',null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('31.07.2017 17:55:24','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,'Harvoni 90 mg/400 mg Filmtabletten - OP28','EU/1/14/958/001','Milinda GmbH','GE4321','gr34215',to_date('01.06.2025 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.05.2022 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,null,'Ledipasvir, Sofosbuvir',null,null,'Bezirksregierung D�sseldorf','2750150','3078936','1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('80','DE111','fdfd','BVL',to_date('02.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('02.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 15:13:42','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('02.08.2017 08:54:12','DD.MM.YYYY HH24:MI:SS'),'MMULIKITA',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('70','DE2453','Neuer Fall','BFARM',to_date('05.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('26.07.2017 17:58:10','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,'Harvoni 90 mg/400 mg Filmtabletten - OP(3x28)','EU/1/14/958/002','Gilead Sciences International Limited',null,null,null,to_date('01.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,'Ledipasvir, Sofosbuvir',null,null,null,'2711769','8030549','1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('71','DE23456','Harvoni2','BFARM',to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,null,'<p>bpuibdcpIUB&Uuml;OKINc</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('100','DE000100','Testfall34','BMEL',to_date('22.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('22.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','9',null,null,to_date('22.12.2017 09:38:56','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('22.12.2017 09:35:30','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,'Echter Warthaer Balsam',null,'Berg-Apotheke Othfresen','NRTAE2','NRET45',to_date('01.06.2020 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.02.2021 00:00:00','DD.MM.YYYY HH24:MI:SS'),'3',null,null,'Alantwurzelstock, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Aloe, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Benzoe, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Bitterkleebl�tter, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Campher, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Enzianwurzel, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Galgantwurzelstock, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Johanniskraut, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Kalmuswurzelstock, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Meisterwurzwurzelstock, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Myrrhe, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Rhabarberwurzel, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Sassafraswurzelholz, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Schwertlilienwurzelstock, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Tausendg�ldenkraut, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Weihrauch, FE mit Ethanol/Ethanol-Wasser (%-Angaben), Zaunr�be, FE mit Ethanol/Ethanol-Wasser (%-Angaben)',null,null,'Landeskriminalamt Niedersachsen','0000738','0091824','1','Zulassungsinhaber',null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('8','CGN4711','K�lle','erwr',to_date('29.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('29.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','4','1','jhsdjfhsdjkfhsdjfh',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('29.06.2017 13:19:44','DD.MM.YYYY HH24:MI:SS'),'MMULIKITA',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('76','DE12345','Neu','BFARM',to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','12',null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('31.07.2017 17:55:24','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,'Harvoni 90 mg/400 mg Filmtabletten - OP28','EU/1/14/958/001','Milinda GmbH','GE4321','gr34215',to_date('01.06.2025 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.05.2022 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,null,'Ledipasvir, Sofosbuvir',null,null,'Bezirksregierung D�sseldorf','2750150','3078936','1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('80','DE111','fdfd','BVL',to_date('02.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('02.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 15:13:42','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('02.08.2017 08:54:12','DD.MM.YYYY HH24:MI:SS'),'MMULIKITA',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('70','DE2453','Neuer Fall','BFARM',to_date('05.06.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('26.07.2017 17:58:10','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,'Harvoni 90 mg/400 mg Filmtabletten - OP(3x28)','EU/1/14/958/002','Gilead Sciences International Limited',null,null,null,to_date('01.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,'Ledipasvir, Sofosbuvir',null,null,null,'2711769','8030549','1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('71','DE23456','Harvoni2','BFARM',to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('26.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'54',null,null,'<p>bpuibdcpIUB&Uuml;OKINc</p>
 ',to_date('05.12.2017 14:20:16','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('26.07.2017 18:57:52','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,'Harvoni 90 mg/400 mg Filmtabletten - OP28','EU/1/14/958/001','Gilead Sciences International Limited',null,null,to_date('01.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.09.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,'Ledipasvir, Sofosbuvir',null,null,null,'2711768','8030549','2',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('72','DE1234','Beizeichnung','BFARM',to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('31.07.2017 11:40:48','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('73','DE','Beu','BFARM',to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 16:29:30','DD.MM.YYYY HH24:MI:SS'),'RAS_INTERN',to_date('31.07.2017 11:42:15','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'RAS_INTERN',to_date('05.12.2017 16:29:30','DD.MM.YYYY HH24:MI:SS'),null,null,null,'2',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('74','DE1234','Son Ding','BFARM',to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 16:53:22','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('31.07.2017 11:58:48','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,'Aspirinuom',null,'Bayer',null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('81','DE000081','Arzneimitteldiebstahl in K�ln','NW - Nordrhein-Westfalen',to_date('02.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('02.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,'<p>Alle betroffenen AM sind als F&auml;lschung von Markt zu nehmen.</p>
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('72','DE1234','Beizeichnung','BFARM',to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('31.07.2017 11:40:48','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('73','DE','Beu','BFARM',to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 16:29:30','DD.MM.YYYY HH24:MI:SS'),'INTERN',to_date('31.07.2017 11:42:15','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'INTERN',to_date('05.12.2017 16:29:30','DD.MM.YYYY HH24:MI:SS'),null,null,null,'2',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('74','DE1234','Son Ding','BFARM',to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('31.07.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('05.12.2017 16:53:22','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('31.07.2017 11:58:48','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,'Aspirinuom',null,'Bayer',null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('81','DE000081','Arzneimitteldiebstahl in K�ln','NW - Nordrhein-Westfalen',to_date('02.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('02.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,'<p>Alle betroffenen AM sind als F&auml;lschung von Markt zu nehmen.</p>
 ',to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('02.08.2017 09:22:18','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,'mehrere','mehrere','mehrere','mehrere','mehrere',null,null,'1',null,null,'mehrere',null,null,'mehrere',null,null,'1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('82','ghjkfkzzf',null,null,to_date('02.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('02.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','10',null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('02.08.2017 09:34:33','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,'Aspirin Nasenspray',null,null,null,null,to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,'Oxymetazolinhydrochlorid',null,null,null,'2137607','8011204','1',null,null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('97','DE1234','Shanghai Fall','BFARM',to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','2',null,null,to_date('15.12.2017 17:05:13','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('11.12.2017 17:33:17','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,'CiNU I',null,'Bristol Arzneimittel GmbH   [HIST]','YIAN01','YOIAN00',to_date('01.01.2020 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.02.2021 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,null,'Lomustin',null,null,null,'0027878','3336692','1','�rtlicher Vertreter',null);
-Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,RAS_FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('98','DE1223454','Schleswig Container','BFARM',to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('14.12.2017 15:40:41','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('11.12.2017 17:54:05','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('82','ghjkfkzzf',null,null,to_date('02.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('02.08.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','10',null,null,to_date('05.12.2017 14:08:29','DD.MM.YYYY HH24:MI:SS'),'ADMIN',to_date('02.08.2017 09:34:33','DD.MM.YYYY HH24:MI:SS'),'TKLOSE',null,null,null,null,null,null,null,'Aspirin Nasenspray',null,null,null,null,to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.01.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),null,null,null,'Oxymetazolinhydrochlorid',null,null,null,'2137607','8011204','1',null,null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('97','DE1234','Shanghai Fall','BFARM',to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37','2',null,null,to_date('15.12.2017 17:05:13','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('11.12.2017 17:33:17','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,'CiNU I',null,'Bristol Arzneimittel GmbH   [HIST]','YIAN01','YOIAN00',to_date('01.01.2020 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('01.02.2021 00:00:00','DD.MM.YYYY HH24:MI:SS'),'5',null,null,'Lomustin',null,null,null,'0027878','3336692','1','�rtlicher Vertreter',null);
+Insert into AMF_VORGANG (ID_VORGANG,VORGANGSNUMMER,BEZEICHNUNG,MELDENDE_STELLE,EINGANGSDATUM,ERSTELLUNGSDATUM,STAAT_ID,BUNDESLAND_ID,BUNDESOBERBEHOERDE,BEMERKUNG,MODIFIED,MODIFIED_BY,CREATED,CREATED_BY,BEARB_INSPEKTOR,BETEIL_INSPEKTOR,STELLUNGNAHME_ANGEFORDERT,STUFENPLANBEAUFTRAG,RISIKO_STELLUNGNAHME,CHARGEN_MAENGEL,FALL,AM_NAME,AM_ZNR,AM_PU,AM_CHRG_ORIG,AM_CHRG_FAELSCH,AM_CHRG_HLTB,AM_CHRG_F_HLTB,ART_DER_FAELSCHUNG,FAELSCHUNGSART_SONSTIGE,AM_CHRG_STATUS,AM_WIRKSTOFF,DELETED_BY,DELETED,ZUST_LANDESBEHOERDE,AM_ENR,AM_PNR,AMF_MELDUNG_STATUS,ART_DER_ZUSTAENDIGKEIT,ART_DER_ZUSTAENDIGKEIT_SONST) values ('98','DE1223454','Schleswig Container','BFARM',to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),to_date('11.12.2017 00:00:00','DD.MM.YYYY HH24:MI:SS'),'37',null,null,null,to_date('14.12.2017 15:40:41','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',to_date('11.12.2017 17:54:05','DD.MM.YYYY HH24:MI:SS'),'TRIVADIS_ADMIN',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1',null,null);
 --------------------------------------------------------
 --  DDL for Index AMF_VORGANG_DEL_IDX
 --------------------------------------------------------
@@ -2592,25 +2592,25 @@ end;
 /
 ALTER TRIGGER "AMF_VORGANG_BIU_TRG" ENABLE;
 --------------------------------------------------------
---  DDL for Trigger BFARM_AMF_MELDUNG_BD_TRG
+--  DDL for Trigger AMF_MELDUNG_BD_TRG
 --------------------------------------------------------
 
-  CREATE OR REPLACE TRIGGER "BFARM_AMF_MELDUNG_BD_TRG" 
+  CREATE OR REPLACE TRIGGER "AMF_MELDUNG_BD_TRG" 
 before delete on "AMF_VORGANG"
 referencing old as old new as new
 for each row
 declare
   pragma autonomous_transaction;
 begin
-      "BFARM_RAS_SOFT_DELETE" ('AMF_VORGANG', :old.id_vorgang);
+      "SOFT_DELETE" ('AMF_VORGANG', :old.id_vorgang);
 end;
 /
-ALTER TRIGGER "BFARM_AMF_MELDUNG_BD_TRG" ENABLE;
+ALTER TRIGGER "AMF_MELDUNG_BD_TRG" ENABLE;
 --------------------------------------------------------
---  DDL for Trigger BFARM_AMF_STATUS_TRG
+--  DDL for Trigger AMF_STATUS_TRG
 --------------------------------------------------------
 
-  CREATE OR REPLACE TRIGGER "BFARM_AMF_STATUS_TRG" 
+  CREATE OR REPLACE TRIGGER "AMF_STATUS_TRG" 
 before update of AMF_MELDUNG_STATUS on "AMF_VORGANG"
 referencing old as old new as new
 for each row
@@ -2624,12 +2624,12 @@ begin
     end if;
 end;
 /
-ALTER TRIGGER "BFARM_AMF_STATUS_TRG" ENABLE;
+ALTER TRIGGER "AMF_STATUS_TRG" ENABLE;
 --------------------------------------------------------
---  DDL for Trigger BFARM_AMF_DEL_TRG
+--  DDL for Trigger AMF_DEL_TRG
 --------------------------------------------------------
 
-  CREATE OR REPLACE TRIGGER "BFARM_AMF_DEL_TRG" 
+  CREATE OR REPLACE TRIGGER "AMF_DEL_TRG" 
 before update of DELETED, DELETED_BY on "AMF_VORGANG"
 referencing old as old new as new
 for each row
@@ -2639,13 +2639,13 @@ begin
     end if;
 end;
 /
-ALTER TRIGGER "BFARM_AMF_DEL_TRG" ENABLE;
+ALTER TRIGGER "AMF_DEL_TRG" ENABLE;
 --------------------------------------------------------
---  DDL for Procedure BFARM_RAS_SOFT_DELETE
+--  DDL for Procedure SOFT_DELETE
 --------------------------------------------------------
 set define off;
 
-  CREATE OR REPLACE PROCEDURE "BFARM_RAS_SOFT_DELETE" (
+  CREATE OR REPLACE PROCEDURE "SOFT_DELETE" (
 p_table in varchar2,
 p_id number,
 p_msg in varchar2 :=' k�nnen nicht gel�scht werden!',
@@ -2656,25 +2656,25 @@ l_status_id pls_integer;
 l_msg varchar2(1000);
 begin
     select app_status_id into l_status_id
-    from "BFARM_APEX_APP_STATUS"
+    from "APEX_APP_STATUS"
     where app_status = upper(nvl(p_new_status, 'LOCKED'));
-    if (upper(p_table) = 'BFARM_APEX_APP_USER') then
+    if (upper(p_table) = 'APEX_APP_USER') then
         l_msg := 'Benutzer'||p_msg;
         commit;
-        update  "BFARM_APEX_APP_USER"
+        update  "APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
         where APP_USER_ID = p_id;
-    elsif  (upper(p_table) = 'RAS_DOMAINEN') then
+    elsif  (upper(p_table) = 'DOMAINEN') then
         l_msg := 'Domainen'||p_msg;
         commit;
-        update  "BFARM_APEX_APP_USER"
+        update  "APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
         where app_user_domain_id  = p_id;
-        update "RAS_DOMAINEN"
+        update "DOMAINEN"
         set deleted = sysdate,
               deleted_by     = nvl(v('APP_USER'), user)
         where domain_id = p_id;
@@ -2820,7 +2820,7 @@ BEGIN
 BEGIN
    DBMS_NETWORK_ACL_ADMIN.add_privilege (
     acl          => 'smtp_access.xml',
-    principal    => 'RAS_INTERN',
+    principal    => 'INTERN',
     is_grant     => TRUE,
     privilege    => 'connect');
    COMMIT;
@@ -2930,18 +2930,18 @@ create unique index "APX$DOMAIN_UNQ1"   on "APX$DOMAIN"(upper(trim(apx_domain_na
 --create unique index "APX$DOMAIN_UNQ2"   on "APX$DOMAIN"(upper(trim(apx_domain)), app_id);
 create unique index "APX$DOMAIN_UNQ3"   on "APX$DOMAIN"(upper(trim(apx_domain_name)), upper(trim(apx_domain)), app_id);
 
-grant insert, update, delete on "APX$DOMAIN" to ras_intern;
+grant insert, update, delete on "APX$DOMAIN" to intern;
 
 
 insert into "RAS"."APX$DOMAIN" (apx_domain_id, apx_domain, apx_domain_name, apx_domain_code, apx_domain_description)
 SELECT DOMAIN_ID,  DOMAIN, DOMAIN_OWNER||' ' ||DOMAIN_CODE, DOMAIN_CODE, DOMAIN_OWNER
-FROM "RAS_INTERN"."RAS_DOMAINEN"
+FROM "INTERN"."DOMAINEN"
 ;
 
 commit;
 
 SELECT count(*), upper(trim(DOMAIN_OWNER))
-FROM RAS_INTERN.RAS_DOMAINEN
+FROM INTERN.DOMAINEN
 group by upper(trim(DOMAIN_OWNER))
 having count (*) > 1;
 
@@ -2951,15 +2951,15 @@ create sequence "APX$DOMAIN_ID_SEQ" start with 80 nocache nocycle;
 
 
 
-alter table "RAS_DOMAINEN" modify STATUS_ID number default 15;
+alter table "DOMAINEN" modify STATUS_ID number default 15;
 
 
-grant select on ras_domainen to ras;
+grant select on domainen to ras;
 
 commit;
 
-create or replace trigger "RAS_DOMAINEN_BIUD_TRG" 
-before insert or update or delete on "RAS_DOMAINEN"
+create or replace trigger "DOMAINEN_BIUD_TRG" 
+before insert or update or delete on "DOMAINEN"
 referencing new as new old as old
 for each row
 begin
@@ -2981,22 +2981,22 @@ begin
 end;
 /
 
-select ras_domains_id_seq.nextval from dual;
+select domains_id_seq.nextval from dual;
 
-create or replace trigger "RAS_DOMAINEN_BD_TRG" 
-before delete on "RAS_DOMAINEN"
+create or replace trigger "DOMAINEN_BD_TRG" 
+before delete on "DOMAINEN"
 referencing old as old new as new
 for each row
   declare
   pragma autonomous_transaction;
   begin
     -- now soft delete
-      "BFARM_RAS_SOFT_DELETE" ('RAS_DOMAINEN', :old.domain_id);
+      "SOFT_DELETE" ('DOMAINEN', :old.domain_id);
   end;
 /
 
-create or replace trigger "RAS_DOMAINEN_BU_DEL_TRG" 
-before update of DELETED on "RAS_DOMAINEN"
+create or replace trigger "DOMAINEN_BU_DEL_TRG" 
+before update of DELETED on "DOMAINEN"
 referencing new as new
 for each row
 begin
@@ -3141,7 +3141,7 @@ begin
     if (l_token is not null) then
         if ("IS_VALID_USER_TOKEN"(l_username, l_token)) then
             if (l_userid is null) then -- get a fresh ID from sequence
-                select ras_intern.bfarm_apex_app_user_id_seq.nextval
+                select intern.apex_app_user_id_seq.nextval
                 into l_userid
                 from dual;
             end if;    
@@ -3218,7 +3218,7 @@ begin
             -- returning apx_user_id, apx_username, apx_user_email
             -- into l_userid, l_username, l_email_address;
    */
-            insert into "RAS_INTERN"."BFARM_APEX_APP_USER"  (
+            insert into "INTERN"."APEX_APP_USER"  (
                 APP_USER_ID,
                 APP_USERNAME,
                 APP_USER_EMAIL,
@@ -3254,7 +3254,7 @@ begin
               APX_USER_PHONE2,
               APX_USER_DESCRIPTION,
               (select  STATUS_ID
-               from "RAS_INTERN"."BFARM_APEX_STATUS"
+               from "INTERN"."APEX_STATUS"
                where status = 'OPEN' 
                and status_scope = 'ACCOUNT'),
               APX_USER_PARENT_USER_ID,
@@ -3262,9 +3262,9 @@ begin
               APX_USER_TOKEN,
               APX_USER_TOKEN_CREATED,
               APX_USER_DOMAIN_ID,
-             (select ras_melder_id 
-              from  "RAS_INTERN"."RAS_DOMAIN_GRUPPEN" 
-              where ras_domain_id = APX_USER_DOMAIN_ID)
+             (select melder_id 
+              from  "INTERN"."DOMAIN_GRUPPEN" 
+              where domain_id = APX_USER_DOMAIN_ID)
             from APEX_USER_REGISTRATION
             where apx_user_token = l_token
             );
@@ -3530,7 +3530,7 @@ begin
     l_last_name                     := p_last_name;
     l_token                         := p_token;
     l_web_password                  := p_web_password;
-    l_default_schema                := nvl(p_default_schema   , 'RAS_INTERN');
+    l_default_schema                := nvl(p_default_schema   , 'INTERN');
     l_app_id                        := nvl(p_app_id           , v('APP_ID'));
     l_result                        := nvl(p_result           , 0);
 
@@ -3659,10 +3659,10 @@ procedure do_reset_pwd (
 p_username in varchar2 )
 is
 begin
-apex_util.set_security_group_id(apex_util.find_security_group_id('BFARM_APEX_TEST'));
+apex_util.set_security_group_id(apex_util.find_security_group_id('APEX_TEST'));
 apex_util.reset_pw (
 p_user => p_username,
-p_msg => p_username||', your password in workspace BFARM_APEX_TEST has been reset.' );
+p_msg => p_username||', your password in workspace APEX_TEST has been reset.' );
        insert into LOGT values (1, 'Before Creating Apex User');
        commit;
 end do_reset_pwd;
@@ -3826,7 +3826,7 @@ begin
     l_last_name                     := p_last_name;
     l_token                         := p_token;
     l_web_password                  := p_web_password;
-    l_default_schema                := nvl(p_default_schema   , 'RAS_INTERN');
+    l_default_schema                := nvl(p_default_schema   , 'INTERN');
     l_app_id                        := nvl(p_app_id           , v('APP_ID'));
     l_result                        := nvl(p_result           , 0);
 
@@ -3973,7 +3973,7 @@ begin
     l_last_name                     := p_last_name;
     l_token                         := p_token;
     l_web_password                  := p_web_password;
-    l_default_schema                := nvl(p_default_schema   , 'RAS_INTERN');
+    l_default_schema                := nvl(p_default_schema   , 'INTERN');
     l_app_id                        := nvl(p_app_id           , 100002);
     l_result                        := nvl(p_result           , 0);
 
