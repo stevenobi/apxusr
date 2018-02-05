@@ -4715,3 +4715,280 @@ begin
     end if;
 end;    
  
+
+
+  ALTER TABLE "RAS"."APX$USER_REG" DROP CONSTRAINT "APX$USREG_APP_USER_ID_FK";
+  ALTER TABLE "RAS"."APX$USER_REG" ADD CONSTRAINT "APX$USREG_APP_USER_ID_FK" FOREIGN KEY ("APX_APP_USER_ID")
+	  REFERENCES "RAS_INTERN"."BFARM_APEX_APP_USER" ("APP_USER_ID") ON DELETE CASCADE ENABLE;
+    
+    
+create synonym RAS_INTERN.APEX_USER_REGISTRATION for  "RAS"."APX$USER_REG";    
+grant select, update, delete on "RAS"."APX$USER_REG" to RAS_INTERN;
+
+
+select * from wwv_flow_users;
+
+--- DBMS_SCHEDULER Job to create Users
+begin
+    dbms_scheduler.create_job (
+    job_name => 'EDIT_APEX_USER_JOB',
+    job_type => 'STORED_PROCEDURE',
+    job_action => '"APEX_EDIT_USER_PKG"."DO_DROP_USER"',
+    number_of_arguments => 4,
+    enabled => false );
+end;
+/
+
+
+create or replace package "APEX_EDIT_USER_PKG" 
+authid current_user
+as
+
+-- create and set job
+procedure "DROP_USER_JOB" (
+    p_result           number
+  , p_username         varchar2
+  , p_user_id          number
+  , p_app_id           number
+);
+
+procedure "DO_DROP_USER" (
+      p_result           number
+    , p_username         varchar2
+    , p_user_id          number    
+    , p_app_id           number
+);
+
+end "APEX_EDIT_USER_PKG";
+/
+
+
+create or replace package body "APEX_EDIT_USER_PKG" 
+as
+-- create and set job
+procedure "DROP_USER_JOB" (
+    p_result             number
+  , p_username       varchar2
+  , p_user_id          number
+  , p_app_id           number
+)
+is
+begin
+    dbms_scheduler.set_job_argument_value (
+        job_name => 'EDIT_APEX_USER_JOB',
+        argument_position => 1,
+        argument_value => p_result 
+        );
+    dbms_scheduler.set_job_argument_value (
+        job_name => 'EDIT_APEX_USER_JOB',
+        argument_position => 2,
+        argument_value => p_username 
+        );
+    dbms_scheduler.set_job_argument_value (
+        job_name => 'EDIT_APEX_USER_JOB',
+        argument_position => 3,
+        argument_value => p_user_id 
+        );
+    dbms_scheduler.set_job_argument_value (
+        job_name => 'EDIT_APEX_USER_JOB',
+        argument_position => 4,
+        argument_value =>  p_app_id
+        );        
+    -- now run the job
+    dbms_scheduler.run_job (
+        job_name => 'EDIT_APEX_USER_JOB',
+        use_current_session => false );
+
+end "DROP_USER_JOB";
+
+-- create apex user
+procedure "DO_DROP_USER" (
+      p_result           number
+    , p_username         varchar2
+    , p_user_id          number    
+    , p_app_id           number
+    )
+is
+    -- Local Variables
+    l_result             varchar2(4000);
+    l_result_code        pls_integer;
+    l_username           varchar2(128);
+    l_user_id            number;
+    l_app_id             number;
+begin
+
+  -- Setting Locals Defaults
+    l_username           := p_username;
+    l_user_id            := p_user_id;
+    l_app_id             := nvl(p_app_id, 100002);
+    l_result             := nvl(p_result, 0);
+
+    -- set Apex Environment
+    for c1 in (
+        select workspace_id
+        from apex_applications
+        where application_id = l_app_id 
+        ) loop
+        apex_util.set_security_group_id(
+            p_security_group_id => c1.workspace_id
+            );
+    end loop;
+    
+    begin
+      if (l_user_id is not null) then
+          "APEX_UTIL"."REMOVE_USER"(p_user_id => l_user_id);
+      elsif (l_username is not null) then
+          "APEX_UTIL"."REMOVE_USER"(p_user_name => l_username);
+      end if;    
+    end;
+
+
+end "DO_DROP_USER";
+
+end "APEX_EDIT_USER_PKG";
+/
+
+
+grant execute on APEX_EDIT_USER_PKG to ras_intern;
+--grant execute on EDIT_APEX_USER_JOB to ras_intern;
+
+declare
+l_user_id number := null;
+l_app_id number := 100002;
+l_username varchar2(128) := 'TRIVADIS@BFARM.DE';
+begin
+    for c1 in (
+        select workspace_id
+        from apex_applications
+        where application_id = l_app_id 
+        ) loop
+        apex_util.set_security_group_id(
+            p_security_group_id => c1.workspace_id
+            );
+    end loop;
+    
+    begin
+        if (l_user_id is not null) then
+            "APEX_UTIL"."REMOVE_USER"(p_user_id => l_user_id);
+        elsif (l_username is not null) then
+            "APEX_UTIL"."REMOVE_USER"(p_user_name => l_username);
+        end if;
+    end;
+end;
+/
+
+        select workspace_id
+        from apex_applications
+        where application_id = 100002; 
+
+
+declare
+l_result number;
+l_user_id number := null;
+l_app_id number := 100002;
+l_username varchar2(128) := 'TRIVADIS@BFARM.DE';
+begin
+         "APEX_EDIT_USER_PKG"."DROP_USER_JOB"(  
+             p_result           => l_result
+           , p_username     => l_username
+           , p_user_id        => l_user_id
+           , p_app_id         => 100002
+        );
+end;
+/
+
+insert into APX$MAIL_CONTENT 
+(  APX_MAIL_TOPIC,
+  APX_MAIL_SUBJECT,
+  APX_MAIL_BODY,
+  APX_MAIL_BODY_HTML,
+  APX_MAIL_HEAD,
+  APX_MAIL_BODY_CONTENT,
+  APX_MAIL_TAIL,
+  APX_MAIL_TO,
+  APX_MAIL_TO_USER,
+  APX_MAIL_GREETING,
+  APX_IMG_URL1,
+  APX_IMG_URL1_ALT,
+  APX_TEXT1,
+  APX_TEXT2,
+  APX_URL_PARAMS,
+  APX_URL_VALUES,
+  APX_URL_QUERY,
+  APX_PARENT_MAIL_ID,
+  APX_APP_PAGE,
+  APX_APP_REQUEST,
+  APX_MAIL_SEC_LEVEL,
+  APX_MAIL_STATUS_ID,
+  APP_ID)
+(SELECT 
+  APX_MAIL_TOPIC,
+  APX_MAIL_SUBJECT,
+  APX_MAIL_BODY,
+  APX_MAIL_BODY_HTML,
+  APX_MAIL_HEAD,
+  APX_MAIL_BODY_CONTENT,
+  APX_MAIL_TAIL,
+  APX_MAIL_TO,
+  APX_MAIL_TO_USER,
+  APX_MAIL_GREETING,
+  APX_IMG_URL1,
+  APX_IMG_URL1_ALT,
+  APX_TEXT1,
+  APX_TEXT2,
+  APX_URL_PARAMS,
+  APX_URL_VALUES,
+  APX_URL_QUERY,
+  APX_PARENT_MAIL_ID,
+  APX_APP_PAGE,
+  APX_APP_REQUEST,
+  APX_MAIL_SEC_LEVEL,
+  APX_MAIL_STATUS_ID,
+  100002
+FROM APX$MAIL_CONTENT
+WHERE app_id != 0);
+
+
+select "APX$MAIL_CONTENT_ID_SEQ".NEXTVAL from dual;
+
+
+select 1 as cnt, app_user_id, upper(trim(app_username)) as username
+                         from "RAS_INTERN"."BFARM_APEX_APP_USER"
+                         where upper(trim(app_username)) = :l_username;
+
+
+select *  from user_objects where status != 'VALID';
+
+select 'alter synonym RAS.' || object_name || ' compile ;'  from user_objects where status != 'VALID';
+
+alter synonym RAS.APEX_USER_ALL_REG compile ;
+alter synonym RAS.APEX_APP_USERS compile ;
+alter synonym RAS.APEX_APP_ROLES compile ;
+alter synonym RAS.APEX_USER_PRIVILEGES compile ;
+alter synonym RAS.APEX_USER_DOMAINS compile ;
+
+
+  declare
+l_result number;
+l_user_id number := null;
+l_app_id number := 100002;
+l_username varchar2(128) := 'TRIVADIS@BFARM.DE';
+begin
+         "RAS"."APEX_EDIT_USER_PKG"."DROP_USER_JOB"(  
+             p_result           => l_result
+           , p_username     => l_username
+           , p_user_id        => l_user_id
+           , p_app_id         => 100002
+        );
+end;
+/
+
+begin
+    dbms_scheduler.create_job (
+    job_name => 'EDIT_APEX_USER_JOB',
+    job_type => 'STORED_PROCEDURE',
+    job_action => '"RAS"."APEX_EDIT_USER_PKG"."DO_DROP_USER"',
+    number_of_arguments => 4,
+    enabled => false );
+end;
+/
