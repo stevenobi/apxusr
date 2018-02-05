@@ -4191,6 +4191,8 @@ p_new_status varchar2 := 'LOCKED'
 pragma autonomous_transaction;
 l_status_id pls_integer;
 l_msg varchar2(1000);
+l_result number;
+l_username varchar2(128);
 begin
     select app_status_id into l_status_id
     from "BFARM_APEX_APP_STATUS"
@@ -4203,9 +4205,22 @@ begin
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
         where APP_USER_ID = p_id;
+        -- get the username
+        select upper(trim(app_username))
+        into l_username
+        from  "BFARM_APEX_APP_USER"
+        where  APP_USER_ID = p_id;
+        -- remove user from registration table
         delete from "RAS"."APX$USER_REG"
-        where apx_app_user_id =  p_id;
+        where upper(trim(apx_username)) =  l_username;
         commit;
+        -- remove user from apex
+         "RAS"."APEX_EDIT_USER_PKG"."DROP_USER_JOB"(  
+             p_result           => l_result
+           , p_username     => l_username
+           , p_user_id        => null
+           , p_app_id         => 100002
+        );
     elsif  (upper(p_table) = 'RAS_DOMAINEN') then
         l_msg := 'Domainen'||p_msg;
         commit;
@@ -4252,6 +4267,7 @@ begin
     RAISE_APPLICATION_ERROR (-20002, l_msg, TRUE);
 end;
 /
+
 
 
 declare
@@ -4304,3 +4320,7 @@ apex_util.set_session_state('P0_USER_REG_STATUS', l_result);
 
 end;
 /
+
+
+
+
