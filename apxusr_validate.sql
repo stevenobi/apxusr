@@ -4664,6 +4664,11 @@ begin
         raise create_user_error;
     end if;
 
+    -- assemble output
+    l_result  := l_result_code ||' '||l_result;
+    p_result  := l_result;
+
+
 exception when create_user_error then
     l_result  := l_result_code ||' '||l_result;
     p_result  := l_result;
