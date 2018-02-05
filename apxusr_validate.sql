@@ -4135,10 +4135,20 @@ end "DO_DROP_USER";
 end "APEX_EDIT_USER_PKG";
 /
 
+-- create job in primary parsing schema
+begin
+    dbms_scheduler.create_job (
+    job_name => 'EDIT_APEX_USER_JOB',
+    job_type => 'STORED_PROCEDURE',
+    job_action => '"RAS"."APEX_EDIT_USER_PKG"."DO_DROP_USER"',
+    number_of_arguments => 4,
+    enabled => false );
+end;
+/
 
 
-------------------------------------------------------------------------------------
----
+
+---------------------------------------------------------------------------------------
 
     if (l_topic = 'REGISTER') then
         insert into "APEX_USER_REGISTRATION" (
@@ -4321,6 +4331,373 @@ apex_util.set_session_state('P0_USER_REG_STATUS', l_result);
 end;
 /
 
+
+create or replace procedure "APX_CREATE_USER" (
+      p_username                    in       varchar2
+    , p_result                      in out   varchar2
+    , p_email_address               in       varchar2        := null
+    , p_first_name                  in       varchar2        := null
+    , p_last_name                   in       varchar2        := null
+    , p_params                      in       clob            := null
+    , p_values                      in       clob            := null
+    , p_topic                       in       varchar2        := null
+    , p_userid                      in       pls_integer     := null
+    , p_domain_id                   in       pls_integer     := null
+    , p_token                       in       varchar2        := null
+    , p_description                 in       varchar2        := null
+    , p_web_password                in       varchar2        := null
+    , p_web_password_format         in       varchar2        := null
+    , p_change_password_on_first_use in      varchar2        := null
+    , p_group_ids                   in       varchar2        := null
+    , p_developer_privs             in       varchar2        := null
+    , p_default_schema              in       varchar2        := null
+    , p_allow_access_to_schemas     in       varchar2        := null
+    , p_account_expiry              in       date            := null
+    , p_account_locked              in       varchar2        := null
+    , p_attribute_01                in       varchar2        := null
+    , p_attribute_02                in       varchar2        := null
+    , p_attribute_03                in       varchar2        := null
+    , p_attribute_04                in       varchar2        := null
+    , p_attribute_05                in       varchar2        := null
+    , p_app_id                      in       pls_integer     := v('APP_ID')
+    , p_debug                       in       boolean         := null
+    , p_send_mail                   in       boolean         := null
+    , p_create_apex_user            in       boolean         := null
+)
+authid current_user
+is
+    -- Local Variables
+    l_username                      varchar2(128);
+    l_result                        varchar2(4000);
+    l_result_code                   pls_integer;
+    l_email_address                 varchar2(128);
+    l_first_name                    varchar2(128);
+    l_last_name                     varchar2(128);
+    l_params                        clob;
+    l_values                        clob;
+    l_topic                         varchar2(64);
+    l_userid                        pls_integer;
+    l_domain_id                     pls_integer;
+    l_token                         varchar2(4000);
+    l_description                   varchar2(1000);
+    l_web_password                  varchar2(1000);
+    l_web_password_format           varchar2(1000);
+    l_group_ids                     varchar2(1000);
+    l_developer_privs               varchar2(1000);
+    l_default_schema                varchar2(1000);
+    l_allow_access_to_schemas       varchar2(1000);
+    l_change_password_on_first_use  varchar2(10);
+    l_account_expiry                date;
+    l_account_locked                varchar2(1000);
+    l_attribute_01                  varchar2(1000);
+    l_attribute_02                  varchar2(1000);
+    l_attribute_03                  varchar2(1000);
+    l_attribute_04                  varchar2(1000);
+    l_attribute_05                  varchar2(1000);
+    l_app_id                        pls_integer;
+    l_debug                         boolean;
+    l_send_mail                     boolean;
+    l_create_apex_user              boolean;
+    l_user_count                  pls_integer := 0;
+
+    CREATE_USER_ERROR               exception;
+
+    -- Constants
+    C_TOPIC                         constant          varchar2(1000)  := 'CREATE';
+    C_PASSWORD_FORMAT               constant          varchar2(1000)  := 'CLEAR_TEXT';
+    C_ACCOUNT_LOCKED                constant          varchar2(10)    := 'N';
+    C_ACCOUNT_EXPIRED               constant          date    := TRUNC(SYSDATE);
+    C_CHANGE_PASSWORD_ON_FIRST_USE  constant          varchar2(10)    := 'N';
+    C_APP_ID                        constant          pls_integer     := 100000;
+    C_TARGET_APP                constant          pls_integer     := 100002;
+    C_RESULT                        constant          pls_integer     := null;
+    C_DEBUG                         constant          boolean         := false;
+    C_SEND_MAIL                     constant          boolean         := false;
+    C_CREATE_APEX_USER              constant          boolean         := true;
+    C_DEVELOPER_PRIVS               constant          varchar2(1000)  := null;
+    C_ALLOW_ACCESS_TO_SCHEMAS       constant          varchar2(1000)  := null;
+
+begin
+
+   -- Setting Locals Defaults
+    l_email_address                 := p_email_address;
+    l_username                      := nvl(p_username, p_email_address);
+    l_first_name                    := p_first_name;
+    l_last_name                     := p_last_name;
+    l_params                        := p_params;
+    l_values                        := p_values;
+    l_topic                         := nvl(p_topic            , C_TOPIC);
+    l_userid                        := p_userid;
+    l_domain_id                     := p_domain_id;
+    l_token                         := p_token;
+    l_description                   := p_description;
+    l_web_password                  := p_web_password;
+    l_web_password_format           := p_web_password_format;
+    l_group_ids                     := p_group_ids;
+    l_developer_privs               := p_developer_privs;
+    l_default_schema                := p_default_schema;
+    l_allow_access_to_schemas       := p_allow_access_to_schemas;
+    l_change_password_on_first_use  := nvl(p_change_password_on_first_use, C_CHANGE_PASSWORD_ON_FIRST_USE);
+    l_account_expiry                := nvl(p_account_expiry   , C_ACCOUNT_EXPIRED);
+    l_account_locked                := nvl(p_account_locked   , C_ACCOUNT_LOCKED);
+    l_attribute_01                  := p_attribute_01;
+    l_attribute_02                  := p_attribute_02;
+    l_attribute_03                  := p_attribute_03;
+    l_attribute_04                  := p_attribute_04;
+    l_attribute_05                  := p_attribute_05;
+    l_app_id                        := nvl(p_app_id           , C_APP_ID);
+    l_result                        := nvl(p_result           , C_RESULT);
+    l_result_code                   := 0;
+    l_debug                         := nvl(p_debug            , C_DEBUG);
+    l_send_mail                     := nvl(p_send_mail        , C_SEND_MAIL);
+    l_create_apex_user              := nvl(p_create_apex_user , C_CREATE_APEX_USER);
+
+  
+    
+    if (l_token is not null) then
+        if ("IS_VALID_USER_TOKEN"(l_username, l_token)) then
+            -- see if user exists    
+            for u in (select count(1) as cnt, app_user_id, upper(trim(app_username)) as username
+                         from "RAS_INTERN"."BFARM_APEX_APP_USER"
+                         where upper(trim(app_username)) = l_username) loop
+                         l_user_count := u.cnt;
+                         l_userid := u.app_user_id;
+                         l_username := u.username;
+            end loop;             
+
+               if (l_user_count = 0) then -- no user yet, so...
+                  begin
+                  
+                      -- get a fresh ID from sequence
+                      if (l_userid is null) then 
+                          select "RAS_INTERN"."BFARM_APEX_APP_USER_ID_SEQ".nextval
+                          into l_userid
+                          from dual;
+                      end if;          
+                      
+                      -- create local app user first
+                      insert into "RAS_INTERN"."BFARM_APEX_APP_USER"  (
+                          APP_USER_ID,
+                          APP_USERNAME,
+                          APP_USER_EMAIL,
+                          APP_USER_DEFAULT_ROLE_ID,
+                          APP_USER_CODE,
+                          APP_USER_AD_LOGIN,
+                          APP_USER_NOVELL_LOGIN,
+                          APP_USER_FIRST_NAME,
+                          APP_USER_LAST_NAME,
+                          APP_USER_ADRESS,
+                          APP_USER_PHONE1,
+                          APP_USER_PHONE2,
+                          APP_USER_DESCRIPTION,
+                          APP_USER_STATUS_ID,
+                          APP_USER_PARENT_USER_ID,
+                          APP_ID,
+                          APP_USER_TOKEN,
+                          APP_USER_TOKEN_LAST_UPDATE,
+                          APP_USER_DOMAIN_ID,
+                          APP_USER_MELDER_ID) 
+                      (select 
+                        l_userid,
+                        APX_USERNAME,
+                        APX_USER_EMAIL,
+                        APX_USER_DEFAULT_ROLE_ID,
+                        APX_USER_CODE,
+                        APX_USER_AD_LOGIN,
+                        APX_USER_HOST_LOGIN,
+                        APX_USER_FIRST_NAME,
+                        APX_USER_LAST_NAME,
+                        APX_USER_ADRESS,
+                        APX_USER_PHONE1,
+                        APX_USER_PHONE2,
+                        APX_USER_DESCRIPTION,
+                        (select  STATUS_ID
+                         from "RAS_INTERN"."BFARM_APEX_STATUS"
+                         where status = 'OPEN' 
+                         and status_scope = 'ACCOUNT'),
+                        APX_USER_PARENT_USER_ID,
+                        C_TARGET_APP,
+                        APX_USER_TOKEN,
+                        APX_USER_TOKEN_CREATED,
+                        APX_USER_DOMAIN_ID,
+                       (select ras_melder_id 
+                        from  "RAS_INTERN"."RAS_DOMAIN_GRUPPEN" 
+                        where ras_domain_id = APX_USER_DOMAIN_ID)
+                      from APEX_USER_REGISTRATION
+                      where apx_user_token = l_token
+                      );
+                      
+                      commit;
+                      l_result_code := 0;
+                      
+                  exception when no_data_found then
+                      l_result_code := 2;
+                      l_result      := 'No User Data for Token found.';
+                      raise create_user_error;
+                 end;
+               
+               else  -- user exists
+               
+                      begin
+                           -- update existing user
+                          update "RAS_INTERN"."BFARM_APEX_APP_USER"
+                          set (app_user_status_id, app_user_token, app_user_token_last_update, deleted, deleted_by, app_user_domain_id, app_user_melder_id) =
+                           (select
+                                (select STATUS_ID
+                                 from "RAS_INTERN"."BFARM_APEX_STATUS"
+                                 where status = 'OPEN' 
+                                 and status_scope = 'ACCOUNT'),
+                                 apx_user_token,
+                                 apx_user_token_created,
+                                 null, null,
+                                 apx_user_domain_id,
+                                 (select ras_melder_id 
+                                  from  "RAS_INTERN"."RAS_DOMAIN_GRUPPEN" 
+                                  where ras_domain_id = APX_USER_DOMAIN_ID)
+                            from APEX_USER_REGISTRATION
+                            where apx_user_token = l_token)
+                          where upper(trim(app_username)) = upper(trim(l_username));
+                          
+                          -- set status to registered
+                          update "APEX_USER_REGISTRATION"
+                          set apx_user_status_id = (select apex_status_id
+                                                                 from "APEX_STATUS"
+                                                                 where app_id is null
+                                                                 and apex_status_context = 'USER'
+                                                                 and apex_status = 'CREATED'),
+                                apx_app_user_id  = l_userid,
+                                apex_user_id     = l_userid
+                          where apx_user_token = l_token;
+                          commit;
+                          l_result_code := 0;
+                          l_result          := 'Updated User';
+                       exception when others then
+                           l_result_code := 2;
+                           l_result          := 'User Create Error';
+                           raise  create_user_error; 
+                       end;
+               
+               end if;
+
+
+        end if;
+    else -- insert into shadow table
+        begin
+            insert into "APEX_USER" (
+                                      app_id
+                                    , apx_username
+                                    , apx_user_email
+                                    , apx_user_first_name
+                                    , apx_user_last_name
+                                    , apx_user_description
+                                    )
+                                values (
+                                      C_TARGET_APP
+                                    , l_username
+                                    , l_email_address
+                                    , l_first_name
+                                    , l_last_name
+                                    , 'Empty Token while creating User'
+                                    )
+            returning apx_user_id, apx_username, apx_user_email
+            into l_userid, l_username, l_email_address;
+    
+            commit;
+            l_result_code := 0;
+          
+        exception when others then
+            l_result_code := 2;
+            l_result          := 'User Create Error';
+            raise  create_user_error; 
+        end;
+    end if;
+
+    if l_create_apex_user then
+
+        -- set Apex Environment
+        for c1 in (
+            select workspace_id
+            from apex_applications
+            where application_id = l_app_id 
+            ) loop
+            apex_util.set_security_group_id(
+                p_security_group_id => c1.workspace_id
+                );
+        end loop;
+
+        apex_util.create_user (
+              p_user_id                       => l_userid
+            , p_user_name                     => l_username
+            , p_first_name                    => l_first_name
+            , p_last_name                     => l_last_name
+            , p_description                   => l_description
+            , p_email_address                 => l_email_address
+            , p_web_password                  => l_web_password
+            , p_developer_privs               => l_developer_privs
+            , p_default_schema                => l_default_schema
+            , p_allow_access_to_schemas       => l_allow_access_to_schemas
+            , p_change_password_on_first_use  => l_change_password_on_first_use
+            , p_account_expiry                => l_account_expiry
+            , p_account_locked                => l_account_locked
+            , p_attribute_01                  => l_attribute_01
+            , p_attribute_02                  => l_attribute_02
+            , p_attribute_03                  => l_attribute_03
+            , p_attribute_04                  => l_attribute_04
+            , p_attribute_05                  => l_attribute_05
+        );
+
+        commit;
+        l_result_code := 0;
+
+    end if;
+
+    -- send confirmation mail if specified
+    if l_send_mail then
+
+        "SEND_MAIL" (
+            p_result      =>  l_result
+          , p_mailto      =>  l_email_address
+          , p_username    =>  l_username
+          , p_topic       =>  l_topic
+          , p_params      =>  l_params
+          , p_values      =>  l_values
+          , p_app_id      =>  l_app_id
+          , p_debug_only  =>  l_debug
+        );
+
+    end if;
+
+
+    if (l_result_code = 0) then
+        -- set status to registered
+        update "APEX_USER_REGISTRATION"
+        set apx_user_status_id = (select apex_status_id
+                                    from "APEX_STATUS"
+                                   where app_id is null
+                                     and apex_status_context = 'USER'
+                                     and apex_status = 'CREATED'),
+            apx_app_user_id  = l_userid,
+            apex_user_id     = l_userid
+        where apx_user_token = l_token;
+
+    l_result_code := 0;
+
+    end if;
+
+    commit;
+    p_result  := l_result || ' User Created successfully';
+ 
+exception when create_user_error then
+    l_result  := l_result_code ||' '||l_result;
+    p_result  := l_result;
+when dup_val_on_index then
+    rollback;
+    l_result  := -1 ||' ERROR: User exists!';
+    p_result  := l_result;
+when others then
+rollback;
+raise;
+end "APX_CREATE_USER";
 
 
 
