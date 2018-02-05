@@ -3691,6 +3691,16 @@ end;
 
 
 --------------------------------------------------------------------------------
+--- DBMS_SCHEDULER Job to create Users
+begin
+    dbms_scheduler.create_job (
+    job_name => 'CREATE_APEX_USER_JOB',
+    job_type => 'STORED_PROCEDURE',
+    job_action => 'APEX_CREATE_USER_PKG."DO_CREATE_USER"',
+    number_of_arguments => 9,
+    enabled => false );
+end;
+/
 
 create or replace package "APEX_CREATE_USER_PKG" 
 authid current_user
@@ -3973,7 +3983,7 @@ begin
     l_last_name                     := p_last_name;
     l_token                         := p_token;
     l_web_password                  := p_web_password;
-    l_default_schema                := nvl(p_default_schema   , 'INTERN');
+    l_default_schema                := nvl(p_default_schema   , 'RAS_INTERN');
     l_app_id                        := nvl(p_app_id           , 100002);
     l_result                        := nvl(p_result           , 0);
 
@@ -4004,6 +4014,132 @@ end "DO_CREATE_USER";
 end "APEX_CREATE_USER_PKG";
 
 
+--------------------------------------------------------------------------------------------------------
+--- DBMS_SCHEDULER Job to create Users
+begin
+    dbms_scheduler.create_job (
+    job_name => 'EDIT_APEX_USER_JOB',
+    job_type => 'STORED_PROCEDURE',
+    job_action => '"APEX_EDIT_USER_PKG"."DO_DROP_USER"',
+    number_of_arguments => 4,
+    enabled => false );
+end;
+/
+
+create or replace package "APEX_EDIT_USER_PKG" 
+authid current_user
+as
+
+-- create and set job
+procedure "DROP_USER_JOB" (
+    p_result           number
+  , p_username         varchar2
+  , p_user_id          number
+  , p_app_id           number
+);
+
+procedure "DO_DROP_USER" (
+      p_result           number
+    , p_username         varchar2
+    , p_user_id          number    
+    , p_app_id           number
+);
+
+end "APEX_EDIT_USER_PKG";
+/
+
+
+
+create or replace package body "APEX_EDIT_USER_PKG" 
+as
+-- create and set job
+procedure "DROP_USER_JOB" (
+    p_result           number
+  , p_username         varchar2
+  , p_user_id          number
+  , p_app_id           number
+)
+is
+begin
+    dbms_scheduler.set_job_argument_value (
+        job_name => 'EDIT_APEX_USER_JOB',
+        argument_position => 1,
+        argument_value => p_result 
+        );
+    dbms_scheduler.set_job_argument_value (
+        job_name => 'EDIT_APEX_USER_JOB',
+        argument_position => 2,
+        argument_value => p_username 
+        );
+    dbms_scheduler.set_job_argument_value (
+        job_name => 'EDIT_APEX_USER_JOB',
+        argument_position => 3,
+        argument_value => p_user_id 
+        );
+    dbms_scheduler.set_job_argument_value (
+        job_name => 'EDIT_APEX_USER_JOB',
+        argument_position => 4,
+        argument_value =>  p_app_id
+        );        
+    -- now run the job
+    dbms_scheduler.run_job (
+        job_name => 'EDIT_APEX_USER_JOB',
+        use_current_session => false );
+
+end "DROP_USER_JOB";
+
+-- create apex user
+procedure "DO_DROP_USER" (
+      p_result           number
+    , p_username         varchar2
+    , p_user_id          number    
+    , p_app_id           number
+    )
+is
+    -- Local Variables
+    l_result             varchar2(4000);
+    l_result_code        pls_integer;
+    l_username           varchar2(128);
+    l_user_id            number;
+    l_app_id             number;
+begin
+
+  -- Setting Locals Defaults
+    l_username           := p_username;
+    l_user_id            := p_user_id;
+    l_app_id             := nvl(p_app_id, 100002);
+    l_result             := nvl(p_result, 0);
+
+    -- set Apex Environment
+    for c1 in (
+        select workspace_id
+        from apex_applications
+        where application_id = l_app_id 
+        ) loop
+        apex_util.set_security_group_id(
+            p_security_group_id => c1.workspace_id
+            );
+    end loop;
+    
+    begin
+      if (l_user_id is not null) then
+          "APEX_UTIL"."REMOVE_USER"(p_user_id => l_user_id);
+      elsif (l_username is not null) then
+          "APEX_UTIL"."REMOVE_USER"(p_user_name => l_username);
+      end if;    
+    end;
+
+
+end "DO_DROP_USER";
+
+end "APEX_EDIT_USER_PKG";
+/
+
+
+
+------------------------------------------------------------------------------------
+---
+
     if (l_topic = 'REGISTER') then
         insert into "APEX_USER_REGISTRATION" (
                                               apx_username
@@ -4031,3 +4167,88 @@ end "APEX_CREATE_USER_PKG";
     end if; 
 	
 	
+
+#WORKSPACE_IMAGES#js/BFARM_FOOTER.min.js?v=20180118.#APEX_VERSION#
+#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js?v=20180129.#APEX_VERSION#
+#WORKSPACE_IMAGES#js/validate/messages_de.min.js?v=20180129.#APEX_VERSION#
+
+#WORKSPACE_IMAGES#css/validate/screen.min.css?v=20180129.#APEX_VERSION#
+#WORKSPACE_IMAGES#css/validateForm.min.css?v=20180129.#APEX_VERSION#
+
+
+ALTER TABLE "RAS"."APX$USER_REG" DROP CONSTRAINT "APX$USREG_APP_USER_ID_FK";
+ALTER TABLE "RAS"."APX$USER_REG" ADD CONSTRAINT "APX$USREG_APP_USER_ID_FK" FOREIGN KEY ("APX_APP_USER_ID")
+REFERENCES "RAS_INTERN"."BFARM_APEX_APP_USER" ("APP_USER_ID") ON DELETE CASCADE ENABLE;
+
+
+
+create or replace procedure "BFARM_RAS_SOFT_DELETE" (
+p_table in varchar2,
+p_id number,
+p_msg in varchar2 :=' können nicht gelöscht werden!',
+p_new_status varchar2 := 'LOCKED'
+) is
+pragma autonomous_transaction;
+l_status_id pls_integer;
+l_msg varchar2(1000);
+begin
+    select app_status_id into l_status_id
+    from "BFARM_APEX_APP_STATUS"
+    where app_status = upper(nvl(p_new_status, 'LOCKED'));
+    if (upper(p_table) = 'BFARM_APEX_APP_USER') then
+        l_msg := 'Benutzer'||p_msg;
+        commit;
+        update  "BFARM_APEX_APP_USER"
+        set deleted  = sysdate,
+              deleted_by  = nvl(v('APP_USER'), user),
+              app_user_status_id = l_status_id
+        where APP_USER_ID = p_id;
+        delete from "RAS"."APX$USER_REG"
+        where apx_app_user_id =  p_id;
+        commit;
+    elsif  (upper(p_table) = 'RAS_DOMAINEN') then
+        l_msg := 'Domainen'||p_msg;
+        commit;
+        update  "BFARM_APEX_APP_USER"
+        set deleted  = sysdate,
+              deleted_by  = nvl(v('APP_USER'), user),
+              app_user_status_id = l_status_id
+        where app_user_domain_id  = p_id;
+        update "RAS_DOMAINEN"
+        set deleted = sysdate,
+              deleted_by     = nvl(v('APP_USER'), user)
+        where domain_id = p_id;
+    elsif (upper(p_table) = 'AMF_VORGANG') then
+        l_msg := 'RAS Vorgänge'||p_msg;
+        commit;
+        UPDATE "AMF_VORGANG"
+        set DELETED = sysdate,
+              DELETED_BY = nvl(v('APP_USER'), user),
+              AMF_MELDUNG_STATUS = l_status_id
+        where ID_VORGANG = p_id;    
+    elsif (upper(p_table) = 'DOKUMENTE') then
+        l_msg := 'RAS Vorgangsdokumente'||p_msg;
+        commit;
+        UPDATE "DOKUMENTE"
+        set DELETED = sysdate,
+              DELETED_BY = nvl(v('APP_USER'), user)
+        where ID_VORGANG = p_id;    
+    elsif (upper(p_table) = 'BOB_LAENDER_ROW_DOKUMENTE') then
+        l_msg := 'RAS Vorgangsdokumente'||p_msg;
+        commit;
+        UPDATE "BOB_LAENDER_ROW_DOKUMENTE"
+        set DELETED = sysdate,
+              DELETED_BY = nvl(v('APP_USER'), user)
+        where ID_VORGANG = p_id;   
+    elsif (upper(p_table) = 'BOB_LAENDER_ROW_ERGAENZUNGEN') then
+        l_msg := 'RAS Vorgangsergänzungen'||p_msg;
+        commit;
+        UPDATE "BOB_LAENDER_ROW_ERGAENZUNGEN"
+        set DELETED = sysdate,
+              DELETED_BY = nvl(v('APP_USER'), user)
+        where ID_VORGANG = p_id;    
+    end if;        
+    commit;
+    RAISE_APPLICATION_ERROR (-20002, l_msg, TRUE);
+end;
+
