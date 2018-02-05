@@ -4251,4 +4251,56 @@ begin
     commit;
     RAISE_APPLICATION_ERROR (-20002, l_msg, TRUE);
 end;
+/
 
+
+declare
+l_result      varchar2(4000);
+l_first_name  varchar2(1000);
+l_last_name   varchar2(1000);
+begin
+
+apex_util.set_session_state('P0_USER_REG_STATUS', null);
+
+    for u in (select apx_user_first_name, apx_user_last_name
+              from "APEX_USER_REGISTRATION"
+              where apx_user_token = v('P112_TOKEN')) loop
+              l_first_name := u.apx_user_first_name;
+              l_last_name  := u.apx_user_last_name;
+    end loop;
+/*    
+raise_application_error(-20001, 'Email '|| v('P112_EMAIL') || ' First Name: '||
+                        l_first_name || ' Last Name '||l_last_name|| ' Password: ' ||
+                        :P112_PASSWORD_NEW_VERIFY|| 'Token: '||v('P112_TOKEN')||' appId '||:APP_ID);
+*/
+
+  "APEX_CREATE_USER_PKG"."CREATE_USER_JOB"(  
+                      p_result           => l_result
+                    , p_username         => v('P112_EMAIL')
+                    , p_first_name       => l_first_name
+                    , p_last_name        => l_last_name
+                    , p_web_password     => v('P112_PASSWORD_NEW_VERIFY')
+                    , p_email_address    => v('P112_EMAIL')
+                    , p_token            => v('P112_TOKEN')
+                    , p_app_id           => 100002
+                    , p_default_schema   => 'RAS_INTERN'
+  );
+ 
+  
+/*
+    APX_CREATE_USER(  p_result           => l_result
+                    , p_username         => v('P112_EMAIL')
+                    , p_first_name       => l_first_name
+                    , p_last_name        => l_last_name
+                    , p_web_password     => v('P112_PASSWORD_NEW_VERIFY')
+                    , p_email_address    => v('P112_EMAIL')
+                    , p_token            => v('P112_TOKEN')
+                    , p_app_id           => v('APP_ID')
+                    , p_default_schema   => 'RAS_INTERN');
+*/
+
+
+apex_util.set_session_state('P0_USER_REG_STATUS', l_result);
+
+end;
+/
