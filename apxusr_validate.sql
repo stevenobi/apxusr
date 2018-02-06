@@ -5754,3 +5754,50 @@ setFooter();
 #WORKSPACE_IMAGES#css/validate/screen.min.css?v=20180129.#APEX_VERSION#
 #WORKSPACE_IMAGES#css/validateForm.min.css?v=20180129.#APEX_VERSION#
 
+create or replace function "GET_TARGET_APP_ID" (
+p_app_name varchar2 := 'RAS AMF'
+)
+return number
+is
+l_app_name  varchar2(128);
+l_return   number;
+begin
+    l_app_name := p_app_name;
+    for i in (select  apex_config_item_value
+                 from "APEX_CONFIGURATION"
+                 where substr(apex_config_comment, 1, 13) = 'TARGET_APP_ID'
+                 and apex_config_item = trim(l_app_name)) loop
+             l_return := i.apex_config_item_value;
+    end loop;
+return l_return;    
+end;
+/
+
+
+select GET_TARGET_APP_ID from dual;
+
+--select substr(apex_config_comment, 1, 15) from APEX_CONFIGURATION
+--where apex_config_item = 'RAS_USRREG';
+
+create or replace function "GET_SOURCE_APP_ID" (
+p_app_name varchar2 := 'RAS_USRREG'
+)
+return number
+is
+l_app_name  varchar2(128);
+l_return   number;
+begin
+    l_app_name := p_app_name;
+    for i in (select  apex_config_item_value
+                 from "APEX_CONFIGURATION"
+                 where substr(apex_config_comment, 1, 15) = 'REGISTER_APP_ID'
+                 and apex_config_item = trim(l_app_name)) loop
+             l_return := i.apex_config_item_value;
+    end loop;
+return l_return;    
+end;
+/
+
+--select GET_SOURCE_APP_ID from dual;
+
+
