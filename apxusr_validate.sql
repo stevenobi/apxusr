@@ -5800,4 +5800,197 @@ end;
 
 --select GET_SOURCE_APP_ID from dual;
 
+insert into APX$MAIL_CONTENT 
+(  APX_MAIL_TOPIC,
+  APX_MAIL_SUBJECT,
+  APX_MAIL_BODY,
+  APX_MAIL_BODY_HTML,
+  APX_MAIL_HEAD,
+  APX_MAIL_BODY_CONTENT,
+  APX_MAIL_TAIL,
+  APX_MAIL_TO,
+  APX_MAIL_TO_USER,
+  APX_MAIL_GREETING,
+  APX_IMG_URL1,
+  APX_IMG_URL1_ALT,
+  APX_TEXT1,
+  APX_TEXT2,
+  APX_URL_PARAMS,
+  APX_URL_VALUES,
+  APX_URL_QUERY,
+  APX_PARENT_MAIL_ID,
+  APX_APP_PAGE,
+  APX_APP_REQUEST,
+  APX_MAIL_SEC_LEVEL,
+  APX_MAIL_STATUS_ID,
+  APP_ID)
+(SELECT 
+  APX_MAIL_TOPIC,
+  APX_MAIL_SUBJECT,
+  APX_MAIL_BODY,
+  APX_MAIL_BODY_HTML,
+  APX_MAIL_HEAD,
+  APX_MAIL_BODY_CONTENT,
+  APX_MAIL_TAIL,
+  APX_MAIL_TO,
+  APX_MAIL_TO_USER,
+  APX_MAIL_GREETING,
+  APX_IMG_URL1,
+  APX_IMG_URL1_ALT,
+  APX_TEXT1,
+  APX_TEXT2,
+  APX_URL_PARAMS,
+  APX_URL_VALUES,
+  APX_URL_QUERY,
+  APX_PARENT_MAIL_ID,
+  APX_APP_PAGE,
+  APX_APP_REQUEST,
+  APX_MAIL_SEC_LEVEL,
+  APX_MAIL_STATUS_ID,
+  100002
+FROM APX$MAIL_CONTENT
+WHERE app_id != 0);
+
+commit;
+
+
+select substr(apex_config_comment, 1, 13) from 
+ "APEX_CONFIGURATION"
+                 where apex_config_item = 'RAS AMF';
+
+create or replace function "GET_TARGET_APP_ID" (
+p_app_name varchar2 := 'RAS AMF'
+)
+return number
+is
+l_app_name  varchar2(128);
+l_return   number;
+begin
+    l_app_name := p_app_name;
+    for i in (select  apex_config_item_value
+                 from "APEX_CONFIGURATION"
+                 where substr(apex_config_comment, 1, 13) = 'TARGET_APP_ID'
+                 and apex_config_item = trim(l_app_name)) loop
+             l_return := i.apex_config_item_value;
+    end loop;
+return l_return;    
+end;
+/
+
+
+--CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."RAS_AMIS_MAH" ("ZNR", "ENR", "AM", "MAH", "PNR", "ISO", "REGBEZ", "PNRAEANZ", "PNRSTM", "FSTR", "FPORT", "FPLZO", "ZUBPNR") AS 
+
+create materialized view "RAS_AMIS_MAH_MV"
+as
+  select /*+ INDEX(k XPKKATPNR) */ h.znr, h.enr, H.AM, K.PNAME as MAH, K.PNR as PNR, k.FISONR as ISO, 
+           k.REGBEZ, K.PNRAEANZ, K.PNRSTM, k.FSTR, k.FPORT, k.FPLZO, k.ZUBPNR
+from data.HITS h, data.TANTR t, data.KATPNR k
+where k.PNR != 0000000 
+and h.enr = t.enr
+and T.PNRANT = k.PNR;
+
+
+create or replace force view "MIME_TYPE_ICONS"
+as 
+  SELECT B.MIME_NAME,
+  B.MIME_TEMPLATE AS MIME_TYPE,
+  B.MIME_GROUP,
+  A.ICON_ID,
+  A.ICON,
+  A.ICON_MIME_TYPE,
+  A.ICON_FILE_NAME,
+  A.ICON_CHARSET,
+  A.CREATED,
+  A.CREATED_BY,
+  A.MODIFIED,
+  A.MODIFIED_BY
+FROM "MIME_TYPES" B JOIN "MIME_ICONS" A
+ON (A.ICON_ID = B.ICON_ID);
+
+
+  GRANT SELECT ON "BFARM_APEX_ADMIN"."MIME_TYPE_ICONS" TO PUBLIC;
+
+CREATE OR REPLACE FORCE VIEW "BFARM_APEX_ADMIN"."BFARM_APEX_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
+  select app_username, application_role from "BFARM_APPLICATION_ADMINS" 
+union 
+select user_name, application_role from "BFARM_WORKSPACE_ADMINS"
+;
+
+
+CREATE OR REPLACE FORCE VIEW "BFARM_APEX_ADMIN"."BFARM_WORKSPACE_ADMINS" ("USER_NAME", "APPLICATION_ROLE") AS 
+  select user_name, 'WORKSPACE_ADMIN_USER' as "APPLICATION_ROLE" 
+from "BFARM_APEX_WORKSPACE_USERS" 
+where IS_ADMIN = 'Yes' 
+union 
+select owner, 'APPLICATION_OWNER'  as "APPLICATION_ROLE" 
+from "BFARM_APEX_WORKSPACE"
+;
+
+select * from user_objects where status != 'VALID';
+
+
+create or replace function "GET_TARGET_APP_ID" (
+p_app_name varchar2 := 'RAS AMF'
+)
+return number
+is
+l_app_name  varchar2(128);
+l_return   number;
+begin
+    l_app_name := p_app_name;
+    for i in (select  apex_config_item_value
+                 from "APEX_CONFIGURATION"
+                 where substr(apex_config_comment, 1, 13) = 'TARGET_APP_ID'
+                 and apex_config_item = trim(l_app_name)) loop
+             l_return := i.apex_config_item_value;
+    end loop;
+return l_return;    
+end;
+/
+
+
+select GET_TARGET_APP_ID from dual;
+
+--select substr(apex_config_comment, 1, 15) from APEX_CONFIGURATION
+--where apex_config_item = 'RAS_USRREG';
+
+create or replace function "GET_SOURCE_APP_ID" (
+p_app_name varchar2 := 'RAS_USRREG'
+)
+return number
+is
+l_app_name  varchar2(128);
+l_return   number;
+begin
+    l_app_name := p_app_name;
+    for i in (select  apex_config_item_value
+                 from "APEX_CONFIGURATION"
+                 where substr(apex_config_comment, 1, 15) = 'REGISTER_APP_ID'
+                 and apex_config_item = trim(l_app_name)) loop
+             l_return := i.apex_config_item_value;
+    end loop;
+return l_return;    
+end;
+/
+
+--select GET_SOURCE_APP_ID from dual;
+
+create or replace force view "MIME_TYPE_ICONS"
+as 
+  SELECT B.MIME_NAME,
+  B.MIME_TEMPLATE AS MIME_TYPE,
+  B.MIME_GROUP,
+  A.ICON_ID,
+  A.ICON,
+  A.ICON_MIME_TYPE,
+  A.ICON_FILE_NAME,
+  A.ICON_CHARSET,
+  A.CREATED,
+  A.CREATED_BY,
+  A.MODIFIED,
+  A.MODIFIED_BY
+FROM "MIME_TYPES" B JOIN "MIME_ICONS" A
+ON (A.ICON_ID = B.ICON_ID);
+
+
 
