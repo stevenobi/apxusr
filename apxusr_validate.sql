@@ -5739,3 +5739,18 @@ exception when others then
                      LF || SQLERRM  || LF ||'</body></html>';
 end;
 /
+
+
+#WORKSPACE_IMAGES#js/BFARM_FOOTER.min.js?v=20180205.#APEX_VERSION#
+#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js?v=20180205.#APEX_VERSION#
+#WORKSPACE_IMAGES#js/validate/messages_de.min.js?v=20180205.#APEX_VERSION#
+#WORKSPACE_IMAGES#js/validateFormGlobals.min.js?v=20180205.#APEX_VERSION#
+
+
+// set BFARM Footer
+setFooter();
+
+#WORKSPACE_IMAGES#css/BFARM_Theme101.min.css?v=20180118.#APEX_VERSION#
+#WORKSPACE_IMAGES#css/validate/screen.min.css?v=20180129.#APEX_VERSION#
+#WORKSPACE_IMAGES#css/validateForm.min.css?v=20180129.#APEX_VERSION#
+
