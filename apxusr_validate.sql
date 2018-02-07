@@ -4192,7 +4192,7 @@ REFERENCES "RAS_INTERN"."_APEX_APP_USER" ("APP_USER_ID") ON DELETE CASCADE ENABL
 
 
 
-create or replace procedure "_RAS_SOFT_DELETE" (
+create or replace procedure "BFARM_RAS_SOFT_DELETE" (
 p_table in varchar2,
 p_id number,
 p_msg in varchar2 :=' können nicht gelöscht werden!',
@@ -4205,25 +4205,25 @@ l_result number;
 l_username varchar2(128);
 begin
     select app_status_id into l_status_id
-    from "_APEX_APP_STATUS"
+    from "BFARM_APEX_APP_STATUS"
     where app_status = upper(nvl(p_new_status, 'LOCKED'));
-    if (upper(p_table) = '_APEX_APP_USER') then
+    if (upper(p_table) = 'BFARM_APEX_APP_USER') then
         l_msg := 'Benutzer'||p_msg;
         commit;
-        update  "_APEX_APP_USER"
+        update  "BFARM_APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
         where APP_USER_ID = p_id;
         -- get the username
-        select upper(trim(app_username))
-        into l_username
-        from  "_APEX_APP_USER"
-        where  APP_USER_ID = p_id;
+        for u in (select upper(trim(app_username)) username
+                     from  "BFARM_APEX_APP_USER"
+                    where  APP_USER_ID = p_id) loop
+            l_username := u.username;
+        end loop;    
         -- remove user from registration table
         delete from "RAS"."APX$USER_REG"
-        where upper(trim(apx_username)) =  l_username;
-        commit;
+        where upper(trim(apx_username)) =  nvl(l_username, '');
         -- remove user from apex
          "RAS"."APEX_EDIT_USER_PKG"."DROP_USER_JOB"(  
              p_result           => l_result
@@ -4234,7 +4234,7 @@ begin
     elsif  (upper(p_table) = 'RAS_DOMAINEN') then
         l_msg := 'Domainen'||p_msg;
         commit;
-        update  "_APEX_APP_USER"
+        update  "BFARM_APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
@@ -4276,8 +4276,6 @@ begin
     commit;
     RAISE_APPLICATION_ERROR (-20002, l_msg, TRUE);
 end;
-/
-
 
 declare
 l_result      varchar2(4000);
