@@ -27,7 +27,7 @@ prompt APPLICATION 110 - User Management
 -- Application Export:
 --   Application:     110
 --   Name:            User Management
---   Date and Time:   22:17 Monday February 12, 2018
+--   Date and Time:   23:47 Sunday January 28, 2018
 --   Exported By:     ADMIN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -36,19 +36,19 @@ prompt APPLICATION 110 - User Management
 --
 
 -- Application Statistics:
---   Pages:                     17
---     Items:                   51
---     Validations:              1
---     Processes:               21
---     Regions:                 41
---     Buttons:                 35
---     Dynamic Actions:         49
+--   Pages:                     11
+--     Items:                   25
+--     Validations:              3
+--     Processes:               15
+--     Regions:                 22
+--     Buttons:                 17
+--     Dynamic Actions:         22
 --   Shared Components:
 --     Logic:
 --     Navigation:
 --       Lists:                  4
 --       Breadcrumbs:            1
---         Entries:              4
+--         Entries:              3
 --     Security:
 --       Authentication:         1
 --     User Interface:
@@ -63,7 +63,7 @@ prompt APPLICATION 110 - User Management
 --         Breadcrumb:           1
 --         Button:               3
 --         Report:               9
---       LOVs:                   4
+--       LOVs:                   3
 --     Globalization:
 --     Reports:
 --   Supporting Objects:  Included
@@ -114,7 +114,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212221021'
+,p_last_upd_yyyymmddhh24miss=>'20180128234612'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -162,29 +162,12 @@ wwv_flow_api.create_list_item(
 ,p_list_item_current_for_pages=>'200'
 );
 wwv_flow_api.create_list_item(
- p_id=>wwv_flow_api.id(7196367700555201)
-,p_list_item_display_sequence=>70
-,p_list_item_link_text=>'Apex User Registration'
-,p_list_item_link_target=>'f?p=&APP_ID.:255:&SESSION.::&DEBUG.'
-,p_parent_list_item_id=>wwv_flow_api.id(5688509064072503)
-,p_list_item_current_type=>'COLON_DELIMITED_PAGE_LIST'
-,p_list_item_current_for_pages=>'255'
-);
-wwv_flow_api.create_list_item(
  p_id=>wwv_flow_api.id(6078827046530889)
 ,p_list_item_display_sequence=>50
 ,p_list_item_link_text=>'FormValidation'
 ,p_list_item_link_target=>'f?p=&APP_ID.:3:&SESSION.::&DEBUG.'
 ,p_list_item_current_type=>'COLON_DELIMITED_PAGE_LIST'
 ,p_list_item_current_for_pages=>'3'
-);
-wwv_flow_api.create_list_item(
- p_id=>wwv_flow_api.id(7108061434274956)
-,p_list_item_display_sequence=>60
-,p_list_item_link_text=>'User Navigation'
-,p_list_item_link_target=>'f?p=&APP_ID.:500:&SESSION.::&DEBUG.'
-,p_list_item_current_type=>'COLON_DELIMITED_PAGE_LIST'
-,p_list_item_current_for_pages=>'500'
 );
 wwv_flow_api.create_list(
  p_id=>wwv_flow_api.id(4955137223726764)
@@ -364,22 +347,6 @@ wwv_flow_api.create_list_of_values(
 '  from "APEX_CONFIG_CONTEXT"',
 ' order by 1'))
 );
-wwv_flow_api.create_list_of_values(
- p_id=>wwv_flow_api.id(7220506214687976)
-,p_lov_name=>'APEX_USER_REG_ATTEMPTS'
-,p_lov_query=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'with reg_attempts',
-'as',
-'( select apex_config_item_value as max_attempts',
-'  from  "APEX_CONFIGURATION" ',
-'  where apex_config_item = ''USER_REGISTRATION_ATTEMPTS'')',
-'select   rownum as d',
-'          , rownum as r',
-'from (',
-'select 1 from "APEX_CONFIGURATION" c, reg_attempts a',
-'where rownum <= a.max_attempts);',
-''))
-);
 end;
 /
 prompt --application/shared_components/navigation/trees
@@ -415,12 +382,6 @@ wwv_flow_api.create_menu_option(
 ,p_short_name=>'Apex Objects'
 ,p_link=>'f?p=&APP_ID.:200:&SESSION.'
 ,p_page_id=>200
-);
-wwv_flow_api.create_menu_option(
- p_id=>wwv_flow_api.id(7203652248555216)
-,p_short_name=>'Apex User Registration'
-,p_link=>'f?p=&APP_ID.:255:&SESSION.'
-,p_page_id=>255
 );
 wwv_flow_api.create_menu_option(
  p_id=>wwv_flow_api.id(5710039063068530)
@@ -9317,7 +9278,7 @@ wwv_flow_api.create_page(
 ,p_protection_level=>'D'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212193329'
+,p_last_upd_yyyymmddhh24miss=>'20180128023856'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6146265690406203)
@@ -9336,6 +9297,8 @@ wwv_flow_api.create_page_item(
 ,p_name=>'P0_USER_REG_STATUS'
 ,p_item_sequence=>40
 ,p_item_plug_id=>wwv_flow_api.id(6146265690406203)
+,p_use_cache_before_default=>'NO'
+,p_item_default=>'0'
 ,p_display_as=>'NATIVE_HIDDEN'
 ,p_attribute_01=>'Y'
 );
@@ -10394,7 +10357,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212161309'
+,p_last_upd_yyyymmddhh24miss=>'20180128230526'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(4955714207726765)
@@ -10485,7 +10448,7 @@ wwv_flow_api.create_page_button(
 ,p_button_is_hot=>'Y'
 ,p_button_image_alt=>'Reset Password'
 ,p_button_position=>'BODY'
-,p_button_redirect_url=>'f?p=&APP_ID.:105:&SESSION.:RESETP:&DEBUG.:RP,105:P105_EMAIL:&P101_USERNAME.'
+,p_button_redirect_url=>'f?p=&APP_ID.:103:&SESSION.:REGISTER:&DEBUG.:RP,102:P102_EMAIL:&P101_USERNAME.'
 ,p_grid_column_attributes=>'style="float: right; text-align: right; right: 12px;"'
 ,p_grid_new_row=>'N'
 ,p_grid_new_column=>'Y'
@@ -10610,24 +10573,6 @@ wwv_flow_api.create_page_item(
 ,p_attribute_02=>'VALUE'
 ,p_attribute_04=>'Y'
 );
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7082393895069516)
-,p_name=>'SetFocus'
-,p_event_sequence=>10
-,p_bind_type=>'bind'
-,p_bind_event_type=>'ready'
-,p_display_when_type=>'ITEM_IS_NOT_NULL'
-,p_display_when_cond=>'P101_USERNAME'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7082473338069517)
-,p_event_id=>wwv_flow_api.id(7082393895069516)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>'apex.item( ''P101_PASSWORD'' ).setFocus();'
-);
 wwv_flow_api.create_page_process(
  p_id=>wwv_flow_api.id(4956286671726765)
 ,p_process_sequence=>10
@@ -10731,7 +10676,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180211175203'
+,p_last_upd_yyyymmddhh24miss=>'20180128231402'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5690431702074214)
@@ -10814,16 +10759,15 @@ wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(7074150315865155)
 ,p_button_sequence=>20
 ,p_button_plug_id=>wwv_flow_api.id(12746488383824300)
-,p_button_name=>'REREGISTER'
-,p_button_static_id=>'REREGISTER'
-,p_button_action=>'DEFINED_BY_DA'
+,p_button_name=>'RESETREG'
+,p_button_static_id=>'RESETREG'
+,p_button_action=>'SUBMIT'
 ,p_button_template_options=>'#DEFAULT#:t-Button--link'
 ,p_button_template_id=>wwv_flow_api.id(13845333853068998)
 ,p_button_is_hot=>'Y'
 ,p_button_image_alt=>'Reset Registration'
 ,p_button_position=>'BODY'
-,p_warn_on_unsaved_changes=>null
-,p_grid_column_attributes=>'style="float: right; text-align: right; right: 12px; display:block;"'
+,p_grid_column_attributes=>'style="float: right; text-align: right; right: 12px; display:none;"'
 ,p_grid_new_row=>'N'
 ,p_grid_new_column=>'Y'
 );
@@ -10838,7 +10782,7 @@ wwv_flow_api.create_page_button(
 ,p_button_is_hot=>'Y'
 ,p_button_image_alt=>'Finish'
 ,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP:P101_USERNAME:&P102_EMAIL.'
+,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP,101:P101_USERNAME:&P102_EMAIL.'
 );
 wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(5693832131074248)
@@ -11045,9 +10989,8 @@ wwv_flow_api.create_page_da_action(
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'begin',
 '  apx_user_registration(:P102_EMAIL',
-'                        , p_params => ''USR,TKN''',
+'                        , p_params => ''NEWUSER,TOKEN''',
 '                       );',
-'apex_util.set_session_state(''P0_USER_REG_STATUS'', ''0'');',
 'end;  '))
 ,p_attribute_02=>'P102_EMAIL'
 ,p_stop_execution_on_error=>'Y'
@@ -11064,66 +11007,6 @@ wwv_flow_api.create_page_da_action(
 'var result = $v(''P0_USER_REG_STATUS'');',
 'console.log(''RegDoneResult: '' + (result ? result : ''unknown''));',
 '$(regRegion).delay(1000).fadeOut(400, function(){    ',
-'    if (result && result == 0) {',
-'    $(successRegion).fadeIn(400);',
-'        } else {',
-'    $(errorRegion).fadeIn(400);',
-'        } ',
-'});'))
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7081379504069506)
-,p_name=>'ReRegister'
-,p_event_sequence=>20
-,p_triggering_element_type=>'BUTTON'
-,p_triggering_button_id=>wwv_flow_api.id(7074150315865155)
-,p_bind_type=>'live'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7081506864069508)
-,p_event_id=>wwv_flow_api.id(7081379504069506)
-,p_event_result=>'TRUE'
-,p_action_sequence=>20
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#P102_EMAIL'').attr(''disabled'', ''disabled'');',
-'$(''#P102_FIRSTNAME'').attr(''disabled'', ''disabled'');',
-'$(''#P102_LASTNAME'').attr(''disabled'', ''disabled'');',
-'$(''#REG'').attr(''disabled'', ''disabled'');',
-'$(regRegion + '' > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'');'))
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7081465991069507)
-,p_event_id=>wwv_flow_api.id(7081379504069506)
-,p_event_result=>'TRUE'
-,p_action_sequence=>30
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'begin',
-'  apx_user_registration(:P102_EMAIL',
-'                        , p_params => ''USR,TKN''',
-'                        , p_topic  => ''REREGISTER''',
-'                       );',
-'apex_util.set_session_state(''P0_USER_REG_STATUS'', ''0'');',
-'end;  '))
-,p_attribute_02=>'P102_EMAIL'
-,p_stop_execution_on_error=>'Y'
-,p_wait_for_result=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7081627923069509)
-,p_event_id=>wwv_flow_api.id(7081379504069506)
-,p_event_result=>'TRUE'
-,p_action_sequence=>40
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'var result = $v(''P0_USER_REG_STATUS'');',
-'console.log(''RegDoneResult: '' + (result ? result : ''unknown''));',
-'$(regRegion).delay(1000).fadeOut(400, function(){    ',
 '    if (result && result === 0) {',
 '    $(successRegion).fadeIn(400);',
 '        } else {',
@@ -11134,7 +11017,7 @@ wwv_flow_api.create_page_da_action(
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(6136138679243572)
 ,p_name=>'ResetErrorOnGetFocusEmail'
-,p_event_sequence=>30
+,p_event_sequence=>20
 ,p_triggering_element_type=>'ITEM'
 ,p_triggering_element=>'P102_EMAIL'
 ,p_bind_type=>'bind'
@@ -11157,7 +11040,7 @@ wwv_flow_api.create_page_da_action(
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(6136993928246068)
 ,p_name=>'ResetErrorOnGetFocusFirstname'
-,p_event_sequence=>40
+,p_event_sequence=>30
 ,p_triggering_element_type=>'ITEM'
 ,p_triggering_element=>'P102_FIRSTNAME'
 ,p_bind_type=>'bind'
@@ -11179,7 +11062,7 @@ wwv_flow_api.create_page_da_action(
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(6137751014248221)
 ,p_name=>'ResetErrorOnGetFocusLastname'
-,p_event_sequence=>50
+,p_event_sequence=>40
 ,p_triggering_element_type=>'ITEM'
 ,p_triggering_element=>'P102_LASTNAME'
 ,p_bind_type=>'bind'
@@ -11209,6 +11092,29 @@ wwv_flow_api.create_page_process(
 ,p_error_display_location=>'INLINE_IN_NOTIFICATION'
 ,p_process_when_type=>'NEVER'
 );
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(7080992511069502)
+,p_process_sequence=>10
+,p_process_point=>'ON_SUBMIT_BEFORE_COMPUTATION'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'ResetRegistration'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'begin',
+'update "APEX_USER_REGISTRATION"',
+'set apx_user_token = apx_get_token(upper(:P102_EMAIL)),',
+'    apx_user_token_created = sysdate',
+'where upper(trim(apx_user_email)) = upper(trim(:P102_EMAIL));',
+'commit;',
+'end;'))
+,p_process_error_message=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'Fehler bei Zurücksetzen Ihrer Registrierung. ',
+'#SQLERM#'))
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
+,p_process_when_button_id=>wwv_flow_api.id(7074150315865155)
+,p_process_success_message=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'Registrierung erfolgreich zurückgesetzt.',
+'Bitte versuchen Sie es noch einmal.'))
+);
 end;
 /
 prompt --application/pages/page_00103
@@ -11228,7 +11134,10 @@ wwv_flow_api.create_page(
 ,p_javascript_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js?v=#APEX_VERSION#',
 '#WORKSPACE_IMAGES#js/validate/messages_de.min.js?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#js/validateNewUser.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateFormGlobals.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateRegistrationGlobals.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateForm.min.js?v=#APEX_VERSION#',
+'#WORKSPACE_IMAGES#js/validateUser.min.js?v=#APEX_VERSION#',
 ''))
 ,p_css_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '#WORKSPACE_IMAGES#css/validate/screen.css?v=#APEX_VERSION#',
@@ -11243,11 +11152,11 @@ wwv_flow_api.create_page(
 '    height: 40px;',
 '}',
 '',
-'#NUPWV_CONTAINER > div.t-Form-inputContainer {',
+'#P103_PASSWORD_CONFIRM_CONTAINER > div.t-Form-inputContainer {',
 '    height: 80px;',
 '}',
 '',
-'#P103_USR_REG_CONFIRM_CONTAINER > div.t-Form-inputContainer.col.col-null {',
+'#P103_USRREG_CONFIRM_CONTAINER > div.t-Form-inputContainer.col.col-null {',
 '    min-height: 180px;',
 '}',
 '',
@@ -11259,7 +11168,7 @@ wwv_flow_api.create_page(
 '    min-height: 180px;',
 '}',
 '',
-'#TOKEN-error , #NEWUSER-error , #NUPW-error, #NUPWV-error {',
+'#TOKEN-error , #USERNAME-error , #P103_PASSWORD-error, #P103_PASSWORD_CONFIRM-error {',
 '    top: 48px;',
 '    position: absolute;',
 '    font-size: 90%;',
@@ -11272,49 +11181,15 @@ wwv_flow_api.create_page(
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'Y'
 ,p_browser_cache=>'N'
+,p_deep_linking=>'Y'
 ,p_rejoin_existing_sessions=>'P'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212214358'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(12826221698767930)
-,p_plug_name=>'User Registration Confirmation'
-,p_region_name=>'USREG_CONFIRM'
-,p_icon_css_classes=>'fa-check-circle t-success'
-,p_region_template_options=>'#DEFAULT#:t-Form--slimPadding:t-Form--stretchInputs:margin-top-lg:margin-bottom-lg'
-,p_region_attributes=>'style="display:none;"'
-,p_plug_template=>wwv_flow_api.id(13799328938068981)
-,p_plug_display_sequence=>20
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'TEXT'
-,p_attribute_03=>'Y'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(12830582728770359)
-,p_plug_name=>'User Registration Error'
-,p_region_name=>'USREG_CONFIRM_ERROR'
-,p_icon_css_classes=>'fa-exclamation-triangle t-error'
-,p_region_template_options=>'#DEFAULT#:margin-top-lg:margin-bottom-lg'
-,p_region_attributes=>'style="display:none;"'
-,p_plug_template=>wwv_flow_api.id(13799328938068981)
-,p_plug_display_sequence=>30
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'TEXT'
-,p_attribute_03=>'Y'
+,p_last_upd_yyyymmddhh24miss=>'20180128234612'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(16360515279745656)
 ,p_plug_name=>'User Registration'
-,p_region_name=>'USR_REG_CONFIRM'
 ,p_icon_css_classes=>'fa-cog'
 ,p_region_template_options=>'#DEFAULT#'
 ,p_plug_template=>wwv_flow_api.id(13799328938068981)
@@ -11330,7 +11205,7 @@ wwv_flow_api.create_page_plug(
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(19844254698410034)
 ,p_plug_name=>'Buttons'
-,p_region_name=>'USR_REG_SUB_BUTTONS'
+,p_region_name=>'USR_LOGIN_ERROR'
 ,p_parent_plug_id=>wwv_flow_api.id(16360515279745656)
 ,p_region_template_options=>'#DEFAULT#:t-Form--xlarge:margin-top-md:margin-bottom-none'
 ,p_plug_template=>wwv_flow_api.id(13778706889068974)
@@ -11362,45 +11237,17 @@ wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(7098003751585735)
 ,p_button_sequence=>20
 ,p_button_plug_id=>wwv_flow_api.id(19844254698410034)
-,p_button_name=>'RESET'
-,p_button_static_id=>'RESET'
-,p_button_action=>'DEFINED_BY_DA'
+,p_button_name=>'RESETREG'
+,p_button_static_id=>'RESETREG'
+,p_button_action=>'SUBMIT'
 ,p_button_template_options=>'#DEFAULT#:t-Button--link'
 ,p_button_template_id=>wwv_flow_api.id(13845333853068998)
 ,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Reset'
+,p_button_image_alt=>'Reset Registration'
 ,p_button_position=>'BODY'
-,p_warn_on_unsaved_changes=>null
 ,p_grid_column_attributes=>'style="float: right; text-align: right; right: 12px; display:none;"'
 ,p_grid_new_row=>'N'
 ,p_grid_new_column=>'Y'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7136030748693717)
-,p_button_sequence=>10
-,p_button_plug_id=>wwv_flow_api.id(12826221698767930)
-,p_button_name=>'FINISH'
-,p_button_action=>'REDIRECT_PAGE'
-,p_button_template_options=>'#DEFAULT#:t-Button--large:t-Button--success:t-Button--stretch:t-Button--gapTop:t-Button--gapBottom'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Finish'
-,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP:P101_USERNAME:&NEWUSER.'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7137185586696112)
-,p_button_sequence=>10
-,p_button_plug_id=>wwv_flow_api.id(12830582728770359)
-,p_button_name=>'FINISH_ERR'
-,p_button_static_id=>'FIN_ERR'
-,p_button_action=>'REDIRECT_PAGE'
-,p_button_template_options=>'#DEFAULT#:t-Button--large:t-Button--danger:t-Button--pillEnd:t-Button--stretch:t-Button--gapTop:t-Button--gapBottom'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Finish'
-,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_redirect_url=>'f?p=&APP_ID.:103:&SESSION.:REGISTER:&DEBUG.:RP::'
 );
 wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(5742791851174785)
@@ -11415,7 +11262,7 @@ wwv_flow_api.create_page_button(
 ,p_button_image_alt=>'Sign Up'
 ,p_button_position=>'REGION_TEMPLATE_NEXT'
 ,p_warn_on_unsaved_changes=>null
-,p_button_cattributes=>'disabled="disabled"'
+,p_database_action=>'INSERT'
 );
 wwv_flow_api.create_page_branch(
  p_id=>wwv_flow_api.id(5746440041174812)
@@ -11439,8 +11286,8 @@ wwv_flow_api.create_page_branch(
 );
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(5689720125074207)
-,p_name=>'NUPWV'
-,p_item_sequence=>41
+,p_name=>'P103_PASSWORD_CONFIRM'
+,p_item_sequence=>30
 ,p_item_plug_id=>wwv_flow_api.id(16360515279745656)
 ,p_placeholder=>'Neues Passwort bestätigen'
 ,p_display_as=>'NATIVE_PASSWORD'
@@ -11449,14 +11296,13 @@ wwv_flow_api.create_page_item(
 ,p_tag_attributes=>'minlength="5" required'
 ,p_field_template=>wwv_flow_api.id(13845150629068998)
 ,p_item_template_options=>'#DEFAULT#'
-,p_encrypt_session_state_yn=>'Y'
-,p_attribute_01=>'N'
-,p_attribute_02=>'N'
+,p_attribute_01=>'Y'
+,p_attribute_02=>'Y'
 );
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(5743160098174788)
 ,p_name=>'NEWUSER'
-,p_item_sequence=>21
+,p_item_sequence=>10
 ,p_item_plug_id=>wwv_flow_api.id(16360515279745656)
 ,p_use_cache_before_default=>'NO'
 ,p_display_as=>'NATIVE_DISPLAY_ONLY'
@@ -11468,8 +11314,8 @@ wwv_flow_api.create_page_item(
 );
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(5743523023174792)
-,p_name=>'NUPW'
-,p_item_sequence=>31
+,p_name=>'P103_PASSWORD'
+,p_item_sequence=>20
 ,p_item_plug_id=>wwv_flow_api.id(16360515279745656)
 ,p_placeholder=>'Neues Passwort eingeben'
 ,p_display_as=>'NATIVE_PASSWORD'
@@ -11478,7 +11324,7 @@ wwv_flow_api.create_page_item(
 ,p_tag_attributes=>'minlength="5" required'
 ,p_field_template=>wwv_flow_api.id(13845150629068998)
 ,p_item_template_options=>'#DEFAULT#'
-,p_attribute_01=>'N'
+,p_attribute_01=>'Y'
 ,p_attribute_02=>'Y'
 );
 wwv_flow_api.create_page_item(
@@ -11490,63 +11336,34 @@ wwv_flow_api.create_page_item(
 ,p_display_as=>'NATIVE_HIDDEN'
 ,p_attribute_01=>'Y'
 );
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7082531233069518)
-,p_name=>'PWD'
-,p_item_sequence=>11
-,p_item_plug_id=>wwv_flow_api.id(16360515279745656)
-,p_display_as=>'NATIVE_HIDDEN'
-,p_attribute_01=>'Y'
+wwv_flow_api.create_page_validation(
+ p_id=>wwv_flow_api.id(5744494989174803)
+,p_validation_name=>'IsEmail'
+,p_validation_sequence=>10
+,p_validation=>'NEWUSER'
+,p_validation2=>'^*.@.*$'
+,p_validation_type=>'REGULAR_EXPRESSION'
+,p_error_message=>'Pleas enter a valid email adress'
+,p_always_execute=>'Y'
+,p_when_button_pressed=>wwv_flow_api.id(5742791851174785)
+,p_associated_item=>wwv_flow_api.id(5743160098174788)
+,p_error_display_location=>'INLINE_WITH_FIELD'
 );
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7136430416693717)
-,p_name=>'P103_SUCCESS'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(12826221698767930)
-,p_prompt=>'New'
-,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<h4 class="t-success">Successfully Signed Up.</h4>',
-'',
-'',
-'Thank You...'))
-,p_source_type=>'STATIC'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_tag_css_classes=>'t-text'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_template_options=>'#DEFAULT#:t-Form-fieldContainer--stretchInputs:t-Form-fieldContainer--preTextBlock:t-Form-fieldContainer--postTextBlock:margin-top-lg:margin-bottom-lg'
-,p_escape_on_http_output=>'N'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7137580363696112)
-,p_name=>'P103_ERROR'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(12830582728770359)
-,p_prompt=>'New'
-,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<h4 class="t-error">Error during Registration Confirmation:',
-'&P0_USER_REG_STATUS.</h4>',
-'',
-'Please try to <a href="#">register again</a> later',
-'and if You are still having trouble to register',
-'contact our <a href="f?p=&APP_ID.:SUPPORT:0:::::">Support</a> for help.',
-'',
-'Thank You...'))
-,p_source_type=>'STATIC'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_tag_css_classes=>'t-text'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_template_options=>'#DEFAULT#:t-Form-fieldContainer--stretchInputs:t-Form-fieldContainer--preTextBlock:t-Form-fieldContainer--postTextBlock:margin-top-lg:margin-bottom-lg'
-,p_escape_on_http_output=>'N'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
+wwv_flow_api.create_page_validation(
+ p_id=>wwv_flow_api.id(5668994786959110)
+,p_validation_name=>'EqualsPassword'
+,p_validation_sequence=>20
+,p_validation=>':P103_PASSWORD_CONFIRM = :P103_PASSWORD'
+,p_validation_type=>'PLSQL_EXPRESSION'
+,p_error_message=>'Passwords dont match!'
+,p_always_execute=>'Y'
+,p_when_button_pressed=>wwv_flow_api.id(5742791851174785)
+,p_associated_item=>wwv_flow_api.id(5689720125074207)
+,p_error_display_location=>'INLINE_WITH_FIELD'
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(5669030770959111)
-,p_name=>'SetFieldStatus'
+,p_name=>'SetFieldsStatus'
 ,p_event_sequence=>1
 ,p_bind_type=>'live'
 ,p_bind_event_type=>'ready'
@@ -11569,229 +11386,44 @@ wwv_flow_api.create_page_da_action(
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '$(''#SIGNUP'').hide();',
-'$(pwField).prop( "disabled", true );',
-'$(pwFieldV).prop( "disabled", true );',
+'$(''#P103_PASSWORD'').prop( "disabled", true );',
+'$(''#P103_PASSWORD_CONFIRM'').prop( "disabled", true );',
 ''))
 );
 wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7081736258069510)
-,p_name=>'ResetFields'
-,p_event_sequence=>5
+ p_id=>wwv_flow_api.id(5669888329959119)
+,p_name=>'New'
+,p_event_sequence=>11
 ,p_triggering_element_type=>'BUTTON'
-,p_triggering_button_id=>wwv_flow_api.id(7098003751585735)
+,p_triggering_button_id=>wwv_flow_api.id(5742791851174785)
 ,p_bind_type=>'bind'
 ,p_bind_event_type=>'click'
 );
 wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7081842903069511)
-,p_event_id=>wwv_flow_api.id(7081736258069510)
+ p_id=>wwv_flow_api.id(5669905545959120)
+,p_event_id=>wwv_flow_api.id(5669888329959119)
 ,p_event_result=>'TRUE'
 ,p_action_sequence=>10
 ,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_SET_VALUE'
-,p_affected_elements_type=>'JAVASCRIPT_EXPRESSION'
-,p_affected_elements=>'pwField'
-,p_attribute_01=>'STATIC_ASSIGNMENT'
-,p_attribute_09=>'N'
-,p_stop_execution_on_error=>'Y'
-,p_wait_for_result=>'Y'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>'$(''div.t-Login-header > span'').addClass(''fa-spin'').delay(1000);'
 );
 wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7081945128069512)
-,p_event_id=>wwv_flow_api.id(7081736258069510)
+ p_id=>wwv_flow_api.id(5670018939959121)
+,p_event_id=>wwv_flow_api.id(5669888329959119)
 ,p_event_result=>'TRUE'
 ,p_action_sequence=>20
 ,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_SET_VALUE'
-,p_affected_elements_type=>'JAVASCRIPT_EXPRESSION'
-,p_affected_elements=>'pwFieldV'
-,p_attribute_01=>'STATIC_ASSIGNMENT'
-,p_attribute_09=>'N'
-,p_stop_execution_on_error=>'Y'
-,p_wait_for_result=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7082094330069513)
-,p_event_id=>wwv_flow_api.id(7081736258069510)
-,p_event_result=>'TRUE'
-,p_action_sequence=>30
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''.t-Form-error'').fadeOut();',
-'$(pwField + ''-error'').fadeOut();',
-'$(pwField + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
-'$(pwFieldV + ''-error'').fadeOut();',
-'$(pwFieldV + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
-'// Password Complexity',
-'jQuery.validator.addMethod("pwcheck", function(value) {',
-'    return (',
-'        /^[A-Za-z0-9\d=!\-+#.,:@._*]*$/.test(value) && // consists of only these',
-'        /[=!\-+#.,:@._*]/.test(value) && // a special char',
-'        /[a-z]/.test(value) && // has a lowercase letter',
-'        /\d/.test(value)',
-'    ); // has a digit',
-'});',
-'',
-'var validator = form.validate({',
-'    lang: Lang,',
-'    // This global normalizer will trim',
-'    // the value of all elements before validatng them.',
-'    normalizer: function(value) {',
-'        return $.trim(value);',
-'    },',
-'    rules: {',
-'        NUPW: {',
-'            required: true,',
-'            pwcheck: true',
-'        },',
-'        NUPWV: {',
-'            required: true,',
-'            equalTo: NUPW',
-'        }',
-'    },',
-'    messages: {',
-'        NUPW: {',
-'            pwcheck: PWCHECK_MSG',
-'        }',
-'    }',
-'});'))
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7153646791283123)
-,p_name=>'CheckOnClickDisabledButton'
-,p_event_sequence=>10
-,p_triggering_element_type=>'JQUERY_SELECTOR'
-,p_triggering_element=>'div.t-Login-buttons'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7154040191283124)
-,p_event_id=>wwv_flow_api.id(7153646791283123)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'checkInput();',
-'setReRegButton();'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7154451666287116)
-,p_name=>'CheckOnClickSignUpButton'
-,p_event_sequence=>20
-,p_triggering_element_type=>'JQUERY_SELECTOR'
-,p_triggering_element=>'div.t-Login-buttons'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7154840668287116)
-,p_event_id=>wwv_flow_api.id(7154451666287116)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'checkInput();',
-'setReRegButton();'))
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7155245570289958)
-,p_name=>'SignUp'
-,p_event_sequence=>20
-,p_triggering_element_type=>'BUTTON'
-,p_triggering_button_id=>wwv_flow_api.id(5742791851174785)
-,p_bind_type=>'live'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7156170378289959)
-,p_event_id=>wwv_flow_api.id(7155245570289958)
-,p_event_result=>'TRUE'
-,p_action_sequence=>5
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#NEWUSER'').attr(''disabled'', ''disabled'');',
-'$(''#NUPW'').attr(''disabled'', ''disabled'');',
-'//$(''#NUPWV'').attr(''disabled'', ''disabled'');',
-'$(''#SIGNUP'').attr(''disabled'', ''disabled'');',
-'$(regRegion + '' > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'');'))
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7155660188289959)
-,p_event_id=>wwv_flow_api.id(7155245570289958)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'declare',
-'    l_result           number          := 0;',
-'    l_app_id           number          := v(''APP_ID'');',
-'    l_username         varchar2(200)   := v(''NEUSER'');',
-'    l_web_password     varchar2(200)   := v(''NUPWV'');',
-'    l_email_address    varchar2(200)   := v(''NEWUSER'');',
-'    l_token            varchar2(200)   := v(''TOKEN'');',
-'    l_default_schema   varchar2(200)   := ''APXUSR'';',
-'begin',
-'/*',
-'raise_application_error(-20001, ''In Create User Function''|| v(''NUPWV'')|| '' ''|| l_result ||',
-'l_username ||'' ''||',
-'l_web_password||'' ''||',
-'l_email_address||'' ''||',
-'l_token||'' ''||',
-'l_app_id||'' ''||',
-'l_default_schema);',
-'*/',
-'"APEX_CREATE_USER" (',
-'    p_result           => l_result',
-'  , p_username         => l_username',
-'  , p_web_password     => l_web_password',
-'  , p_email_address    => l_email_address',
-'  , p_token            => l_token',
-'  , p_app_id           => l_app_id',
-'  , p_default_schema   => l_default_schema',
-'    );',
-'if (l_result = ''0'') then    ',
-'    apex_util.set_session_state(''P0_USER_REG_STATUS'', ''CREATED'');',
-'else    ',
-'    apex_util.set_session_state(''P0_USER_REG_STATUS'', l_result);',
-'end if;',
-'--raise_application_error(-20001, ''In Create User Function "''||l_result||''" P0STAT: ''||v(''P0_USER_REG_STATUS''));    ',
-'end;  '))
-,p_attribute_02=>'NEWUSER,TOKEN'
-,p_stop_execution_on_error=>'N'
-,p_wait_for_result=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7156601016289959)
-,p_event_id=>wwv_flow_api.id(7155245570289958)
-,p_event_result=>'TRUE'
-,p_action_sequence=>15
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#P0_USER_REG_STATUS'').val($(''#P0_USER_REG_STATUS'').val());',
-'var result = $v(''P0_USER_REG_STATUS'');',
-'console.log(''RegDoneResult: '' + (result ? result : ''unknown''));',
-'$(regRegion).delay(1000).fadeOut(400, function(){    ',
-'    if (result && result == ''CREATED'') {',
-'    $(successRegion).fadeIn(400);',
-'        } else {',
-'    $(errorRegion).fadeIn(400);',
-'        } ',
-'});'))
+,p_action=>'NATIVE_SUBMIT_PAGE'
+,p_attribute_01=>'SIGNUP'
+,p_attribute_02=>'N'
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(7100290953649912)
 ,p_name=>'ResetErrorOnGetFocusPassword'
 ,p_event_sequence=>21
-,p_triggering_element_type=>'JAVASCRIPT_EXPRESSION'
-,p_triggering_element=>'pwField'
+,p_triggering_element_type=>'ITEM'
+,p_triggering_element=>'P103_PASSWORD'
 ,p_bind_type=>'bind'
 ,p_bind_event_type=>'focusin'
 );
@@ -11804,16 +11436,16 @@ wwv_flow_api.create_page_da_action(
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '$(''.t-Form-error'').fadeOut();',
-'$(pwField + ''-error'').fadeOut();',
-'$(pwField + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
+'$(''#P103_PASSWORD-error'').fadeOut();',
+'$(''#P103_PASSWORD > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
 ''))
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(7081164247069504)
 ,p_name=>'ResetErrorOnGetFocusPasswordConfirm'
 ,p_event_sequence=>31
-,p_triggering_element_type=>'JAVASCRIPT_EXPRESSION'
-,p_triggering_element=>'pwFieldV'
+,p_triggering_element_type=>'ITEM'
+,p_triggering_element=>'P103_PASSWORD_CONFIRM'
 ,p_bind_type=>'bind'
 ,p_bind_event_type=>'focusin'
 );
@@ -11826,8 +11458,8 @@ wwv_flow_api.create_page_da_action(
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '$(''.t-Form-error'').fadeOut();',
-'$(pwFieldV + ''-error'').fadeOut();',
-'$(pwFieldV + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
+'$(''#P103_PASSWORD_CONFIRM-error'').fadeOut();',
+'$(''#P103_PASSWORD_CONFIRM > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
 ''))
 );
 wwv_flow_api.create_page_process(
@@ -11846,56 +11478,17 @@ begin
 wwv_flow_api.create_page(
  p_id=>104
 ,p_user_interface_id=>wwv_flow_api.id(4955200262726764)
-,p_name=>'Reset Password'
+,p_name=>'User Confirm'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'Reset Password'
+,p_step_title=>'User Confirm'
 ,p_warn_on_unsaved_changes=>'N'
-,p_step_sub_title=>'Reset Password'
+,p_step_sub_title=>'User Confirm'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'AUTO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'ON'
-,p_javascript_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#js/validate/messages_de.min.js?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#js/validateNewUser.min.js?v=#APEX_VERSION#',
-''))
-,p_css_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'#WORKSPACE_IMAGES#css/validate/screen.css?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#css/validateInput.min.css?v=#APEX_VERSION#'))
 ,p_inline_css=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'#NEWUSER {',
-'    font-size: 18px;',
-'    text-align: center;',
-'}',
-'',
-'#NEWUSER_CONTAINER > div.t-Form-inputContainer {',
-'    height: 40px;',
-'}',
-'',
-'#NUPWV_CONTAINER > div.t-Form-inputContainer {',
-'    height: 80px;',
-'}',
-'',
-'#P103_USR_REG_CONFIRM_CONTAINER > div.t-Form-inputContainer.col.col-null {',
-'    min-height: 180px;',
-'}',
-'',
-'#P103_SUCCESS_CONTAINER > div.t-Form-inputContainer.col.col-null {',
-'    min-height: 180px;',
-'}',
-'',
-'#P103_ERROR_CONTAINER > div.t-Form-inputContainer.col.col-null {',
-'    min-height: 180px;',
-'}',
-'',
-'#TOKEN-error , #NEWUSER-error , #NUPW-error, #NUPWV-error {',
-'    top: 48px;',
-'    position: absolute;',
-'    font-size: 90%;',
-'    line-height: 1.28;',
-'}',
-'',
-''))
+'.t-success:before { color: green; font-size: 72px; }',
+'#P104_NEWUSER { font-size: large; text-align: center; margin-bottom: 30px; }'))
 ,p_step_template=>wwv_flow_api.id(13761578240068968)
 ,p_page_template_options=>'#DEFAULT#'
 ,p_overwrite_navigation_list=>'N'
@@ -11905,47 +11498,13 @@ wwv_flow_api.create_page(
 ,p_rejoin_existing_sessions=>'P'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180211143457'
+,p_last_upd_yyyymmddhh24miss=>'20171210225923'
 );
 wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(20001602097049666)
-,p_plug_name=>'User Reset Confirmation'
-,p_region_name=>'USRRESETP_CONFIRM'
-,p_icon_css_classes=>'fa-check-circle t-success'
-,p_region_template_options=>'#DEFAULT#:t-Form--slimPadding:t-Form--stretchInputs:margin-top-lg:margin-bottom-lg'
-,p_region_attributes=>'style="display:none;"'
-,p_plug_template=>wwv_flow_api.id(13799328938068981)
-,p_plug_display_sequence=>20
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'TEXT'
-,p_attribute_03=>'Y'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(20005963127052095)
-,p_plug_name=>'User Reset Error'
-,p_region_name=>'USRRESETP_CONFIRM_ERROR'
-,p_icon_css_classes=>'fa-exclamation-triangle t-error'
-,p_region_template_options=>'#DEFAULT#:margin-top-lg:margin-bottom-lg'
-,p_region_attributes=>'style="display:none;"'
-,p_plug_template=>wwv_flow_api.id(13799328938068981)
-,p_plug_display_sequence=>30
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'TEXT'
-,p_attribute_03=>'Y'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(23535895678027392)
-,p_plug_name=>'User Reset Password'
-,p_region_name=>'USRRESETP'
-,p_icon_css_classes=>'fa-cog'
+ p_id=>wwv_flow_api.id(22164303640162935)
+,p_plug_name=>'Thank You Very much...'
+,p_region_css_classes=>'t-success'
+,p_icon_css_classes=>'fa-check-circle'
 ,p_region_template_options=>'#DEFAULT#'
 ,p_plug_template=>wwv_flow_api.id(13799328938068981)
 ,p_plug_display_sequence=>10
@@ -11957,98 +11516,21 @@ wwv_flow_api.create_page_plug(
 ,p_attribute_02=>'TEXT'
 ,p_attribute_03=>'Y'
 );
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(27019635096691770)
-,p_plug_name=>'Buttons'
-,p_region_name=>'USRRESETP_SUB_BUTTONS'
-,p_parent_plug_id=>wwv_flow_api.id(23535895678027392)
-,p_region_template_options=>'#DEFAULT#:t-Form--xlarge:margin-top-md:margin-bottom-none'
-,p_plug_template=>wwv_flow_api.id(13778706889068974)
-,p_plug_display_sequence=>10
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'HTML'
-);
 wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7178790756281739)
-,p_button_sequence=>10
-,p_button_plug_id=>wwv_flow_api.id(27019635096691770)
-,p_button_name=>'CANCEL'
-,p_button_static_id=>'CANCEL'
-,p_button_action=>'REDIRECT_PAGE'
-,p_button_template_options=>'#DEFAULT#:t-Button--link:t-Button--gapLeft'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Cancel'
-,p_button_position=>'BODY'
-,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP,101:P101_USERNAME:&P104_EMAIL.'
-,p_grid_column_attributes=>'style="float: left; text-align: left;"'
-,p_grid_new_row=>'Y'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7178384611281739)
-,p_button_sequence=>20
-,p_button_plug_id=>wwv_flow_api.id(27019635096691770)
-,p_button_name=>'RESET'
-,p_button_static_id=>'RESET'
-,p_button_action=>'DEFINED_BY_DA'
-,p_button_template_options=>'#DEFAULT#:t-Button--link'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Reset'
-,p_button_position=>'BODY'
-,p_warn_on_unsaved_changes=>null
-,p_grid_column_attributes=>'style="float: right; text-align: right; right: 12px; display:none;"'
-,p_grid_new_row=>'N'
-,p_grid_new_column=>'Y'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7179441078281739)
-,p_button_sequence=>10
-,p_button_plug_id=>wwv_flow_api.id(20001602097049666)
-,p_button_name=>'FINISH'
-,p_button_action=>'REDIRECT_PAGE'
-,p_button_template_options=>'#DEFAULT#:t-Button--large:t-Button--success:t-Button--stretch:t-Button--gapTop:t-Button--gapBottom'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Finish'
-,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP:P101_USERNAME:&NEWUSER.'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7180526555281739)
-,p_button_sequence=>10
-,p_button_plug_id=>wwv_flow_api.id(20005963127052095)
-,p_button_name=>'FINISH_ERR'
-,p_button_static_id=>'FIN_ERR'
-,p_button_action=>'REDIRECT_PAGE'
-,p_button_template_options=>'#DEFAULT#:t-Button--large:t-Button--danger:t-Button--pillEnd:t-Button--stretch:t-Button--gapTop:t-Button--gapBottom'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Finish'
-,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_redirect_url=>'f?p=&APP_ID.:104:&SESSION.:REGISTER:&DEBUG.:RP::'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7176025100281737)
+ p_id=>wwv_flow_api.id(5804440361417285)
 ,p_button_sequence=>30
-,p_button_plug_id=>wwv_flow_api.id(23535895678027392)
-,p_button_name=>'SIGNUP'
-,p_button_static_id=>'SIGNUP'
-,p_button_action=>'DEFINED_BY_DA'
-,p_button_template_options=>'#DEFAULT#:t-Button--iconLeft:t-Button--padTop:t-Button--padBottom'
-,p_button_template_id=>wwv_flow_api.id(13845383580068998)
+,p_button_plug_id=>wwv_flow_api.id(22164303640162935)
+,p_button_name=>'DONE'
+,p_button_action=>'SUBMIT'
+,p_button_template_options=>'#DEFAULT#'
+,p_button_template_id=>wwv_flow_api.id(13845333853068998)
 ,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Reset Password'
+,p_button_image_alt=>'Done'
 ,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_warn_on_unsaved_changes=>null
-,p_button_cattributes=>'disabled="disabled"'
+,p_icon_css_classes=>'fa-check-circle-o'
 );
 wwv_flow_api.create_page_branch(
- p_id=>wwv_flow_api.id(7190579518281744)
+ p_id=>wwv_flow_api.id(5808463946417299)
 ,p_branch_name=>'Go To Page 1'
 ,p_branch_action=>'f?p=&APP_ID.:1:&SESSION.::&DEBUG.:RP,1::&success_msg=#SUCCESS_MSG#'
 ,p_branch_point=>'BEFORE_COMPUTATION'
@@ -12056,1544 +11538,129 @@ wwv_flow_api.create_page_branch(
 ,p_branch_sequence=>10
 ,p_branch_condition_type=>'NEVER'
 );
-wwv_flow_api.create_page_branch(
- p_id=>wwv_flow_api.id(7190114196281744)
-,p_branch_name=>'Go To Page 104'
-,p_branch_action=>'f?p=&APP_ID.:104:&SESSION.:SIGNEDUP:&DEBUG.:RP,104:P104_NEWUSER,P104_TOKEN:&NEWUSER.,&TOKEN.&success_msg=#SUCCESS_MSG#'
-,p_branch_point=>'BEFORE_COMPUTATION'
-,p_branch_type=>'REDIRECT_URL'
-,p_branch_when_button_id=>wwv_flow_api.id(5742791851174785)
-,p_branch_sequence=>20
-,p_branch_condition_type=>'PLSQL_EXPRESSION'
-,p_branch_condition=>':P104_PASSWORD_CONFIRM = :P104_PASSWORD'
-);
 wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(6147593497406216)
-,p_name=>'RNPWV'
-,p_item_sequence=>40
-,p_item_plug_id=>wwv_flow_api.id(23535895678027392)
-,p_placeholder=>'Neues Passwort bestätigen'
-,p_display_as=>'NATIVE_PASSWORD'
-,p_cSize=>40
-,p_cMaxlength=>100
-,p_tag_attributes=>'minlength="5" required'
-,p_field_template=>wwv_flow_api.id(13845150629068998)
-,p_item_template_options=>'#DEFAULT#'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7176443915281737)
-,p_name=>'RP_TOKEN'
+ p_id=>wwv_flow_api.id(5804882631417286)
+,p_name=>'P104_TOKEN'
 ,p_item_sequence=>1
-,p_item_plug_id=>wwv_flow_api.id(23535895678027392)
+,p_item_plug_id=>wwv_flow_api.id(22164303640162935)
 ,p_use_cache_before_default=>'NO'
 ,p_display_as=>'NATIVE_HIDDEN'
 ,p_attribute_01=>'Y'
 );
 wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7176885252281737)
-,p_name=>'RP_USER'
+ p_id=>wwv_flow_api.id(5805246190417290)
+,p_name=>'P104_NEWUSER'
 ,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(23535895678027392)
+,p_item_plug_id=>wwv_flow_api.id(22164303640162935)
 ,p_use_cache_before_default=>'NO'
+,p_prompt=>'User'
 ,p_display_as=>'NATIVE_DISPLAY_ONLY'
 ,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_template_options=>'#DEFAULT#'
+,p_item_icon_css_classes=>'fa-user'
+,p_item_template_options=>'#DEFAULT#:t-Form-fieldContainer--stretchInputs'
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'VALUE'
 ,p_attribute_04=>'Y'
 );
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7177213626281737)
-,p_name=>'ROPW'
-,p_item_sequence=>20
-,p_item_plug_id=>wwv_flow_api.id(23535895678027392)
-,p_placeholder=>'Neues Passwort eingeben'
-,p_display_as=>'NATIVE_PASSWORD'
-,p_cSize=>40
-,p_cMaxlength=>100
-,p_tag_attributes=>'minlength="5" required'
-,p_field_template=>wwv_flow_api.id(13845150629068998)
-,p_item_template_options=>'#DEFAULT#'
-,p_attribute_01=>'N'
-,p_attribute_02=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7177615474281738)
-,p_name=>'RNPW'
-,p_item_sequence=>30
-,p_item_plug_id=>wwv_flow_api.id(23535895678027392)
-,p_prompt=>'Rnpw'
-,p_placeholder=>'Neues Passwort bestätigen'
-,p_display_as=>'NATIVE_PASSWORD'
-,p_cSize=>40
-,p_cMaxlength=>100
-,p_tag_attributes=>'minlength="5" required'
-,p_field_template=>wwv_flow_api.id(13845150629068998)
-,p_item_template_options=>'#DEFAULT#'
-,p_attribute_01=>'N'
-,p_attribute_02=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7179878825281739)
-,p_name=>'P104_SUCCESS'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(20001602097049666)
-,p_prompt=>'New'
-,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<h4 class="t-success">Successfully Reset Password.</h4>',
-'',
-'You can now login in with Your new credentials.',
-'',
-'Thank You...'))
-,p_source_type=>'STATIC'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_tag_css_classes=>'t-text'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_template_options=>'#DEFAULT#:t-Form-fieldContainer--stretchInputs:t-Form-fieldContainer--preTextBlock:t-Form-fieldContainer--postTextBlock:margin-top-lg:margin-bottom-lg'
-,p_escape_on_http_output=>'N'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7180978671281740)
-,p_name=>'P104_ERROR'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(20005963127052095)
-,p_prompt=>'New'
-,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<h4 class="t-error">Error during Reset Password:',
-'&P0_USER_REG_STATUS.</h4>',
-'',
-'Please try to reset your password later',
-'and if You are still having trouble to reset your password',
-'contact our <a href="f?p=&APP_ID.:SUPPORT:0:::::">Support</a> for help.',
-'',
-'Thank You...'))
-,p_source_type=>'STATIC'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_tag_css_classes=>'t-text'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_template_options=>'#DEFAULT#:t-Form-fieldContainer--stretchInputs:t-Form-fieldContainer--preTextBlock:t-Form-fieldContainer--postTextBlock:margin-top-lg:margin-bottom-lg'
-,p_escape_on_http_output=>'N'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
+wwv_flow_api.create_page_validation(
+ p_id=>wwv_flow_api.id(5806874868417298)
+,p_validation_name=>'IsEmail'
+,p_validation_sequence=>10
+,p_validation=>'P104_NEWUSER'
+,p_validation2=>'^*.@.*$'
+,p_validation_type=>'REGULAR_EXPRESSION'
+,p_error_message=>'Pleas enter a valid email adress'
+,p_always_execute=>'Y'
+,p_when_button_pressed=>wwv_flow_api.id(5804440361417285)
+,p_associated_item=>wwv_flow_api.id(5805246190417290)
+,p_error_display_location=>'INLINE_WITH_FIELD'
 );
 wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7181772211281741)
-,p_name=>'SetFieldStatus'
-,p_event_sequence=>1
-,p_bind_type=>'live'
+ p_id=>wwv_flow_api.id(5817912387727758)
+,p_name=>'SetIcon'
+,p_event_sequence=>10
+,p_bind_type=>'bind'
 ,p_bind_event_type=>'ready'
-,p_display_when_type=>'FUNCTION_BODY'
-,p_display_when_cond=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'begin',
-'if (:TOKEN is null and :NEWUSER is null) then',
-'  return true;',
-'else',
-'  return false;',
-'end if;',
-'end;'))
 );
 wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7182248024281741)
-,p_event_id=>wwv_flow_api.id(7181772211281741)
+ p_id=>wwv_flow_api.id(5818307765727759)
+,p_event_id=>wwv_flow_api.id(5817912387727758)
 ,p_event_result=>'TRUE'
 ,p_action_sequence=>10
 ,p_execute_on_page_init=>'Y'
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#SIGNUP'').hide();',
-'$(pwField).prop( "disabled", true );',
-'$(pwFieldV).prop( "disabled", true );',
-''))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7184427904281742)
-,p_name=>'ResetFields'
-,p_event_sequence=>5
-,p_triggering_element_type=>'BUTTON'
-,p_triggering_button_id=>wwv_flow_api.id(7098003751585735)
-,p_bind_type=>'bind'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7184915904281742)
-,p_event_id=>wwv_flow_api.id(7184427904281742)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_SET_VALUE'
-,p_affected_elements_type=>'JAVASCRIPT_EXPRESSION'
-,p_affected_elements=>'pwField'
-,p_attribute_01=>'STATIC_ASSIGNMENT'
-,p_attribute_09=>'N'
-,p_stop_execution_on_error=>'Y'
-,p_wait_for_result=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7185453621281742)
-,p_event_id=>wwv_flow_api.id(7184427904281742)
-,p_event_result=>'TRUE'
-,p_action_sequence=>20
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_SET_VALUE'
-,p_affected_elements_type=>'JAVASCRIPT_EXPRESSION'
-,p_affected_elements=>'pwFieldV'
-,p_attribute_01=>'STATIC_ASSIGNMENT'
-,p_attribute_09=>'N'
-,p_stop_execution_on_error=>'Y'
-,p_wait_for_result=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7185903160281742)
-,p_event_id=>wwv_flow_api.id(7184427904281742)
-,p_event_result=>'TRUE'
-,p_action_sequence=>30
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''.t-Form-error'').fadeOut();',
-'$(pwField + ''-error'').fadeOut();',
-'$(pwField + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
-'$(pwFieldV + ''-error'').fadeOut();',
-'$(pwFieldV + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
-'// Password Complexity',
-'jQuery.validator.addMethod("pwcheck", function(value) {',
-'    return (',
-'        /^[A-Za-z0-9\d=!\-+#.,:@._*]*$/.test(value) && // consists of only these',
-'        /[=!\-+#.,:@._*]/.test(value) && // a special char',
-'        /[a-z]/.test(value) && // has a lowercase letter',
-'        /\d/.test(value)',
-'    ); // has a digit',
-'});',
-'',
-'var validator = form.validate({',
-'    lang: Lang,',
-'    // This global normalizer will trim',
-'    // the value of all elements before validatng them.',
-'    normalizer: function(value) {',
-'        return $.trim(value);',
-'    },',
-'    rules: {',
-'        NUPW: {',
-'            required: true,',
-'            pwcheck: true',
-'        },',
-'        NUPWV: {',
-'            required: true,',
-'            equalTo: NUPW',
-'        }',
-'    },',
-'    messages: {',
-'        NUPW: {',
-'            pwcheck: PWCHECK_MSG',
-'        }',
-'    }',
-'});'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7186397046281742)
-,p_name=>'CheckOnClickDisabledButton'
-,p_event_sequence=>10
-,p_triggering_element_type=>'JQUERY_SELECTOR'
-,p_triggering_element=>'div.t-Login-buttons'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7186884524281742)
-,p_event_id=>wwv_flow_api.id(7186397046281742)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'checkInput();',
-'setReRegButton();'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7187269916281742)
-,p_name=>'CheckOnClickSignUpButton'
-,p_event_sequence=>20
-,p_triggering_element_type=>'JQUERY_SELECTOR'
-,p_triggering_element=>'div.t-Login-buttons'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7187744235281743)
-,p_event_id=>wwv_flow_api.id(7187269916281742)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'checkInput();',
-'setReRegButton();'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7188110585281743)
-,p_name=>'SignUp'
-,p_event_sequence=>20
-,p_triggering_element_type=>'BUTTON'
-,p_triggering_button_id=>wwv_flow_api.id(5742791851174785)
-,p_bind_type=>'live'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7189132358281743)
-,p_event_id=>wwv_flow_api.id(7188110585281743)
-,p_event_result=>'TRUE'
-,p_action_sequence=>5
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#NEWUSER'').attr(''disabled'', ''disabled'');',
-'$(''#NUPW'').attr(''disabled'', ''disabled'');',
-'$(''#NUPWV'').attr(''disabled'', ''disabled'');',
-'$(''#SIGNUP'').attr(''disabled'', ''disabled'');',
-'$(regRegion + '' > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'');'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7188687979281743)
-,p_event_id=>wwv_flow_api.id(7188110585281743)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'begin',
-'--raise_application_error(-20001, ''In Func'');',
-'--null; -- apx_user_signup();',
-'apex_util.set_session_state(''P0_USER_REG_STATUS'', ''0'');',
-'end;  '))
-,p_attribute_02=>'NEWUSER,TOKEN'
-,p_stop_execution_on_error=>'N'
-,p_wait_for_result=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7189696525281743)
-,p_event_id=>wwv_flow_api.id(7188110585281743)
-,p_event_result=>'TRUE'
-,p_action_sequence=>15
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'var result = $v(''P0_USER_REG_STATUS'');',
-'console.log(''RegDoneResult: '' + (result ? result : ''unknown''));',
-'$(regRegion).delay(1000).fadeOut(400, function(){    ',
-'    if (result && result == 0) {',
-'    $(successRegion).fadeIn(400);',
-'        } else {',
-'    $(errorRegion).fadeIn(400);',
-'        } ',
-'});'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7183593336281741)
-,p_name=>'ResetErrorOnGetFocusPassword'
-,p_event_sequence=>21
-,p_triggering_element_type=>'JAVASCRIPT_EXPRESSION'
-,p_triggering_element=>'pwField'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'focusin'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7184083845281741)
-,p_event_id=>wwv_flow_api.id(7183593336281741)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''.t-Form-error'').fadeOut();',
-'$(pwField + ''-error'').fadeOut();',
-'$(pwField + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
-''))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7182690704281741)
-,p_name=>'ResetErrorOnGetFocusPasswordConfirm'
-,p_event_sequence=>31
-,p_triggering_element_type=>'JAVASCRIPT_EXPRESSION'
-,p_triggering_element=>'pwFieldV'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'focusin'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7183143226281741)
-,p_event_id=>wwv_flow_api.id(7182690704281741)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''.t-Form-error'').fadeOut();',
-'$(pwFieldV + ''-error'').fadeOut();',
-'$(pwFieldV + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
-''))
-,p_stop_execution_on_error=>'Y'
+,p_attribute_01=>'$(''div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-check-circle-o t-success'');'
 );
 wwv_flow_api.create_page_process(
- p_id=>wwv_flow_api.id(6147673104406217)
+ p_id=>wwv_flow_api.id(5807553503417298)
 ,p_process_sequence=>10
-,p_process_point=>'AFTER_BOX_BODY'
-,p_process_type=>'NATIVE_PLSQL'
-,p_process_name=>'CheckUserValid'
-,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'begin',
-'  if (1 = 1) then',
-'      return true;',
-'  else',
-'      return false;',
-'  end if;',
-'end;'))
-,p_error_display_location=>'INLINE_IN_NOTIFICATION'
-);
-wwv_flow_api.create_page_process(
- p_id=>wwv_flow_api.id(7181332448281740)
-,p_process_sequence=>30
 ,p_process_point=>'AFTER_SUBMIT'
-,p_process_type=>'NATIVE_SESSION_STATE'
-,p_process_name=>'Clear Page(s) Cache'
-,p_attribute_01=>'CLEAR_CACHE_CURRENT_PAGE'
-,p_error_display_location=>'INLINE_IN_NOTIFICATION'
-);
-end;
-/
-prompt --application/pages/page_00105
-begin
-wwv_flow_api.create_page(
- p_id=>105
-,p_user_interface_id=>wwv_flow_api.id(4955200262726764)
-,p_name=>'User Reset Password Request'
-,p_alias=>'RESETP'
-,p_page_mode=>'NORMAL'
-,p_step_title=>'User Reset Password Request'
-,p_warn_on_unsaved_changes=>'N'
-,p_step_sub_title=>'User Reset Password Request'
-,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
-,p_first_item=>'AUTO_FIRST_ITEM'
-,p_autocomplete_on_off=>'OFF'
-,p_javascript_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#js/validate/messages_de.min.js?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#js/validateFormGlobals.min.js?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#js/validateResetPasswordGlobals.min.js?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#js/validateForm.min.js?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#js/validateUser.min.js?v=#APEX_VERSION#'))
-,p_javascript_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'',
-''))
-,p_javascript_code_onload=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'',
-'',
-''))
-,p_css_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'#WORKSPACE_IMAGES#css/validate/screen.css?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#css/validateInput.min.css?v=#APEX_VERSION#'))
-,p_inline_css=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'#P105_SUCCESS_CONTAINER > div.t-Form-inputContainer.col.col-null {',
-'    min-height: 180px;',
-'}',
-'',
-'#P105_ERROR_CONTAINER > div.t-Form-inputContainer.col.col-null {',
-'    min-height: 180px;',
-'}',
-'',
-'#P105_EMAIL_CONTAINER > div.t-Form-inputContainer {',
-'    height: 80px;',
-'}',
-'',
-'#P105_FIRSTNAME-error , #P105_LASTNAME-error , #P105_EMAIL-error {',
-'    top: 48px;',
-'    position: absolute;',
-'    font-size: 90%;',
-'    line-height: 1.28;',
-'}',
-'',
-''))
-,p_step_template=>wwv_flow_api.id(13761578240068968)
-,p_page_template_options=>'#DEFAULT#'
-,p_overwrite_navigation_list=>'N'
-,p_page_is_public_y_n=>'Y'
-,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212221021'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(12915392931265802)
-,p_plug_name=>'User Reset Password Confirmation'
-,p_region_name=>'USRRSTP_CONFIRM'
-,p_icon_css_classes=>'fa-check-circle t-success'
-,p_region_template_options=>'#DEFAULT#:t-Form--slimPadding:t-Form--stretchInputs:margin-top-lg:margin-bottom-lg'
-,p_region_attributes=>'style="display:none;"'
-,p_plug_template=>wwv_flow_api.id(13799328938068981)
-,p_plug_display_sequence=>20
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'TEXT'
-,p_attribute_03=>'Y'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(12918698757265835)
-,p_plug_name=>'User Reset Error'
-,p_region_name=>'USRRSTP_CONFIRM_ERROR'
-,p_icon_css_classes=>'fa-exclamation-triangle t-error'
-,p_region_template_options=>'#DEFAULT#:margin-top-lg:margin-bottom-lg'
-,p_region_attributes=>'style="display:none;"'
-,p_plug_template=>wwv_flow_api.id(13799328938068981)
-,p_plug_display_sequence=>30
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'TEXT'
-,p_attribute_03=>'Y'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(17843469529762470)
-,p_plug_name=>'User Reset Password'
-,p_region_name=>'USRRSTP'
-,p_icon_css_classes=>'fa-cog'
-,p_region_template_options=>'#DEFAULT#'
-,p_region_attributes=>'min-height=900px;'
-,p_plug_template=>wwv_flow_api.id(13799328938068981)
-,p_plug_display_sequence=>10
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'TEXT'
-,p_attribute_03=>'Y'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(19971449613015888)
-,p_plug_name=>'Buttons'
-,p_parent_plug_id=>wwv_flow_api.id(17843469529762470)
-,p_region_template_options=>'#DEFAULT#:t-Form--xlarge:margin-top-md:margin-bottom-none'
-,p_plug_template=>wwv_flow_api.id(13778706889068974)
-,p_plug_display_sequence=>40
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'HTML'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7230154560191592)
-,p_button_sequence=>10
-,p_button_plug_id=>wwv_flow_api.id(19971449613015888)
-,p_button_name=>'CANCEL'
-,p_button_static_id=>'CANCEL'
-,p_button_action=>'REDIRECT_PAGE'
-,p_button_template_options=>'#DEFAULT#:t-Button--link:t-Button--gapLeft'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Cancel'
-,p_button_position=>'BODY'
-,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP,101:P101_USERNAME:&P105_EMAIL.'
-,p_grid_column_attributes=>'style="float: left; text-align: left;"'
-,p_grid_new_row=>'Y'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7229751908191592)
-,p_button_sequence=>20
-,p_button_plug_id=>wwv_flow_api.id(19971449613015888)
-,p_button_name=>'REREGISTER'
-,p_button_static_id=>'REREGISTER'
-,p_button_action=>'DEFINED_BY_DA'
-,p_button_template_options=>'#DEFAULT#:t-Button--link'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Reset Registration'
-,p_button_position=>'BODY'
-,p_warn_on_unsaved_changes=>null
-,p_grid_column_attributes=>'style="float: right; text-align: right; right: 12px; display:block;"'
-,p_grid_new_row=>'N'
-,p_grid_new_column=>'Y'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7225635514191589)
-,p_button_sequence=>10
-,p_button_plug_id=>wwv_flow_api.id(12915392931265802)
-,p_button_name=>'FINISH'
-,p_button_action=>'REDIRECT_PAGE'
-,p_button_template_options=>'#DEFAULT#:t-Button--large:t-Button--success:t-Button--stretch:t-Button--gapTop:t-Button--gapBottom'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Finish'
-,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP:P101_USERNAME:&P105_EMAIL.'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7226744935191591)
-,p_button_sequence=>10
-,p_button_plug_id=>wwv_flow_api.id(12918698757265835)
-,p_button_name=>'FINISH_ERR'
-,p_button_static_id=>'FIN_ERR'
-,p_button_action=>'REDIRECT_PAGE'
-,p_button_template_options=>'#DEFAULT#:t-Button--large:t-Button--danger:t-Button--pillEnd:t-Button--stretch:t-Button--gapTop:t-Button--gapBottom'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Finish'
-,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_redirect_url=>'f?p=&APP_ID.:105:&SESSION.:REGISTER:&DEBUG.:RP::'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7227849842191591)
-,p_button_sequence=>30
-,p_button_plug_id=>wwv_flow_api.id(17843469529762470)
-,p_button_name=>'RESET'
-,p_button_static_id=>'RST'
-,p_button_action=>'DEFINED_BY_DA'
-,p_button_template_options=>'#DEFAULT#:t-Button--gapTop:t-Button--gapBottom'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Request Password Reset'
-,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_warn_on_unsaved_changes=>null
-,p_button_cattributes=>'disabled="disabled"'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7226017154191589)
-,p_name=>'P105_SUCCESS'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(12915392931265802)
-,p_prompt=>'New'
-,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<h4 class="t-success">Reset Password Request Successfully.</h4>',
-'',
-'Please check Your Email Inbox for a Confirmation Email.',
-'If none is found after a couple of minutes, please also',
-'check your Spam Folder or try to <a href="#">register again</a> later...',
-'',
-'Thank You...'))
-,p_source_type=>'STATIC'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_tag_css_classes=>'t-text'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_template_options=>'#DEFAULT#:t-Form-fieldContainer--stretchInputs:t-Form-fieldContainer--preTextBlock:t-Form-fieldContainer--postTextBlock:margin-top-lg:margin-bottom-lg'
-,p_escape_on_http_output=>'N'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7227166016191591)
-,p_name=>'P105_ERROR'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(12918698757265835)
-,p_prompt=>'New'
-,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<h4 class="t-error">Error during Reset Password:',
-'&P0_USER_REG_STATUS.</h4>',
-'',
-'Please try to <a href="#">register again</a> later',
-'and if You are still having trouble to register',
-'contact our <a href="f?p=&APP_ID.:SUPPORT:0:::::">Support</a> for help.',
-'',
-'Thank You...'))
-,p_source_type=>'STATIC'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_tag_css_classes=>'t-text'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_template_options=>'#DEFAULT#:t-Form-fieldContainer--stretchInputs:t-Form-fieldContainer--preTextBlock:t-Form-fieldContainer--postTextBlock:margin-top-lg:margin-bottom-lg'
-,p_escape_on_http_output=>'N'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7228282316191592)
-,p_name=>'P105_FIRSTNAME_H'
-,p_item_sequence=>20
-,p_item_plug_id=>wwv_flow_api.id(17843469529762470)
-,p_display_as=>'NATIVE_HIDDEN'
-,p_encrypt_session_state_yn=>'Y'
-,p_attribute_01=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7228636694191592)
-,p_name=>'P105_LASTNAME_H'
-,p_item_sequence=>30
-,p_item_plug_id=>wwv_flow_api.id(17843469529762470)
-,p_display_as=>'NATIVE_HIDDEN'
-,p_encrypt_session_state_yn=>'Y'
-,p_attribute_01=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7229080454191592)
-,p_name=>'P105_EMAIL'
-,p_item_sequence=>40
-,p_item_plug_id=>wwv_flow_api.id(17843469529762470)
-,p_placeholder=>'E-Mail Adresse'
-,p_display_as=>'NATIVE_TEXT_FIELD'
-,p_cSize=>40
-,p_cMaxlength=>100
-,p_tag_attributes=>'required="true"'
-,p_field_template=>wwv_flow_api.id(13845150629068998)
-,p_item_template_options=>'#DEFAULT#:t-Form-fieldContainer--stretchInputs'
-,p_encrypt_session_state_yn=>'Y'
-,p_attribute_01=>'N'
-,p_attribute_02=>'N'
-,p_attribute_04=>'EMAIL'
-,p_attribute_05=>'BOTH'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7235559412191596)
-,p_name=>'CheckEmailOnClickDisabledButton'
-,p_event_sequence=>3
-,p_triggering_element_type=>'JQUERY_SELECTOR'
-,p_triggering_element=>'div.t-Login-buttons'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7236073804191596)
-,p_event_id=>wwv_flow_api.id(7235559412191596)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'checkInput();',
-'setReRegButton();'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7234614526191594)
-,p_name=>'CheckEmailOnClickRegisterButton'
-,p_event_sequence=>5
-,p_triggering_element_type=>'JQUERY_SELECTOR'
-,p_triggering_element=>'#RST'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7235107492191596)
-,p_event_id=>wwv_flow_api.id(7234614526191594)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'checkInput();',
-'setReRegButton();'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7230941861191594)
-,p_name=>'Reset Password'
-,p_event_sequence=>10
-,p_triggering_element_type=>'BUTTON'
-,p_triggering_button_id=>wwv_flow_api.id(7227849842191591)
-,p_bind_type=>'live'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7231957185191594)
-,p_event_id=>wwv_flow_api.id(7230941861191594)
-,p_event_result=>'TRUE'
-,p_action_sequence=>5
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#P105_EMAIL'').attr(''disabled'', ''disabled'');',
-'$(''#P105_FIRSTNAME'').attr(''disabled'', ''disabled'');',
-'$(''#P105_LASTNAME'').attr(''disabled'', ''disabled'');',
-'$(''#REG'').attr(''disabled'', ''disabled'');',
-'$(regRegion + '' > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'');'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7231403674191594)
-,p_event_id=>wwv_flow_api.id(7230941861191594)
-,p_event_result=>'TRUE'
-,p_action_sequence=>25
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'begin',
-'"APX_USER_RESETP_REQUEST" (',
-'     p_mailto  => v(''P105_EMAIL'')',
-'    );',
-'end;  '))
-,p_attribute_02=>'P105_EMAIL'
-,p_stop_execution_on_error=>'Y'
-,p_wait_for_result=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7232465286191594)
-,p_event_id=>wwv_flow_api.id(7230941861191594)
-,p_event_result=>'TRUE'
-,p_action_sequence=>35
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'var result = $v(''P0_USER_REG_STATUS'');',
-'console.log(''RegDoneResult: '' + (result ? result : ''unknown''));',
-'$(regRegion).delay(1000).fadeOut(400, function(){    ',
-'    if (result && result == 0) {',
-'    $(successRegion).fadeIn(400);',
-'        } else {',
-'    $(errorRegion).fadeIn(400);',
-'        } ',
-'});'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7237382789191596)
-,p_name=>'ReRegister'
-,p_event_sequence=>20
-,p_triggering_element_type=>'BUTTON'
-,p_triggering_button_id=>wwv_flow_api.id(7229751908191592)
-,p_bind_type=>'live'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7238387647191597)
-,p_event_id=>wwv_flow_api.id(7237382789191596)
-,p_event_result=>'TRUE'
-,p_action_sequence=>20
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#P105_EMAIL'').attr(''disabled'', ''disabled'');',
-'$(''#P105_FIRSTNAME'').attr(''disabled'', ''disabled'');',
-'$(''#P105_LASTNAME'').attr(''disabled'', ''disabled'');',
-'$(''#REG'').attr(''disabled'', ''disabled'');',
-'$(regRegion + '' > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'');'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7237804549191597)
-,p_event_id=>wwv_flow_api.id(7237382789191596)
-,p_event_result=>'TRUE'
-,p_action_sequence=>30
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'begin',
-'  apx_user_registration(:P105_EMAIL',
-'                        , p_params => ''USR,TKN''',
-'                        , p_topic  => ''REREGISTER''',
-'                       );',
-'apex_util.set_session_state(''P0_USER_REG_STATUS'', ''0'');',
-'end;  '))
-,p_attribute_02=>'P105_EMAIL'
-,p_stop_execution_on_error=>'Y'
-,p_wait_for_result=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7238893016191597)
-,p_event_id=>wwv_flow_api.id(7237382789191596)
-,p_event_result=>'TRUE'
-,p_action_sequence=>40
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'var result = $v(''P0_USER_REG_STATUS'');',
-'console.log(''RegDoneResult: '' + (result ? result : ''unknown''));',
-'$(regRegion).delay(1000).fadeOut(400, function(){    ',
-'    if (result && result === 0) {',
-'    $(successRegion).fadeIn(400);',
-'        } else {',
-'    $(errorRegion).fadeIn(400);',
-'        } ',
-'});'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7236484501191596)
-,p_name=>'ResetErrorOnGetFocusEmail'
-,p_event_sequence=>30
-,p_triggering_element_type=>'ITEM'
-,p_triggering_element=>'P105_EMAIL'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'focusin'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7236982866191596)
-,p_event_id=>wwv_flow_api.id(7236484501191596)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#P105_EMAIL-error'').fadeOut();',
-'$(''.t-Form-error'').fadeOut();',
-'$(''#P105_EMAIL_CONTAINER > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
-'//setButtonState(buttonID, (userStatus === 0 ? true : false));',
-''))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7232857856191594)
-,p_name=>'ResetErrorOnGetFocusFirstname'
-,p_event_sequence=>40
-,p_triggering_element_type=>'ITEM'
-,p_triggering_element=>'P105_FIRSTNAME#'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'focusin'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7233364998191594)
-,p_event_id=>wwv_flow_api.id(7232857856191594)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#P105_FIRSTNAME-error'').fadeOut();',
-'$(''.t-Form-error'').fadeOut();',
-'$(''#P105_FIRSTNAME_CONTAINER > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
-'//setButtonState(buttonID, (userStatus === 0 ? true : false));'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7233723625191594)
-,p_name=>'ResetErrorOnGetFocusLastname'
-,p_event_sequence=>50
-,p_triggering_element_type=>'ITEM'
-,p_triggering_element=>'P105_LASTNAME#'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'focusin'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7234270878191594)
-,p_event_id=>wwv_flow_api.id(7233723625191594)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#P105_LASTNAME-error'').fadeOut();',
-'$(''.t-Form-error'').fadeOut();',
-'$(''#P105_LASTNAME_CONTAINER > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
-'//setButtonState(buttonID, (userStatus === 0 ? true : false));'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_process(
- p_id=>wwv_flow_api.id(7230527868191593)
-,p_process_sequence=>20
-,p_process_point=>'BEFORE_HEADER'
-,p_process_type=>'NATIVE_SESSION_STATE'
-,p_process_name=>'ClearPage'
-,p_attribute_01=>'CLEAR_CACHE_FOR_ITEMS'
-,p_attribute_03=>'P105_EMAIL'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'Set Username Cookie'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'apex_authentication.send_login_username_cookie (',
+'    p_username => lower(:P104_EMAIL) );'))
 ,p_error_display_location=>'INLINE_IN_NOTIFICATION'
 ,p_process_when_type=>'NEVER'
 );
-end;
-/
-prompt --application/pages/page_00106
-begin
-wwv_flow_api.create_page(
- p_id=>106
-,p_user_interface_id=>wwv_flow_api.id(4955200262726764)
-,p_name=>'Reset Password Confirmation'
-,p_page_mode=>'NORMAL'
-,p_step_title=>'Reset Password Confirmation'
-,p_warn_on_unsaved_changes=>'N'
-,p_step_sub_title=>'Reset Password Confirmation'
-,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
-,p_first_item=>'AUTO_FIRST_ITEM'
-,p_autocomplete_on_off=>'ON'
-,p_javascript_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'#WORKSPACE_IMAGES#js/validate/jquery.validate.min.js?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#js/validate/messages_de.min.js?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#js/validateResetUser.min.js?v=#APEX_VERSION#1',
-''))
-,p_css_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'#WORKSPACE_IMAGES#css/validate/screen.css?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#css/validateInput.min.css?v=#APEX_VERSION#'))
-,p_inline_css=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'#RESETUSER {',
-'    font-size: 18px;',
-'    text-align: center;',
-'}',
-'',
-'#RESETUSER_CONTAINER > div.t-Form-inputContainer {',
-'    height: 40px;',
-'}',
-'',
-'#RNUPWV_CONTAINER > div.t-Form-inputContainer {',
-'    height: 80px;',
-'}',
-'',
-'#P106_USR_REG_CONFIRM_CONTAINER > div.t-Form-inputContainer.col.col-null {',
-'    min-height: 180px;',
-'}',
-'',
-'#P106_SUCCESS_CONTAINER > div.t-Form-inputContainer.col.col-null {',
-'    min-height: 180px;',
-'}',
-'',
-'#P106_ERROR_CONTAINER > div.t-Form-inputContainer.col.col-null {',
-'    min-height: 180px;',
-'}',
-'',
-'#RTOKEN-error , #RESETUSER-error , #RNUPW-error, #RNUPWV-error {',
-'    top: 48px;',
-'    position: absolute;',
-'    font-size: 90%;',
-'    line-height: 1.28;',
-'}',
-'',
-''))
-,p_step_template=>wwv_flow_api.id(13761578240068968)
-,p_page_template_options=>'#DEFAULT#'
-,p_overwrite_navigation_list=>'N'
-,p_page_is_public_y_n=>'Y'
-,p_browser_cache=>'N'
-,p_deep_linking=>'Y'
-,p_rejoin_existing_sessions=>'P'
-,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212161115'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(20069435705195293)
-,p_plug_name=>'User Reset Password Confirmation'
-,p_region_name=>'USRST_CONFIRM'
-,p_icon_css_classes=>'fa-check-circle t-success'
-,p_region_template_options=>'#DEFAULT#:t-Form--slimPadding:t-Form--stretchInputs:margin-top-lg:margin-bottom-lg'
-,p_region_attributes=>'style="display:none"'
-,p_plug_template=>wwv_flow_api.id(13799328938068981)
-,p_plug_display_sequence=>20
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'TEXT'
-,p_attribute_03=>'Y'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(20073796735197722)
-,p_plug_name=>'User Reset Password Error'
-,p_region_name=>'USRST_CONFIRM_ERROR'
-,p_icon_css_classes=>'fa-exclamation-triangle t-error'
-,p_region_template_options=>'#DEFAULT#:margin-top-lg:margin-bottom-lg'
-,p_region_attributes=>'style="display:none;"'
-,p_plug_template=>wwv_flow_api.id(13799328938068981)
-,p_plug_display_sequence=>30
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'TEXT'
-,p_attribute_03=>'Y'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(23603729286173019)
-,p_plug_name=>'User Reset Password'
-,p_region_name=>'USRST'
-,p_icon_css_classes=>'fa-cog'
-,p_region_template_options=>'#DEFAULT#'
-,p_plug_template=>wwv_flow_api.id(13799328938068981)
-,p_plug_display_sequence=>10
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'TEXT'
-,p_attribute_03=>'Y'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(27087468704837397)
-,p_plug_name=>'Buttons'
-,p_region_name=>'USR_RESET_SUB_BUTTONS'
-,p_parent_plug_id=>wwv_flow_api.id(23603729286173019)
-,p_region_template_options=>'#DEFAULT#:t-Form--xlarge:margin-top-md:margin-bottom-none'
-,p_plug_template=>wwv_flow_api.id(13778706889068974)
-,p_plug_display_sequence=>10
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'HTML'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7246696261427365)
-,p_button_sequence=>10
-,p_button_plug_id=>wwv_flow_api.id(27087468704837397)
-,p_button_name=>'CANCEL'
-,p_button_static_id=>'CANCEL'
-,p_button_action=>'REDIRECT_PAGE'
-,p_button_template_options=>'#DEFAULT#:t-Button--link:t-Button--gapLeft'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Cancel'
-,p_button_position=>'BODY'
-,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP,101:P101_USERNAME:&P106_EMAIL.'
-,p_grid_column_attributes=>'style="float: left; text-align: left;"'
-,p_grid_new_row=>'Y'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7246247856427364)
-,p_button_sequence=>20
-,p_button_plug_id=>wwv_flow_api.id(27087468704837397)
-,p_button_name=>'RESET'
-,p_button_static_id=>'RESET'
-,p_button_action=>'DEFINED_BY_DA'
-,p_button_template_options=>'#DEFAULT#:t-Button--link'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Reset'
-,p_button_position=>'BODY'
-,p_warn_on_unsaved_changes=>null
-,p_grid_column_attributes=>'style="float: right; text-align: right; right: 12px; display:none;"'
-,p_grid_new_row=>'N'
-,p_grid_new_column=>'Y'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7247394949427365)
-,p_button_sequence=>10
-,p_button_plug_id=>wwv_flow_api.id(20069435705195293)
-,p_button_name=>'FINISH'
-,p_button_action=>'REDIRECT_PAGE'
-,p_button_template_options=>'#DEFAULT#:t-Button--large:t-Button--success:t-Button--stretch:t-Button--gapTop:t-Button--gapBottom'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Finish'
-,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP:P101_USERNAME:&NEWUSER.'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7248405433427366)
-,p_button_sequence=>10
-,p_button_plug_id=>wwv_flow_api.id(20073796735197722)
-,p_button_name=>'FINISH_ERR'
-,p_button_static_id=>'FIN_ERR'
-,p_button_action=>'REDIRECT_PAGE'
-,p_button_template_options=>'#DEFAULT#:t-Button--large:t-Button--danger:t-Button--pillEnd:t-Button--stretch:t-Button--gapTop:t-Button--gapBottom'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Finish'
-,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_redirect_url=>'f?p=&APP_ID.:106:&SESSION.:REGISTER:&DEBUG.:RP::'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7243963784427363)
-,p_button_sequence=>30
-,p_button_plug_id=>wwv_flow_api.id(23603729286173019)
-,p_button_name=>'RESETP'
-,p_button_static_id=>'RESETP'
-,p_button_action=>'DEFINED_BY_DA'
-,p_button_template_options=>'#DEFAULT#:t-Button--iconLeft:t-Button--padTop:t-Button--padBottom'
-,p_button_template_id=>wwv_flow_api.id(13845383580068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Reset Password'
-,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_warn_on_unsaved_changes=>null
-,p_button_cattributes=>'disabled="disabled"'
-);
-wwv_flow_api.create_page_branch(
- p_id=>wwv_flow_api.id(7258419350427370)
-,p_branch_name=>'Go To Page 1'
-,p_branch_action=>'f?p=&APP_ID.:1:&SESSION.::&DEBUG.:RP,1::&success_msg=#SUCCESS_MSG#'
-,p_branch_point=>'BEFORE_COMPUTATION'
-,p_branch_type=>'REDIRECT_URL'
-,p_branch_sequence=>10
-,p_branch_condition_type=>'NEVER'
-);
-wwv_flow_api.create_page_branch(
- p_id=>wwv_flow_api.id(7258004809427370)
-,p_branch_name=>'Go To Page 104'
-,p_branch_action=>'f?p=&APP_ID.:106:&SESSION.:SIGNEDUP:&DEBUG.:RP,104:P104_NEWUSER,P104_TOKEN:&NEWUSER.,&TOKEN.&success_msg=#SUCCESS_MSG#'
-,p_branch_point=>'BEFORE_COMPUTATION'
-,p_branch_type=>'REDIRECT_URL'
-,p_branch_when_button_id=>wwv_flow_api.id(5742791851174785)
-,p_branch_sequence=>20
-,p_branch_condition_type=>'PLSQL_EXPRESSION'
-,p_branch_condition=>':P106_PASSWORD_CONFIRM = :P106_PASSWORD'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7244319959427363)
-,p_name=>'RTOKEN'
-,p_item_sequence=>1
-,p_item_plug_id=>wwv_flow_api.id(23603729286173019)
-,p_use_cache_before_default=>'NO'
-,p_display_as=>'NATIVE_HIDDEN'
-,p_attribute_01=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7244795433427363)
-,p_name=>'RESETUSER'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(23603729286173019)
-,p_use_cache_before_default=>'NO'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_template_options=>'#DEFAULT#'
-,p_attribute_01=>'N'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7245141679427363)
-,p_name=>'RNUPW'
-,p_item_sequence=>20
-,p_item_plug_id=>wwv_flow_api.id(23603729286173019)
-,p_placeholder=>'Neues Passwort eingeben'
-,p_display_as=>'NATIVE_PASSWORD'
-,p_cSize=>40
-,p_cMaxlength=>100
-,p_tag_attributes=>'minlength="5" required'
-,p_field_template=>wwv_flow_api.id(13845150629068998)
-,p_item_template_options=>'#DEFAULT#'
-,p_attribute_01=>'N'
-,p_attribute_02=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7245523189427363)
-,p_name=>'RNUPWV'
-,p_item_sequence=>30
-,p_item_plug_id=>wwv_flow_api.id(23603729286173019)
-,p_placeholder=>'Neues Passwort bestätigen'
-,p_display_as=>'NATIVE_PASSWORD'
-,p_cSize=>40
-,p_cMaxlength=>100
-,p_tag_attributes=>'minlength="5" required'
-,p_field_template=>wwv_flow_api.id(13845150629068998)
-,p_item_template_options=>'#DEFAULT#'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7247737994427365)
-,p_name=>'P106_SUCCESS'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(20069435705195293)
-,p_prompt=>'New'
-,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<h4 class="t-success">Successfully Reset Password.</h4>',
-'',
-'You can login with your new Password now.',
-'',
-'Thank You...'))
-,p_source_type=>'STATIC'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_tag_css_classes=>'t-text'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_template_options=>'#DEFAULT#:t-Form-fieldContainer--stretchInputs:t-Form-fieldContainer--preTextBlock:t-Form-fieldContainer--postTextBlock:margin-top-lg:margin-bottom-lg'
-,p_escape_on_http_output=>'N'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7248815179427366)
-,p_name=>'P106_ERROR'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(20073796735197722)
-,p_prompt=>'New'
-,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<h4 class="t-error">Error during Reset Password:',
-'&P0_USER_REG_STATUS.</h4>',
-'',
-'Please try to <a href="#">reset your password again</a> later',
-'and if You are still having trouble to reset your password',
-'contact our <a href="f?p=&APP_ID.:SUPPORT:0:::::">Support</a> for help.',
-'',
-'Thank You...'))
-,p_source_type=>'STATIC'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_tag_css_classes=>'t-text'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_template_options=>'#DEFAULT#:t-Form-fieldContainer--stretchInputs:t-Form-fieldContainer--preTextBlock:t-Form-fieldContainer--postTextBlock:margin-top-lg:margin-bottom-lg'
-,p_escape_on_http_output=>'N'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7249624133427366)
-,p_name=>'SetFieldStatus'
-,p_event_sequence=>1
-,p_bind_type=>'live'
-,p_bind_event_type=>'ready'
-,p_display_when_type=>'FUNCTION_BODY'
-,p_display_when_cond=>wwv_flow_string.join(wwv_flow_t_varchar2(
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(5807162834417298)
+,p_process_sequence=>20
+,p_process_point=>'AFTER_SUBMIT'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'Register'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'declare',
+'   l_body      clob;',
+'   l_body_html clob;',
+'   l_token     varchar2(1000);',
 'begin',
-'if (:RTOKEN is null and :RESETUSER is null) then',
-'  return true;',
-'else',
-'  return false;',
-'end if;',
-'end;'))
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7250164549427367)
-,p_event_id=>wwv_flow_api.id(7249624133427366)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'Y'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#SIGNUP'').hide();',
-'$(pwField).prop( "disabled", true );',
-'$(pwFieldV).prop( "disabled", true );',
-''))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7252328435427367)
-,p_name=>'ResetFields'
-,p_event_sequence=>5
-,p_triggering_element_type=>'BUTTON'
-,p_triggering_button_id=>wwv_flow_api.id(7243963784427363)
-,p_bind_type=>'bind'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7252889482427367)
-,p_event_id=>wwv_flow_api.id(7252328435427367)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_SET_VALUE'
-,p_affected_elements_type=>'JAVASCRIPT_EXPRESSION'
-,p_affected_elements=>'pwField'
-,p_attribute_01=>'STATIC_ASSIGNMENT'
-,p_attribute_09=>'N'
-,p_stop_execution_on_error=>'Y'
-,p_wait_for_result=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7253348911427367)
-,p_event_id=>wwv_flow_api.id(7252328435427367)
-,p_event_result=>'TRUE'
-,p_action_sequence=>20
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_SET_VALUE'
-,p_affected_elements_type=>'JAVASCRIPT_EXPRESSION'
-,p_affected_elements=>'pwFieldV'
-,p_attribute_01=>'STATIC_ASSIGNMENT'
-,p_attribute_09=>'N'
-,p_stop_execution_on_error=>'Y'
-,p_wait_for_result=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7253805645427368)
-,p_event_id=>wwv_flow_api.id(7252328435427367)
-,p_event_result=>'TRUE'
-,p_action_sequence=>30
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''.t-Form-error'').fadeOut();',
-'$(pwField + ''-error'').fadeOut();',
-'$(pwField + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
-'$(pwFieldV + ''-error'').fadeOut();',
-'$(pwFieldV + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
-'// Password Complexity',
-'jQuery.validator.addMethod("pwcheck", function(value) {',
-'    return (',
-'        /^[A-Za-z0-9\d=!\-+#.,:@._*]*$/.test(value) && // consists of only these',
-'        /[=!\-+#.,:@._*]/.test(value) && // a special char',
-'        /[a-z]/.test(value) && // has a lowercase letter',
-'        /\d/.test(value)',
-'    ); // has a digit',
-'});',
+'/*',
+'insert into apxusr.apx$app_user_reg (app_user_email, app_id)',
+'values(:P104_EMAIL, :APP_ID);',
+'select app_user_token',
+'into l_token',
+'from apxusr.apx$app_user_reg',
+'where app_user_email = :P104_EMAIL',
+'and app_id = :APP_ID;',
 '',
-'var validator = form.validate({',
-'    lang: Lang,',
-'    // This global normalizer will trim',
-'    // the value of all elements before validatng them.',
-'    normalizer: function(value) {',
-'        return $.trim(value);',
-'    },',
-'    rules: {',
-'        NUPW: {',
-'            required: true,',
-'            pwcheck: true',
-'        },',
-'        NUPWV: {',
-'            required: true,',
-'            equalTo: NUPW',
-'        }',
-'    },',
-'    messages: {',
-'        NUPW: {',
-'            pwcheck: PWCHECK_MSG',
-'        }',
-'    }',
-'});'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7254245781427368)
-,p_name=>'CheckOnClickDisabledButton'
-,p_event_sequence=>10
-,p_triggering_element_type=>'JQUERY_SELECTOR'
-,p_triggering_element=>'div.t-Login-buttons'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7254711871427368)
-,p_event_id=>wwv_flow_api.id(7254245781427368)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'checkInput();',
-'setReRegButton();'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7255144453427368)
-,p_name=>'CheckOnClickSignUpButton'
-,p_event_sequence=>20
-,p_triggering_element_type=>'JQUERY_SELECTOR'
-,p_triggering_element=>'#RESETP'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7255607741427369)
-,p_event_id=>wwv_flow_api.id(7255144453427368)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'checkInput();',
-'setReRegButton();'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7256054281427369)
-,p_name=>'SignUp'
-,p_event_sequence=>20
-,p_triggering_element_type=>'BUTTON'
-,p_triggering_button_id=>wwv_flow_api.id(7243963784427363)
-,p_bind_type=>'live'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7257003610427369)
-,p_event_id=>wwv_flow_api.id(7256054281427369)
-,p_event_result=>'TRUE'
-,p_action_sequence=>5
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#NEWUSER'').attr(''disabled'', ''disabled'');',
-'$(''#NUPW'').attr(''disabled'', ''disabled'');',
-'$(''#NUPWV'').attr(''disabled'', ''disabled'');',
-'$(''#SIGNUP'').attr(''disabled'', ''disabled'');',
-'$(regRegion + '' > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'');'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7256551540427369)
-,p_event_id=>wwv_flow_api.id(7256054281427369)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'begin',
-'--raise_application_error(-20001, ''In Func'');',
-'--null; -- apx_user_signup();',
-'apex_util.set_session_state(''P0_USER_REG_STATUS'', ''0'');',
-'end;  '))
-,p_attribute_02=>'NEWUSER,TOKEN'
-,p_stop_execution_on_error=>'N'
-,p_wait_for_result=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7257599349427370)
-,p_event_id=>wwv_flow_api.id(7256054281427369)
-,p_event_result=>'TRUE'
-,p_action_sequence=>15
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'var result = $v(''P0_USER_REG_STATUS'');',
-'console.log(''RegDoneResult: '' + (result ? result : ''unknown''));',
-'$(regRegion).delay(1000).fadeOut(400, function(){    ',
-'    if (result && result == 0) {',
-'    $(successRegion).fadeIn(400);',
-'        } else {',
-'    $(errorRegion).fadeIn(400);',
-'        } ',
-'});'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7251429677427367)
-,p_name=>'ResetErrorOnGetFocusPassword'
-,p_event_sequence=>21
-,p_triggering_element_type=>'JAVASCRIPT_EXPRESSION'
-,p_triggering_element=>'pwField'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'focusin'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7251984566427367)
-,p_event_id=>wwv_flow_api.id(7251429677427367)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''.t-Form-error'').fadeOut();',
-'$(pwField + ''-error'').fadeOut();',
-'$(pwField + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
+'commit;',
+'*/',
+'l_token := apx_get_token(v(''P104_EMAIL''));',
+'for c1 in (',
+'   select workspace_id',
+'     from apex_applications',
+'    where application_id = :p_app_id )',
+'loop',
+'   apex_util.set_security_group_id(p_security_group_id =>',
+'c1.workspace_id);',
+'end loop;',
+'',
+'    l_body := ''To view the content of this message, please use an HTML enabled mail client.'' || utl_tcp.crlf;',
+' ',
+'    l_body_html := ''<html><body>'' || utl_tcp.crlf ||',
+'                   ''<p>Please confirm your registration at <a href="'' ||',
+'                   apex_mail.get_instance_url || ''f?p=''||v(''APP_ID'')||',
+'                   '':1::CONFIRM:NO::TOKEN:''||l_token||''">Registration Confirmation</a> page.</p>'' || utl_tcp.crlf ||',
+'                   ''<p>Sincerely,<br />'' || utl_tcp.crlf ||',
+'                   ''Yo Bro from Next Do''''<br />'' || utl_tcp.crlf ||',
+'                   ''<img src="http://zapt1.staticworld.net/images/article/2013/04/oracle-logo-100033308-gallery.png" alt="Oracle Logo"></p>'' || utl_tcp.crlf ||',
+'                   ''</body></html>''; ',
+'    apex_mail.send (',
+'        p_to        => v(''P104_EMAIL''),   -- change to your email address',
+'        p_from      => ''s.obermeyer@t-online.de'', -- change to a real senders email address',
+'        p_body      => l_body,',
+'        p_body_html => l_body_html,',
+'        p_subj      => ''Registration Confirmation'' );',
+'',
+'end;',
 ''))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7250509041427367)
-,p_name=>'ResetErrorOnGetFocusPasswordConfirm'
-,p_event_sequence=>31
-,p_triggering_element_type=>'JAVASCRIPT_EXPRESSION'
-,p_triggering_element=>'pwFieldV'
-,p_bind_type=>'bind'
-,p_bind_event_type=>'focusin'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7251047601427367)
-,p_event_id=>wwv_flow_api.id(7250509041427367)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''.t-Form-error'').fadeOut();',
-'$(pwFieldV + ''-error'').fadeOut();',
-'$(pwFieldV + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
-''))
-,p_stop_execution_on_error=>'Y'
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
+,p_process_when_type=>'NEVER'
+,p_process_success_message=>'successfully send mail'
 );
 wwv_flow_api.create_page_process(
- p_id=>wwv_flow_api.id(7249286387427366)
+ p_id=>wwv_flow_api.id(5807923356417299)
 ,p_process_sequence=>30
 ,p_process_point=>'AFTER_SUBMIT'
 ,p_process_type=>'NATIVE_SESSION_STATE'
@@ -14418,11 +12485,11 @@ wwv_flow_api.create_ig_report_column(
 wwv_flow_api.create_ig_report_column(
  p_id=>wwv_flow_api.id(5712914189068547)
 ,p_view_id=>wwv_flow_api.id(5711288064068537)
-,p_display_seq=>3
+,p_display_seq=>2
 ,p_column_id=>wwv_flow_api.id(5712549540068547)
 ,p_is_visible=>true
 ,p_is_frozen=>false
-,p_width=>267
+,p_width=>120
 );
 wwv_flow_api.create_ig_report_column(
  p_id=>wwv_flow_api.id(5713563822068547)
@@ -14542,1391 +12609,6 @@ wwv_flow_api.create_page_process(
 ,p_attribute_06=>'Y'
 ,p_attribute_08=>'Y'
 ,p_error_display_location=>'INLINE_IN_NOTIFICATION'
-);
-end;
-/
-prompt --application/pages/page_00255
-begin
-wwv_flow_api.create_page(
- p_id=>255
-,p_user_interface_id=>wwv_flow_api.id(4955200262726764)
-,p_name=>'Apex User Registration'
-,p_page_mode=>'NORMAL'
-,p_step_title=>'Apex User Registration'
-,p_step_sub_title=>'Apex User Registration'
-,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
-,p_first_item=>'NO_FIRST_ITEM'
-,p_autocomplete_on_off=>'OFF'
-,p_javascript_code_onload=>'$(''#R5710287023068530_ig_grid_view_container > div.a-GV-bdy > div.a-GV-w-frozen > table > tbody > tr.a-GV-row.is-selected > th > span'').click();'
-,p_inline_css=>'#t_Body_content > footer { display: none; }'
-,p_page_template_options=>'#DEFAULT#'
-,p_overwrite_navigation_list=>'N'
-,p_page_is_public_y_n=>'N'
-,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180211155208'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(12905557005623714)
-,p_plug_name=>'Breadcrumb'
-,p_region_template_options=>'#DEFAULT#:t-BreadcrumbRegion--useBreadcrumbTitle'
-,p_component_template_options=>'#DEFAULT#'
-,p_plug_template=>wwv_flow_api.id(13809062957068984)
-,p_plug_display_sequence=>10
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'REGION_POSITION_01'
-,p_menu_id=>wwv_flow_api.id(4956510883726765)
-,p_plug_source_type=>'NATIVE_BREADCRUMB'
-,p_menu_template_id=>wwv_flow_api.id(13846118254068998)
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_plug_display_condition_type=>'NEVER'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(12906198293623715)
-,p_plug_name=>'APEX_USER_REGISTRATION'
-,p_region_name=>'USRREGREPORT'
-,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
-,p_component_template_options=>'#DEFAULT#'
-,p_plug_template=>wwv_flow_api.id(13799874108068981)
-,p_plug_display_sequence=>20
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'select "APX$USER_REG".APX_USER_ID as APX_USER_ID,',
-'    "APX$USER_REG".APX_USERNAME as APX_USERNAME,',
-'    "APX$USER_REG".APX_USER_EMAIL as APX_USER_EMAIL,',
-'    "APX$USER_REG".APX_USER_DEFAULT_ROLE_ID as APX_USER_DEFAULT_ROLE_ID,',
-'    "APX$USER_REG".APX_USER_FIRST_NAME as APX_USER_FIRST_NAME,',
-'    "APX$USER_REG".APX_USER_LAST_NAME as APX_USER_LAST_NAME,',
-'    "APX$USER_REG".APX_USER_DESCRIPTION as APX_USER_DESCRIPTION,',
-'    "APX$USER_REG".APX_APP_USER_ID as APX_APP_USER_ID,',
-'    "APX$USER_REG".APEX_USER_ID as APEX_USER_ID,',
-'    "APX$USER_REG".APX_USER_REG_ATTEMPT as APX_USER_REG_ATTEMPT,',
-'    "APX$USER_REG".APX_USER_TOKEN_CREATED as APX_USER_TOKEN_CREATED,',
-'    "APX$USER_REG".APX_USER_TOKEN_VALID_UNTIL as APX_USER_TOKEN_VALID_UNTIL,',
-'    "APX$USER_REG".APX_USER_TOKEN_TS as APX_USER_TOKEN_TS,',
-'    "APX$USER_REG".APX_USER_TOKEN as APX_USER_TOKEN,',
-'    "APX$USER_REG".APX_USER_DOMAIN_ID as APX_USER_DOMAIN_ID,',
-'    "APX$USER_REG".APX_USER_STATUS_ID as APX_USER_STATUS_ID,',
-'    "APX$USER_REG".APX_USER_SEC_LEVEL as APX_USER_SEC_LEVEL,',
-'    "APX$USER_REG".APX_USER_CONTEXT_ID as APX_USER_CONTEXT_ID,',
-'    "APX$USER_REG".APX_USER_PARENT_USER_ID as APX_USER_PARENT_USER_ID,',
-'    "APX$USER_REG".APP_ID as APP_ID,',
-'    "APX$USER_REG".CREATED as CREATED,',
-'    "APX$USER_REG".MODIFIED as MODIFIED ',
-' from "APX$USER_REG" "APX$USER_REG"'))
-,p_plug_source_type=>'NATIVE_IG'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6147727257406218)
-,p_name=>'APX_USER_ID'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_ID'
-,p_data_type=>'NUMBER'
-,p_is_query_only=>true
-,p_item_type=>'NATIVE_NUMBER_FIELD'
-,p_heading=>'Apx user id'
-,p_heading_alignment=>'RIGHT'
-,p_display_sequence=>160
-,p_value_alignment=>'RIGHT'
-,p_attribute_03=>'right'
-,p_is_required=>true
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_lov_type=>'NONE'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6147825879406219)
-,p_name=>'APX_USERNAME'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USERNAME'
-,p_data_type=>'VARCHAR2'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_TEXT_FIELD'
-,p_heading=>'Apx username'
-,p_heading_alignment=>'LEFT'
-,p_display_sequence=>170
-,p_value_alignment=>'LEFT'
-,p_attribute_05=>'BOTH'
-,p_is_required=>true
-,p_enable_filter=>true
-,p_filter_operators=>'C:S:CASE_INSENSITIVE:REGEXP'
-,p_filter_is_required=>false
-,p_filter_text_case=>'MIXED'
-,p_filter_exact_match=>true
-,p_filter_lov_type=>'DISTINCT'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6147993308406220)
-,p_name=>'APX_USER_EMAIL'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_EMAIL'
-,p_data_type=>'VARCHAR2'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_TEXT_FIELD'
-,p_heading=>'Apx user email'
-,p_heading_alignment=>'LEFT'
-,p_display_sequence=>180
-,p_value_alignment=>'LEFT'
-,p_attribute_05=>'BOTH'
-,p_is_required=>true
-,p_enable_filter=>true
-,p_filter_operators=>'C:S:CASE_INSENSITIVE:REGEXP'
-,p_filter_is_required=>false
-,p_filter_text_case=>'MIXED'
-,p_filter_exact_match=>true
-,p_filter_lov_type=>'DISTINCT'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6148044908406221)
-,p_name=>'APX_USER_DEFAULT_ROLE_ID'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_DEFAULT_ROLE_ID'
-,p_data_type=>'NUMBER'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_NUMBER_FIELD'
-,p_heading=>'Apx user default role id'
-,p_heading_alignment=>'RIGHT'
-,p_display_sequence=>190
-,p_value_alignment=>'RIGHT'
-,p_attribute_03=>'right'
-,p_is_required=>true
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_lov_type=>'NONE'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6148173814406222)
-,p_name=>'APX_USER_FIRST_NAME'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_FIRST_NAME'
-,p_data_type=>'VARCHAR2'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_TEXT_FIELD'
-,p_heading=>'Apx user first name'
-,p_heading_alignment=>'LEFT'
-,p_display_sequence=>200
-,p_value_alignment=>'LEFT'
-,p_attribute_05=>'BOTH'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_operators=>'C:S:CASE_INSENSITIVE:REGEXP'
-,p_filter_is_required=>false
-,p_filter_text_case=>'MIXED'
-,p_filter_exact_match=>true
-,p_filter_lov_type=>'DISTINCT'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6148244329406223)
-,p_name=>'APX_USER_LAST_NAME'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_LAST_NAME'
-,p_data_type=>'VARCHAR2'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_TEXT_FIELD'
-,p_heading=>'Apx user last name'
-,p_heading_alignment=>'LEFT'
-,p_display_sequence=>210
-,p_value_alignment=>'LEFT'
-,p_attribute_05=>'BOTH'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_operators=>'C:S:CASE_INSENSITIVE:REGEXP'
-,p_filter_is_required=>false
-,p_filter_text_case=>'MIXED'
-,p_filter_exact_match=>true
-,p_filter_lov_type=>'DISTINCT'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6148351780406224)
-,p_name=>'APX_USER_DESCRIPTION'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_DESCRIPTION'
-,p_data_type=>'VARCHAR2'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_TEXTAREA'
-,p_heading=>'Apx user description'
-,p_heading_alignment=>'LEFT'
-,p_display_sequence=>220
-,p_value_alignment=>'LEFT'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'N'
-,p_attribute_03=>'N'
-,p_attribute_04=>'BOTH'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_operators=>'C:S:CASE_INSENSITIVE:REGEXP'
-,p_filter_is_required=>false
-,p_filter_text_case=>'MIXED'
-,p_filter_lov_type=>'NONE'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>false
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6148409552406225)
-,p_name=>'APX_APP_USER_ID'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_APP_USER_ID'
-,p_data_type=>'NUMBER'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_NUMBER_FIELD'
-,p_heading=>'Apx app user id'
-,p_heading_alignment=>'RIGHT'
-,p_display_sequence=>230
-,p_value_alignment=>'RIGHT'
-,p_attribute_03=>'right'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_lov_type=>'NONE'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6148528594406226)
-,p_name=>'APEX_USER_ID'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APEX_USER_ID'
-,p_data_type=>'NUMBER'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_NUMBER_FIELD'
-,p_heading=>'Apex user id'
-,p_heading_alignment=>'RIGHT'
-,p_display_sequence=>240
-,p_value_alignment=>'RIGHT'
-,p_attribute_03=>'right'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_lov_type=>'NONE'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6148681355406227)
-,p_name=>'APX_USER_REG_ATTEMPT'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_REG_ATTEMPT'
-,p_data_type=>'NUMBER'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_SELECT_LIST'
-,p_heading=>'APX User Reg Attempt'
-,p_heading_alignment=>'RIGHT'
-,p_display_sequence=>250
-,p_value_alignment=>'RIGHT'
-,p_is_required=>false
-,p_lov_type=>'SHARED'
-,p_lov_id=>wwv_flow_api.id(7220506214687976)
-,p_lov_display_extra=>true
-,p_lov_display_null=>false
-,p_enable_filter=>true
-,p_filter_operators=>'C:S:CASE_INSENSITIVE:REGEXP'
-,p_filter_is_required=>false
-,p_filter_text_case=>'MIXED'
-,p_filter_exact_match=>true
-,p_filter_lov_type=>'LOV'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6148702368406228)
-,p_name=>'APX_USER_TOKEN_CREATED'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_TOKEN_CREATED'
-,p_data_type=>'DATE'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_DATE_PICKER'
-,p_heading=>'Apx user token created'
-,p_heading_alignment=>'CENTER'
-,p_display_sequence=>260
-,p_value_alignment=>'CENTER'
-,p_attribute_04=>'button'
-,p_attribute_05=>'N'
-,p_attribute_07=>'NONE'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_date_ranges=>'ALL'
-,p_filter_lov_type=>'DISTINCT'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6148888122406229)
-,p_name=>'APX_USER_TOKEN_VALID_UNTIL'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_TOKEN_VALID_UNTIL'
-,p_data_type=>'DATE'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_DATE_PICKER'
-,p_heading=>'Apx user token valid until'
-,p_heading_alignment=>'CENTER'
-,p_display_sequence=>270
-,p_value_alignment=>'CENTER'
-,p_attribute_04=>'button'
-,p_attribute_05=>'N'
-,p_attribute_07=>'NONE'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_date_ranges=>'ALL'
-,p_filter_lov_type=>'DISTINCT'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6148960888406230)
-,p_name=>'APX_USER_TOKEN_TS'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_TOKEN_TS'
-,p_data_type=>'TIMESTAMP_TZ'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_TEXT_FIELD'
-,p_heading=>'Apx user token ts'
-,p_heading_alignment=>'LEFT'
-,p_display_sequence=>280
-,p_value_alignment=>'LEFT'
-,p_attribute_05=>'BOTH'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_date_ranges=>'ALL'
-,p_filter_lov_type=>'DISTINCT'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6149016825406231)
-,p_name=>'APX_USER_TOKEN'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_TOKEN'
-,p_data_type=>'VARCHAR2'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_TEXTAREA'
-,p_heading=>'Apx user token'
-,p_heading_alignment=>'LEFT'
-,p_display_sequence=>290
-,p_value_alignment=>'LEFT'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'N'
-,p_attribute_03=>'N'
-,p_attribute_04=>'BOTH'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_operators=>'C:S:CASE_INSENSITIVE:REGEXP'
-,p_filter_is_required=>false
-,p_filter_text_case=>'MIXED'
-,p_filter_lov_type=>'NONE'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>false
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6149157008406232)
-,p_name=>'APX_USER_DOMAIN_ID'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_DOMAIN_ID'
-,p_data_type=>'NUMBER'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_NUMBER_FIELD'
-,p_heading=>'Apx user domain id'
-,p_heading_alignment=>'RIGHT'
-,p_display_sequence=>300
-,p_value_alignment=>'RIGHT'
-,p_attribute_03=>'right'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_lov_type=>'NONE'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6149221197406233)
-,p_name=>'APX_USER_STATUS_ID'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_STATUS_ID'
-,p_data_type=>'NUMBER'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_NUMBER_FIELD'
-,p_heading=>'Apx user status id'
-,p_heading_alignment=>'RIGHT'
-,p_display_sequence=>310
-,p_value_alignment=>'RIGHT'
-,p_attribute_03=>'right'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_lov_type=>'NONE'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6149361593406234)
-,p_name=>'APX_USER_SEC_LEVEL'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_SEC_LEVEL'
-,p_data_type=>'NUMBER'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_NUMBER_FIELD'
-,p_heading=>'Apx user sec level'
-,p_heading_alignment=>'RIGHT'
-,p_display_sequence=>320
-,p_value_alignment=>'RIGHT'
-,p_attribute_03=>'right'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_lov_type=>'NONE'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6149482125406235)
-,p_name=>'APX_USER_CONTEXT_ID'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_CONTEXT_ID'
-,p_data_type=>'NUMBER'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_NUMBER_FIELD'
-,p_heading=>'Apx user context id'
-,p_heading_alignment=>'RIGHT'
-,p_display_sequence=>330
-,p_value_alignment=>'RIGHT'
-,p_attribute_03=>'right'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_lov_type=>'NONE'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6149573280406236)
-,p_name=>'APX_USER_PARENT_USER_ID'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APX_USER_PARENT_USER_ID'
-,p_data_type=>'NUMBER'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_NUMBER_FIELD'
-,p_heading=>'Apx user parent user id'
-,p_heading_alignment=>'RIGHT'
-,p_display_sequence=>340
-,p_value_alignment=>'RIGHT'
-,p_attribute_03=>'right'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_lov_type=>'NONE'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6149674165406237)
-,p_name=>'CREATED'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'CREATED'
-,p_data_type=>'DATE'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_DATE_PICKER'
-,p_heading=>'Created'
-,p_heading_alignment=>'CENTER'
-,p_display_sequence=>350
-,p_value_alignment=>'CENTER'
-,p_attribute_04=>'button'
-,p_attribute_05=>'N'
-,p_attribute_07=>'NONE'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_date_ranges=>'ALL'
-,p_filter_lov_type=>'DISTINCT'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(6149798228406238)
-,p_name=>'MODIFIED'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'MODIFIED'
-,p_data_type=>'DATE'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_DATE_PICKER'
-,p_heading=>'Modified'
-,p_heading_alignment=>'CENTER'
-,p_display_sequence=>360
-,p_value_alignment=>'CENTER'
-,p_attribute_04=>'button'
-,p_attribute_05=>'N'
-,p_attribute_07=>'NONE'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_date_ranges=>'ALL'
-,p_filter_lov_type=>'DISTINCT'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(12864113757514288)
-,p_name=>'APEX$ROW_ACTION'
-,p_item_type=>'NATIVE_ROW_ACTION'
-,p_display_sequence=>20
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(12864292665514289)
-,p_name=>'APEX$ROW_SELECTOR'
-,p_item_type=>'NATIVE_ROW_SELECTOR'
-,p_display_sequence=>10
-,p_attribute_01=>'Y'
-,p_attribute_02=>'Y'
-,p_attribute_03=>'N'
-);
-wwv_flow_api.create_region_column(
- p_id=>wwv_flow_api.id(12913223147623734)
-,p_name=>'APP_ID'
-,p_source_type=>'DB_COLUMN'
-,p_source_expression=>'APP_ID'
-,p_data_type=>'NUMBER'
-,p_is_query_only=>false
-,p_item_type=>'NATIVE_NUMBER_FIELD'
-,p_heading=>'App ID'
-,p_heading_alignment=>'CENTER'
-,p_display_sequence=>150
-,p_value_alignment=>'RIGHT'
-,p_attribute_03=>'center'
-,p_is_required=>false
-,p_enable_filter=>true
-,p_filter_is_required=>false
-,p_filter_lov_type=>'NONE'
-,p_use_as_row_header=>false
-,p_enable_sort_group=>true
-,p_enable_pivot=>false
-,p_is_primary_key=>false
-,p_duplicate_value=>true
-,p_include_in_export=>true
-);
-wwv_flow_api.create_interactive_grid(
- p_id=>wwv_flow_api.id(12906671848623716)
-,p_internal_uid=>12906671848623716
-,p_is_editable=>true
-,p_edit_operations=>'i:u:d'
-,p_lost_update_check_type=>'VALUES'
-,p_add_row_if_empty=>true
-,p_submit_checked_rows=>false
-,p_lazy_loading=>false
-,p_requires_filter=>false
-,p_show_nulls_as=>'-'
-,p_fixed_row_height=>true
-,p_pagination_type=>'SCROLL'
-,p_show_total_row_count=>true
-,p_show_toolbar=>true
-,p_enable_save_public_report=>false
-,p_enable_subscriptions=>true
-,p_enable_download=>true
-,p_enable_mail_download=>true
-,p_fixed_header=>'REGION'
-,p_fixed_header_max_height=>560
-,p_show_icon_view=>false
-,p_show_detail_view=>false
-);
-wwv_flow_api.create_ig_report(
- p_id=>wwv_flow_api.id(12907057899623719)
-,p_interactive_grid_id=>wwv_flow_api.id(12906671848623716)
-,p_type=>'PRIMARY'
-,p_default_view=>'GRID'
-,p_show_row_number=>false
-,p_settings_area_expanded=>true
-);
-wwv_flow_api.create_ig_report_view(
- p_id=>wwv_flow_api.id(12907199334623722)
-,p_report_id=>wwv_flow_api.id(12907057899623719)
-,p_view_type=>'GRID'
-,p_srv_exclude_null_values=>false
-,p_srv_only_display_columns=>true
-,p_edit_mode=>false
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7205709980577500)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>4
-,p_column_id=>wwv_flow_api.id(6147727257406218)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>95
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7206254311577503)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>7
-,p_column_id=>wwv_flow_api.id(6147825879406219)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>151
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7206726663577504)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>7
-,p_column_id=>wwv_flow_api.id(6147993308406220)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>208
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7207231743577506)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>6
-,p_column_id=>wwv_flow_api.id(6148044908406221)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>187
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7207760212577507)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>7
-,p_column_id=>wwv_flow_api.id(6148173814406222)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>171
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7208267781577508)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>9
-,p_column_id=>wwv_flow_api.id(6148244329406223)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>163
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7208717237577509)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>9
-,p_column_id=>wwv_flow_api.id(6148351780406224)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>154
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7209287318577510)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>11
-,p_column_id=>wwv_flow_api.id(6148409552406225)
-,p_is_visible=>true
-,p_is_frozen=>false
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7209720164577512)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>12
-,p_column_id=>wwv_flow_api.id(6148528594406226)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>117
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7210240653577513)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>3
-,p_column_id=>wwv_flow_api.id(6148681355406227)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>176
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7210760893577514)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>13
-,p_column_id=>wwv_flow_api.id(6148702368406228)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>157
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7211295513577515)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>14
-,p_column_id=>wwv_flow_api.id(6148888122406229)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>168
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7211702751577516)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>15
-,p_column_id=>wwv_flow_api.id(6148960888406230)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>223
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7212222511577517)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>16
-,p_column_id=>wwv_flow_api.id(6149016825406231)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>446
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7212752462577519)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>17
-,p_column_id=>wwv_flow_api.id(6149157008406232)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>145
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7213234028577520)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>18
-,p_column_id=>wwv_flow_api.id(6149221197406233)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>126
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7213720477577521)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>19
-,p_column_id=>wwv_flow_api.id(6149361593406234)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>144
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7214232965577522)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>20
-,p_column_id=>wwv_flow_api.id(6149482125406235)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>134
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7214743282577523)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>22
-,p_column_id=>wwv_flow_api.id(6149573280406236)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>158
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7215277826577524)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>22
-,p_column_id=>wwv_flow_api.id(6149674165406237)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>122
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(7215738537577525)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>32
-,p_column_id=>wwv_flow_api.id(6149798228406238)
-,p_is_visible=>true
-,p_is_frozen=>false
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(12913617476623735)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>11
-,p_column_id=>wwv_flow_api.id(12913223147623734)
-,p_is_visible=>true
-,p_is_frozen=>false
-,p_width=>139
-);
-wwv_flow_api.create_ig_report_column(
- p_id=>wwv_flow_api.id(12915072078627779)
-,p_view_id=>wwv_flow_api.id(12907199334623722)
-,p_display_seq=>0
-,p_column_id=>wwv_flow_api.id(12864113757514288)
-,p_is_visible=>true
-,p_is_frozen=>true
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7203871136555216)
-,p_name=>'AlertFade'
-,p_event_sequence=>10
-,p_triggering_element_type=>'REGION'
-,p_triggering_region_id=>wwv_flow_api.id(12906198293623715)
-,p_bind_type=>'bind'
-,p_bind_event_type=>'NATIVE_IG|REGION TYPE|interactivegridselectionchange'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7204326297555216)
-,p_event_id=>wwv_flow_api.id(7203871136555216)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>'$(''.t-Alert'').fadeOut(2400);'
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_process(
- p_id=>wwv_flow_api.id(7203139893555214)
-,p_process_sequence=>10
-,p_process_point=>'AFTER_SUBMIT'
-,p_region_id=>wwv_flow_api.id(12906198293623715)
-,p_process_type=>'NATIVE_IG_DML'
-,p_process_name=>'APEX_CONFIGURATION - Save Interactive Grid Data'
-,p_attribute_01=>'REGION_SOURCE'
-,p_attribute_05=>'Y'
-,p_attribute_06=>'Y'
-,p_attribute_08=>'Y'
-,p_error_display_location=>'INLINE_IN_NOTIFICATION'
-);
-end;
-/
-prompt --application/pages/page_00404
-begin
-wwv_flow_api.create_page(
- p_id=>404
-,p_user_interface_id=>wwv_flow_api.id(4955200262726764)
-,p_name=>'UserConfirmDef'
-,p_page_mode=>'NORMAL'
-,p_step_title=>'UserConfirmDef'
-,p_warn_on_unsaved_changes=>'N'
-,p_step_sub_title=>'UserConfirmDef'
-,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
-,p_first_item=>'AUTO_FIRST_ITEM'
-,p_autocomplete_on_off=>'ON'
-,p_inline_css=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'.t-success:before { color: green; font-size: 72px; }',
-'#P104_NEWUSER { font-size: large; text-align: center; margin-bottom: 30px; }'))
-,p_step_template=>wwv_flow_api.id(13761578240068968)
-,p_page_template_options=>'#DEFAULT#'
-,p_overwrite_navigation_list=>'N'
-,p_page_is_public_y_n=>'Y'
-,p_browser_cache=>'N'
-,p_deep_linking=>'Y'
-,p_rejoin_existing_sessions=>'P'
-,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180211142430'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(29333596295425327)
-,p_plug_name=>'Thank You Very much...'
-,p_region_css_classes=>'t-success'
-,p_icon_css_classes=>'fa-check-circle'
-,p_region_template_options=>'#DEFAULT#'
-,p_plug_template=>wwv_flow_api.id(13799328938068981)
-,p_plug_display_sequence=>10
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'TEXT'
-,p_attribute_03=>'Y'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7169927723262398)
-,p_button_sequence=>30
-,p_button_plug_id=>wwv_flow_api.id(29333596295425327)
-,p_button_name=>'DONE'
-,p_button_action=>'SUBMIT'
-,p_button_template_options=>'#DEFAULT#'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Done'
-,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_icon_css_classes=>'fa-check-circle-o'
-);
-wwv_flow_api.create_page_branch(
- p_id=>wwv_flow_api.id(7173751414262411)
-,p_branch_name=>'Go To Page 1'
-,p_branch_action=>'f?p=&APP_ID.:1:&SESSION.::&DEBUG.:RP,1::&success_msg=#SUCCESS_MSG#'
-,p_branch_point=>'BEFORE_COMPUTATION'
-,p_branch_type=>'REDIRECT_URL'
-,p_branch_sequence=>10
-,p_branch_condition_type=>'NEVER'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7170386083262400)
-,p_name=>'P404_TOKEN'
-,p_item_sequence=>1
-,p_item_plug_id=>wwv_flow_api.id(29333596295425327)
-,p_use_cache_before_default=>'NO'
-,p_display_as=>'NATIVE_HIDDEN'
-,p_attribute_01=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7170728610262400)
-,p_name=>'P404_NEWUSER'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(29333596295425327)
-,p_use_cache_before_default=>'NO'
-,p_prompt=>'User'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_icon_css_classes=>'fa-user'
-,p_item_template_options=>'#DEFAULT#:t-Form-fieldContainer--stretchInputs'
-,p_attribute_01=>'N'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
-);
-wwv_flow_api.create_page_validation(
- p_id=>wwv_flow_api.id(7171225669262409)
-,p_validation_name=>'IsEmail'
-,p_validation_sequence=>10
-,p_validation=>'P404_NEWUSER'
-,p_validation2=>'^*.@.*$'
-,p_validation_type=>'REGULAR_EXPRESSION'
-,p_error_message=>'Pleas enter a valid email adress'
-,p_always_execute=>'Y'
-,p_when_button_pressed=>wwv_flow_api.id(7169927723262398)
-,p_associated_item=>wwv_flow_api.id(7170728610262400)
-,p_error_display_location=>'INLINE_WITH_FIELD'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7172749208262410)
-,p_name=>'SetIcon'
-,p_event_sequence=>10
-,p_bind_type=>'bind'
-,p_bind_event_type=>'ready'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7173280808262411)
-,p_event_id=>wwv_flow_api.id(7172749208262410)
-,p_event_result=>'TRUE'
-,p_action_sequence=>10
-,p_execute_on_page_init=>'Y'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>'$(''div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-check-circle-o t-success'');'
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_process(
- p_id=>wwv_flow_api.id(7171984339262410)
-,p_process_sequence=>10
-,p_process_point=>'AFTER_SUBMIT'
-,p_process_type=>'NATIVE_PLSQL'
-,p_process_name=>'Set Username Cookie'
-,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'apex_authentication.send_login_username_cookie (',
-'    p_username => lower(:P404_EMAIL) );'))
-,p_error_display_location=>'INLINE_IN_NOTIFICATION'
-,p_process_when_type=>'NEVER'
-);
-wwv_flow_api.create_page_process(
- p_id=>wwv_flow_api.id(7171565802262410)
-,p_process_sequence=>20
-,p_process_point=>'AFTER_SUBMIT'
-,p_process_type=>'NATIVE_PLSQL'
-,p_process_name=>'Register'
-,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'declare',
-'   l_body      clob;',
-'   l_body_html clob;',
-'   l_token     varchar2(1000);',
-'begin',
-'/*',
-'insert into apxusr.apx$app_user_reg (app_user_email, app_id)',
-'values(:P404_EMAIL, :APP_ID);',
-'select app_user_token',
-'into l_token',
-'from apxusr.apx$app_user_reg',
-'where app_user_email = :P404_EMAIL',
-'and app_id = :APP_ID;',
-'',
-'commit;',
-'*/',
-'l_token := apx_get_token(v(''P404_EMAIL''));',
-'for c1 in (',
-'   select workspace_id',
-'     from apex_applications',
-'    where application_id = :p_app_id )',
-'loop',
-'   apex_util.set_security_group_id(p_security_group_id =>',
-'c1.workspace_id);',
-'end loop;',
-'',
-'    l_body := ''To view the content of this message, please use an HTML enabled mail client.'' || utl_tcp.crlf;',
-' ',
-'    l_body_html := ''<html><body>'' || utl_tcp.crlf ||',
-'                   ''<p>Please confirm your registration at <a href="'' ||',
-'                   apex_mail.get_instance_url || ''f?p=''||v(''APP_ID'')||',
-'                   '':1::CONFIRM:NO::TOKEN:''||l_token||''">Registration Confirmation</a> page.</p>'' || utl_tcp.crlf ||',
-'                   ''<p>Sincerely,<br />'' || utl_tcp.crlf ||',
-'                   ''Yo Bro from Next Do''''<br />'' || utl_tcp.crlf ||',
-'                   ''<img src="http://zapt1.staticworld.net/images/article/2013/04/oracle-logo-100033308-gallery.png" alt="Oracle Logo"></p>'' || utl_tcp.crlf ||',
-'                   ''</body></html>''; ',
-'    apex_mail.send (',
-'        p_to        => v(''P404_EMAIL''),   -- change to your email address',
-'        p_from      => ''s.obermeyer@t-online.de'', -- change to a real senders email address',
-'        p_body      => l_body,',
-'        p_body_html => l_body_html,',
-'        p_subj      => ''Registration Confirmation'' );',
-'',
-'end;',
-''))
-,p_error_display_location=>'INLINE_IN_NOTIFICATION'
-,p_process_when_type=>'NEVER'
-,p_process_success_message=>'successfully send mail'
-);
-wwv_flow_api.create_page_process(
- p_id=>wwv_flow_api.id(7172324318262410)
-,p_process_sequence=>30
-,p_process_point=>'AFTER_SUBMIT'
-,p_process_type=>'NATIVE_SESSION_STATE'
-,p_process_name=>'Clear Page(s) Cache'
-,p_attribute_01=>'CLEAR_CACHE_CURRENT_PAGE'
-,p_error_display_location=>'INLINE_IN_NOTIFICATION'
-);
-end;
-/
-prompt --application/pages/page_00500
-begin
-wwv_flow_api.create_page(
- p_id=>500
-,p_user_interface_id=>wwv_flow_api.id(4955200262726764)
-,p_name=>'User Nav'
-,p_alias=>'UN'
-,p_page_mode=>'NORMAL'
-,p_step_title=>'User Nav'
-,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
-,p_first_item=>'NO_FIRST_ITEM'
-,p_autocomplete_on_off=>'OFF'
-,p_step_template=>wwv_flow_api.id(5659357216802420)
-,p_page_template_options=>'#DEFAULT#'
-,p_overwrite_navigation_list=>'N'
-,p_page_is_public_y_n=>'Y'
-,p_browser_cache=>'N'
-,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180211162141'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(6146977460406210)
-,p_plug_name=>'ITEMS'
-,p_region_template_options=>'#DEFAULT#:t-Form--labelsAbove'
-,p_plug_template=>wwv_flow_api.id(13778706889068974)
-,p_plug_display_sequence=>10
-,p_include_in_reg_disp_sel_yn=>'Y'
-,p_plug_display_point=>'AFTER_HEADER'
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'HTML'
-);
-wwv_flow_api.create_page_branch(
- p_id=>wwv_flow_api.id(6146876356406209)
-,p_branch_name=>'Go To Page 103'
-,p_branch_action=>'f?p=&APP_ID.:103:&SESSION.:REG_CONFIRM:&DEBUG.:RP,103:NEWUSER,TOKEN:&USR.,&TKN.'
-,p_branch_point=>'BEFORE_COMPUTATION'
-,p_branch_type=>'REDIRECT_URL'
-,p_branch_sequence=>10
-,p_branch_condition_type=>'FUNCTION_BODY'
-,p_branch_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'begin',
-'if (1=1) then',
-'return true;',
-'else return false;',
-'end if;',
-'end;'))
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(6147007119406211)
-,p_name=>'USR'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(6146977460406210)
-,p_use_cache_before_default=>'NO'
-,p_prompt=>'USR'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_field_template=>wwv_flow_api.id(13845150629068998)
-,p_item_template_options=>'#DEFAULT#'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(6147189521406212)
-,p_name=>'TKN'
-,p_item_sequence=>20
-,p_item_plug_id=>wwv_flow_api.id(6146977460406210)
-,p_prompt=>'TKN'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_field_template=>wwv_flow_api.id(13845150629068998)
-,p_item_template_options=>'#DEFAULT#'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
-);
-wwv_flow_api.create_page_process(
- p_id=>wwv_flow_api.id(6147471620406215)
-,p_process_sequence=>10
-,p_process_point=>'AFTER_FOOTER'
-,p_process_type=>'NATIVE_PLSQL'
-,p_process_name=>'GoToPage'
-,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'declare',
-'l_usr   clob;',
-'l_token clob;',
-'l_request varchar2(1000);',
-'begin',
-'    l_usr := :USR;',
-'    l_token := :TKN;',
-'    l_request := :REQUEST;',
-'    --    raise_application_error(-20001, ''In Proc: ''||l_usr||'',''||l_token||'',''||l_request);',
-'    ',
-'    ',
-'if (l_request = ''REGISTER'') then    ',
-'    if (is_valid_user_token(l_usr, l_token)) then',
-'',
-'        htp.init;',
-'        owa_util.redirect_url(''f?p=&APP_ID.:USRREG_CONFIRM:0:''||v(''REQUEST'')||'':::NEWUSER,TOKEN:''||l_usr||'',''||l_token);',
-'        apex_application.stop_apex_engine;',
-'    else',
-'        redirect(''f?p=&APP_ID.:ERRPAGE:0:TOKEN_INVALID:::P501_USR:''||l_usr);',
-'    end if;    ',
-'end if;',
-'    ',
-'end;    '))
-,p_error_display_location=>'INLINE_IN_NOTIFICATION'
-);
-end;
-/
-prompt --application/pages/page_00501
-begin
-wwv_flow_api.create_page(
- p_id=>501
-,p_user_interface_id=>wwv_flow_api.id(4955200262726764)
-,p_name=>'User Error Page'
-,p_alias=>'ERRPAGE'
-,p_page_mode=>'NORMAL'
-,p_step_title=>'User Error Page'
-,p_step_sub_title=>'User Error Page'
-,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
-,p_first_item=>'NO_FIRST_ITEM'
-,p_autocomplete_on_off=>'OFF'
-,p_css_file_urls=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'#WORKSPACE_IMAGES#css/validate/screen.css?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#css/validateInput.min.css?v=#APEX_VERSION#'))
-,p_inline_css=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'.t-Form--labelsAbove .t-Form-fieldContainer .t-Form-inputContainer {',
-'    height: 200px;',
-'}'))
-,p_step_template=>wwv_flow_api.id(5659357216802420)
-,p_page_template_options=>'#DEFAULT#'
-,p_overwrite_navigation_list=>'N'
-,p_page_is_public_y_n=>'Y'
-,p_browser_cache=>'N'
-,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180211172959'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(12812756519730434)
-,p_plug_name=>'User Registration Error'
-,p_region_name=>'USREG_CONFIRM_ERROR'
-,p_icon_css_classes=>'fa-exclamation-triangle t-error'
-,p_region_template_options=>'#DEFAULT#:margin-top-lg:margin-bottom-lg'
-,p_plug_template=>wwv_flow_api.id(13799328938068981)
-,p_plug_display_sequence=>20
-,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_display_point=>'BODY'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'TEXT'
-,p_attribute_03=>'Y'
-);
-wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(13263645028053339)
-,p_plug_name=>'ITEMS'
-,p_region_template_options=>'#DEFAULT#:t-Form--labelsAbove'
-,p_plug_template=>wwv_flow_api.id(13778706889068974)
-,p_plug_display_sequence=>10
-,p_include_in_reg_disp_sel_yn=>'Y'
-,p_plug_display_point=>'AFTER_HEADER'
-,p_plug_query_row_template=>1
-,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_attribute_01=>'N'
-,p_attribute_02=>'HTML'
-);
-wwv_flow_api.create_page_button(
- p_id=>wwv_flow_api.id(7119346021656187)
-,p_button_sequence=>10
-,p_button_plug_id=>wwv_flow_api.id(12812756519730434)
-,p_button_name=>'FINISH_ERR'
-,p_button_static_id=>'FIN_ERR'
-,p_button_action=>'REDIRECT_PAGE'
-,p_button_template_options=>'#DEFAULT#:t-Button--large:t-Button--danger:t-Button--pillEnd:t-Button--stretch:t-Button--gapTop:t-Button--gapBottom'
-,p_button_template_id=>wwv_flow_api.id(13845333853068998)
-,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Finish'
-,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTER:&DEBUG.::P101_USERNAME:&P501_USR.'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7117374769647134)
-,p_name=>'ERRUSR'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(13263645028053339)
-,p_use_cache_before_default=>'NO'
-,p_prompt=>'USR'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_field_template=>wwv_flow_api.id(13845150629068998)
-,p_item_template_options=>'#DEFAULT#'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7117782846647134)
-,p_name=>'ERRMSG1'
-,p_item_sequence=>20
-,p_item_plug_id=>wwv_flow_api.id(13263645028053339)
-,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'declare',
-'l_req varchar2(32000);',
-'begin',
-'  l_req := :REQUEST;',
-'  if (l_req is not null) then',
-'    if (l_req = ''TOKEN_INVALID'') then',
-'        return ''Registration has expired.'';',
-'    else',
-'        return ''Unknown Error. ''|| l_req;',
-'    end if;    ',
-'  end if;',
-'end;'))
-,p_source_type=>'FUNCTION_BODY'
-,p_display_as=>'NATIVE_HIDDEN'
-,p_attribute_01=>'Y'
-);
-wwv_flow_api.create_page_item(
- p_id=>wwv_flow_api.id(7119718438656187)
-,p_name=>'ERRORMSG'
-,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(12812756519730434)
-,p_prompt=>'New'
-,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<strong><h4>Error for User: &P501_USR.</h4></strong>',
-'<h5 class="t-error">&P501_ERR.</h5>',
-'Please try to <a href="f?p=&APP_ID.:102:0:REGISTER::::#">register again</a> later',
-'and if You are still having trouble to register',
-'contact our <a href="f?p=&APP_ID.:SUPPORT:0:::::">Support</a> for help.',
-'',
-'Thank You...'))
-,p_source_type=>'STATIC'
-,p_display_as=>'NATIVE_DISPLAY_ONLY'
-,p_tag_css_classes=>'t-text'
-,p_field_template=>wwv_flow_api.id(13844768632068998)
-,p_item_template_options=>'#DEFAULT#:t-Form-fieldContainer--stretchInputs:t-Form-fieldContainer--preTextBlock:t-Form-fieldContainer--postTextBlock:margin-top-lg:margin-bottom-lg'
-,p_escape_on_http_output=>'N'
-,p_attribute_01=>'Y'
-,p_attribute_02=>'VALUE'
-,p_attribute_04=>'Y'
-);
-wwv_flow_api.create_page_process(
- p_id=>wwv_flow_api.id(7118140188647144)
-,p_process_sequence=>10
-,p_process_point=>'AFTER_FOOTER'
-,p_process_type=>'NATIVE_PLSQL'
-,p_process_name=>'GoToPage'
-,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'declare',
-'l_usr   clob;',
-'l_token clob;',
-'begin',
-'    l_usr := :USR;',
-'    l_token := :TKN;',
-'',
-'    if (to_char(trim(l_token)) = ''GtRDESTWYFXU332q6GCKT58rMP'') then',
-'        htp.init;',
-'        owa_util.redirect_url(''f?p=&APP_ID.:103:0:REG_CONFIRM:NO:RP,103:NEWUSER,TOKEN:''||l_usr||'',''||l_token); /*Replace 10 with actual Page Number*/',
-'        apex_application.stop_apex_engine;',
-'    else',
-'        --raise_application_error(-20001, ''In Proc: ''||l_usr||'',''||l_token);',
-'        htp.init;',
-'        owa_util.redirect_url(''f?p=&APP_ID.:ERRPAGE:0:TOKEN_INVALID:::USR,TKN:''||l_usr||'',''||l_token); /*Replace 10 with actual Page Number*/',
-'        apex_application.stop_apex_engine;',
-'    end if;',
-'end;    '))
-,p_error_display_location=>'INLINE_IN_NOTIFICATION'
-,p_process_when_type=>'NEVER'
 );
 end;
 /
