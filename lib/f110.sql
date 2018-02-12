@@ -27,7 +27,7 @@ prompt APPLICATION 110 - User Management
 -- Application Export:
 --   Application:     110
 --   Name:            User Management
---   Date and Time:   22:17 Monday February 12, 2018
+--   Date and Time:   22:36 Monday February 12, 2018
 --   Exported By:     ADMIN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -37,12 +37,12 @@ prompt APPLICATION 110 - User Management
 
 -- Application Statistics:
 --   Pages:                     17
---     Items:                   51
+--     Items:                   52
 --     Validations:              1
 --     Processes:               21
 --     Regions:                 41
 --     Buttons:                 35
---     Dynamic Actions:         49
+--     Dynamic Actions:         48
 --   Shared Components:
 --     Logic:
 --     Navigation:
@@ -114,7 +114,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212221021'
+,p_last_upd_yyyymmddhh24miss=>'20180212223600'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -9317,7 +9317,7 @@ wwv_flow_api.create_page(
 ,p_protection_level=>'D'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212193329'
+,p_last_upd_yyyymmddhh24miss=>'20180212222912'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6146265690406203)
@@ -9372,6 +9372,14 @@ wwv_flow_api.create_page_item(
 ,p_item_default=>'0'
 ,p_source=>'apex_mail.get_instance_url();'
 ,p_source_type=>'FUNCTION'
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(7082607516069519)
+,p_name=>'P0_USER_RST_STATUS'
+,p_item_sequence=>50
+,p_item_plug_id=>wwv_flow_api.id(6146265690406203)
 ,p_display_as=>'NATIVE_HIDDEN'
 ,p_attribute_01=>'Y'
 );
@@ -12492,10 +12500,14 @@ wwv_flow_api.create_page(
 '#WORKSPACE_IMAGES#js/validateFormGlobals.min.js?v=#APEX_VERSION#',
 '#WORKSPACE_IMAGES#js/validateResetPasswordGlobals.min.js?v=#APEX_VERSION#',
 '#WORKSPACE_IMAGES#js/validateForm.min.js?v=#APEX_VERSION#',
-'#WORKSPACE_IMAGES#js/validateUser.min.js?v=#APEX_VERSION#'))
-,p_javascript_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'',
 ''))
+,p_javascript_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'function checkInput() {',
+'   setButtonState(''#RST'', form.valid());',
+'}',
+'function setReRegButton() {',
+'    return false;',
+'}'))
 ,p_javascript_code_onload=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '',
 '',
@@ -12530,7 +12542,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212221021'
+,p_last_upd_yyyymmddhh24miss=>'20180212223600'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(12915392931265802)
@@ -12704,7 +12716,7 @@ wwv_flow_api.create_page_item(
 ,p_prompt=>'New'
 ,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '<h4 class="t-error">Error during Reset Password:',
-'&P0_USER_REG_STATUS.</h4>',
+'&P0_USER_RST_STATUS.</h4>',
 '',
 'Please try to <a href="#">register again</a> later',
 'and if You are still having trouble to register',
@@ -12820,8 +12832,8 @@ wwv_flow_api.create_page_da_action(
 '$(''#P105_FIRSTNAME'').attr(''disabled'', ''disabled'');',
 '$(''#P105_LASTNAME'').attr(''disabled'', ''disabled'');',
 '$(''#REG'').attr(''disabled'', ''disabled'');',
-'$(regRegion + '' > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'');'))
-,p_stop_execution_on_error=>'Y'
+'$(regRegion + '' > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'');',
+''))
 );
 wwv_flow_api.create_page_da_action(
  p_id=>wwv_flow_api.id(7231403674191594)
@@ -12832,9 +12844,10 @@ wwv_flow_api.create_page_da_action(
 ,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'begin',
-'"APX_USER_RESETP_REQUEST" (',
+'    "APX_USER_RESETP_REQUEST" (',
 '     p_mailto  => v(''P105_EMAIL'')',
 '    );',
+'apex_util.set_session_state(''P0_USER_RST_STATUS'', ''RESET_REQUESTED'');',
 'end;  '))
 ,p_attribute_02=>'P105_EMAIL'
 ,p_stop_execution_on_error=>'Y'
@@ -12848,78 +12861,16 @@ wwv_flow_api.create_page_da_action(
 ,p_execute_on_page_init=>'N'
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'var result = $v(''P0_USER_REG_STATUS'');',
-'console.log(''RegDoneResult: '' + (result ? result : ''unknown''));',
+'$(''#P0_USER_RST_STATUS'').val($(''#P0_USER_RST_STATUS'').val());',
+'var result = $(''#P0_USER_RST_STATUS'').val();',
+'console.log(''ResetResult: '' + (result ? result : ''unknown''));',
 '$(regRegion).delay(1000).fadeOut(400, function(){    ',
-'    if (result && result == 0) {',
+'    if (result && result == ''RESET_REQUESTED'') {',
 '    $(successRegion).fadeIn(400);',
 '        } else {',
 '    $(errorRegion).fadeIn(400);',
 '        } ',
 '});'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_event(
- p_id=>wwv_flow_api.id(7237382789191596)
-,p_name=>'ReRegister'
-,p_event_sequence=>20
-,p_triggering_element_type=>'BUTTON'
-,p_triggering_button_id=>wwv_flow_api.id(7229751908191592)
-,p_bind_type=>'live'
-,p_bind_event_type=>'click'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7238387647191597)
-,p_event_id=>wwv_flow_api.id(7237382789191596)
-,p_event_result=>'TRUE'
-,p_action_sequence=>20
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#P105_EMAIL'').attr(''disabled'', ''disabled'');',
-'$(''#P105_FIRSTNAME'').attr(''disabled'', ''disabled'');',
-'$(''#P105_LASTNAME'').attr(''disabled'', ''disabled'');',
-'$(''#REG'').attr(''disabled'', ''disabled'');',
-'$(regRegion + '' > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'');'))
-,p_stop_execution_on_error=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7237804549191597)
-,p_event_id=>wwv_flow_api.id(7237382789191596)
-,p_event_result=>'TRUE'
-,p_action_sequence=>30
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'begin',
-'  apx_user_registration(:P105_EMAIL',
-'                        , p_params => ''USR,TKN''',
-'                        , p_topic  => ''REREGISTER''',
-'                       );',
-'apex_util.set_session_state(''P0_USER_REG_STATUS'', ''0'');',
-'end;  '))
-,p_attribute_02=>'P105_EMAIL'
-,p_stop_execution_on_error=>'Y'
-,p_wait_for_result=>'Y'
-);
-wwv_flow_api.create_page_da_action(
- p_id=>wwv_flow_api.id(7238893016191597)
-,p_event_id=>wwv_flow_api.id(7237382789191596)
-,p_event_result=>'TRUE'
-,p_action_sequence=>40
-,p_execute_on_page_init=>'N'
-,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'var result = $v(''P0_USER_REG_STATUS'');',
-'console.log(''RegDoneResult: '' + (result ? result : ''unknown''));',
-'$(regRegion).delay(1000).fadeOut(400, function(){    ',
-'    if (result && result === 0) {',
-'    $(successRegion).fadeIn(400);',
-'        } else {',
-'    $(errorRegion).fadeIn(400);',
-'        } ',
-'});'))
-,p_stop_execution_on_error=>'Y'
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(7236484501191596)
