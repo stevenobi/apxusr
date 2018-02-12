@@ -27,7 +27,7 @@ prompt APPLICATION 110 - User Management
 -- Application Export:
 --   Application:     110
 --   Name:            User Management
---   Date and Time:   22:36 Monday February 12, 2018
+--   Date and Time:   22:44 Monday February 12, 2018
 --   Exported By:     ADMIN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -114,7 +114,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212223600'
+,p_last_upd_yyyymmddhh24miss=>'20180212224344'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -12542,7 +12542,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'Y'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212223600'
+,p_last_upd_yyyymmddhh24miss=>'20180212224143'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(12915392931265802)
@@ -12846,6 +12846,7 @@ wwv_flow_api.create_page_da_action(
 'begin',
 '    "APX_USER_RESETP_REQUEST" (',
 '     p_mailto  => v(''P105_EMAIL'')',
+'    , p_params => ''RESETUSER,RTOKEN''',
 '    );',
 'apex_util.set_session_state(''P0_USER_RST_STATUS'', ''RESET_REQUESTED'');',
 'end;  '))
@@ -12961,6 +12962,7 @@ wwv_flow_api.create_page(
  p_id=>106
 ,p_user_interface_id=>wwv_flow_api.id(4955200262726764)
 ,p_name=>'Reset Password Confirmation'
+,p_alias=>'RESETPW'
 ,p_page_mode=>'NORMAL'
 ,p_step_title=>'Reset Password Confirmation'
 ,p_warn_on_unsaved_changes=>'N'
@@ -13019,7 +13021,7 @@ wwv_flow_api.create_page(
 ,p_rejoin_existing_sessions=>'P'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212161115'
+,p_last_upd_yyyymmddhh24miss=>'20180212224344'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(20069435705195293)
