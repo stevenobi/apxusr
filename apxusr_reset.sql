@@ -6331,11 +6331,17 @@ from dual; -- Error: OPTIO_VALUE parameter not found! /* not a valid dimension *
 -- Funtion to return User Information for Apex Workspace
 -- and APX Users
 
-
- drop function "APX_IS_APEX_USR";
- drop function "APX_IS_APEX_USR_LOCKED";
- drop function "APX_IS_APEX_USR_EXPIRED";
-
+drop function APX_IS_APEX_USR;
+drop function APX_IS_APEX_USR_LOCKED;
+drop function APX_IS_APEX_USR_EXPIRED;
+drop function APX_IS_APEX_USR_INT;
+drop function APX_IS_APEX_USR_LOCKED_INT;
+drop function APX_IS_APEX_USR_EXPIRED_INT;
+drop function APX_IS_APEX_USR_TXT;
+drop function APX_IS_APEX_USR_LOCKED_TXT;
+drop function APX_IS_APEX_USR_EXPIRED_TXT;
+drop function APX_GET_APEX_USR_DAYS_LEFT;
+ 
 --
 -- 2018/01/14 SO: created
 --
@@ -6346,9 +6352,8 @@ from dual; -- Error: OPTIO_VALUE parameter not found! /* not a valid dimension *
 -- Get User Infos
 
 
-
 -- Is User Token valid?
-create or replace function "IS_VALID_USER_TOKEN" (
+create or replace function "IS_VALID_USER_REG_TOKEN" (
      p_username    in    varchar2
    , p_token       in    varchar2
 )  return boolean
@@ -6396,7 +6401,9 @@ raise;
 end;
 /
 
--- select "APX_GET_APEX_USR_DAYS_LEFT"('admin') as days_left from dual;
+ 
+-- only works from within APEX                  
+-- select "APX_GET_APEX_USR_DAYS_LEFT"('ADMIN') as days_left from dual;
 
 -- Is User an Apex User Account?
 create or replace function "APX_IS_APEX_USR" (
@@ -6535,7 +6542,7 @@ raise;
 end;
 /
 
-select decode(apx_is_apex_usr_expired_int('admin') , 1, 'Yes', 'No') as is_apex_user from dual;
+--select decode(apx_is_apex_usr_expired_int('admin') , 1, 'Yes', 'No') as is_apex_user from dual;
 
 ---------------------------------------------------
 -- Is User an Apex User Account (Text)?
@@ -6634,13 +6641,6 @@ exception when others then
 raise;
 end;
 /
-
-select apx_is_apex_usr_expired_txt('admin', 1) as is_apex_user from dual;
-
-
-
-
-
 
 
 
