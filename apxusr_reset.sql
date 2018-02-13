@@ -6648,3 +6648,115 @@ end;
 
 
 #WORKSPACE_IMAGES#js/validateNewUser.min.js?v=20180213#APEX_VERSION#
+
+---------------------------------------------------------------------------
+-- User Reset Password Request
+create or replace procedure "APX_USER_RESETP_REQUEST" (
+     p_mailto                        varchar2
+   , p_username                      varchar2        := null
+   , p_first_name                    varchar2        := null
+   , p_last_name                     varchar2        := null
+   , p_params                        clob            := null
+   , p_values                        clob            := null
+   , p_topic                         varchar2        := null
+   , p_userid                        pls_integer     := null
+   , p_domain_id                     pls_integer     := null
+   , p_token                         varchar2        := null
+   , p_from                          varchar2        := null
+   , p_app_id                        pls_integer     := null
+   , p_for_app_id                    pls_integer     := null
+   , p_result                        pls_integer     := null
+   , p_debug                         boolean         := null
+   , p_send_mail                     boolean         := null
+
+)
+is
+    -- Local Variables
+    l_mailto                        varchar2(64);
+    l_username                      varchar2(64);
+    l_first_name                    varchar2(64);
+    l_last_name                     varchar2(64);
+    l_params                        varchar2(4000);
+    l_values                        varchar2(4000);
+    l_topic                         varchar2(64);
+    l_userid                        pls_integer;
+    l_domain_id                     pls_integer;
+    l_token                         varchar2(4000);
+    l_from                          varchar2(64);
+    l_app_id                        pls_integer;
+    l_for_app_id                    pls_integer;
+    l_result                        pls_integer;
+    l_debug                         boolean;
+    l_send_mail                     boolean;
+
+    -- Constants
+    C_TOPIC                         constant          varchar2(1000)  := 'RESET_PW';
+    C_FROM                          constant          varchar2(1000)  := 'arzneimittelfaelschung@bfarm.de';
+    C_APP_ID                        constant          pls_integer     := 100000;
+    C_FOR_APP_ID                    constant          pls_integer     := 100002;
+    C_RESULT                        constant          pls_integer     := 0;
+    C_DEBUG                         constant          boolean         := false;
+    C_SEND_MAIL                     constant          boolean         := true;
+
+begin
+
+   -- Setting Locals Defaults
+    l_mailto                        := p_mailto;
+    l_username                      := nvl(p_username       , l_mailto);
+    l_first_name                    := p_first_name;
+    l_last_name                     := p_last_name;
+    l_params                        := p_params;
+    l_values                        := p_values;
+    l_topic                         := nvl(p_topic          , C_TOPIC);
+    l_userid                        := p_userid;
+    l_domain_id                     := p_domain_id;
+    l_token                         := p_token;
+    l_from                          := nvl(p_from           , C_FROM);
+    l_app_id                        := nvl(p_app_id         , C_APP_ID);
+    l_for_app_id                    := nvl(p_for_app_id     , C_FOR_APP_ID);
+    l_result                        := nvl(p_result         , C_RESULT);
+    l_debug                         := nvl(p_debug          , C_DEBUG);
+    l_send_mail                     := nvl(p_send_mail      , C_SEND_MAIL);
+
+    update "APEX_USER"
+    set apx_user_token = apx_get_token(upper(l_username)),
+                apx_user_token_created = sysdate,
+                apx_user_token_valid_until = sysdate + 1
+    where upper(trim(apx_user_email)) = upper(trim(l_mailto))
+    returning apx_user_id, apx_username, apx_user_token
+    into l_userid, l_username, l_token;
+
+
+    -- send confirmation mail if specified
+    if l_send_mail then
+
+        "SEND_MAIL" (
+            p_result      =>  l_result
+          , p_mailto      =>  l_mailto
+          , p_username    =>  l_username
+          , p_topic       =>  l_topic
+          , p_params      =>  l_params
+          , p_values      =>  nvl(l_values, l_username||','||l_token)
+          , p_app_id      =>  l_app_id
+          , p_debug_only  =>  l_debug
+        );
+
+    end if;
+
+    commit;
+
+exception when dup_val_on_index then
+rollback;
+when others then
+rollback;
+raise;
+end;
+/
+
+
+
+
+
+
+
+
