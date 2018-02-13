@@ -6643,6 +6643,8 @@ end;
 /
 
 
+<!--[if gt IE 9]><!--> <html class="html-login no-js" lang="&BROWSER_LANGUAGE."> <!--<![endif]-->
+
 
 
 
