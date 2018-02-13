@@ -6647,4 +6647,4 @@ end;
 
 
 
-
+#WORKSPACE_IMAGES#js/validateNewUser.min.js?v=20180213#APEX_VERSION#
