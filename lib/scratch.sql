@@ -1,3 +1,32 @@
+--Anyway, I did this to get it working:
+
+begin
+APEX_UTIL.CREATE_USER(
+p_user_name => 'abc128',
+p_web_password =>  upper(dbms_obfuscation_toolkit.md5(input =>utl_i18n.string_to_raw('abc128')))
+);
+end;
+
+--Notice i dont have the web password format parameter. The password is still encrypted in the 
+--database, as you have created a hash of it, so the password field will have the hashed value
+--stored, so if someone manages to see it, it''d be quite difficult to guess.
+
+--Then, modify the login process to be like:
+
+wwv_flow_custom_auth_std.login(
+    P_UNAME       => :P101_USERNAME,
+    P_PASSWORD    => upper(dbms_obfuscation_toolkit.md5(input =>utl_i18n.string_to_raw(:P101_PASSWORD))),
+    P_SESSION_ID  => v('APP_SESSION'),
+    P_FLOW_PAGE   => :APP_ID||':1'
+    );
+
+--And it seems to work.
+
+--Ta,
+--Trent
+-----------------------------------------------------------
+
+
 declare
 invalid_domain exception;
 begin
