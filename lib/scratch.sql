@@ -4283,6 +4283,17 @@ select apx_is_apex_usr_expired_txt('admin', 1) as is_apex_user from dual;
 
 
 
+grant apex_administrator_role to ras_intern;
+grant apex_administrator_role to ras;
+
+
+alter system set job_queue_processes= 100 scope=both;
+
+
+select * from apex_debug_messages where id >= 809000
+order by message_timestamp asc;
+
+
 
 
 
