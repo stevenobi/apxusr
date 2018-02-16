@@ -2439,7 +2439,7 @@ create or replace procedure "APX_EDIT_USER" (
     , p_params                      in       clob            := null
     , p_values                      in       clob            := null
     , p_topic                       in       varchar2        := null
-    , p_userid                      in       pls_integer     := null
+    , p_userid                      in       number          := null
     , p_domain_id                   in       pls_integer     := null
     , p_token                       in       varchar2        := null
     , p_description                 in       varchar2        := null
@@ -2482,7 +2482,7 @@ is
     l_params                        clob;
     l_values                        clob;
     l_topic                         varchar2(64);
-    l_userid                        pls_integer;
+    l_userid                        number;
     l_domain_id                     pls_integer;
     l_token                         varchar2(4000);
     l_description                   varchar2(1000);
@@ -2585,6 +2585,7 @@ begin
                         );
                 end loop;
 
+                --raise_application_error(-20001, 'User: "'||l_username||'"');
                 l_userid := apex_util.get_user_id (l_username);
 
                 apex_util.fetch_user (
