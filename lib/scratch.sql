@@ -1,32 +1,3 @@
---Anyway, I did this to get it working:
-
-begin
-APEX_UTIL.CREATE_USER(
-p_user_name => 'abc128',
-p_web_password =>  upper(dbms_obfuscation_toolkit.md5(input =>utl_i18n.string_to_raw('abc128')))
-);
-end;
-
---Notice i dont have the web password format parameter. The password is still encrypted in the 
---database, as you have created a hash of it, so the password field will have the hashed value
---stored, so if someone manages to see it, it''d be quite difficult to guess.
-
---Then, modify the login process to be like:
-
-wwv_flow_custom_auth_std.login(
-    P_UNAME       => :P101_USERNAME,
-    P_PASSWORD    => upper(dbms_obfuscation_toolkit.md5(input =>utl_i18n.string_to_raw(:P101_PASSWORD))),
-    P_SESSION_ID  => v('APP_SESSION'),
-    P_FLOW_PAGE   => :APP_ID||':1'
-    );
-
---And it seems to work.
-
---Ta,
---Trent
------------------------------------------------------------
-
-
 declare
 invalid_domain exception;
 begin
@@ -4283,15 +4254,251 @@ select apx_is_apex_usr_expired_txt('admin', 1) as is_apex_user from dual;
 
 
 
-grant apex_administrator_role to ras_intern;
-grant apex_administrator_role to ras;
+
+( user_id
+, security_group_id
+, user_name
+, first_name
+, last_name
+, app_id
+, creation_date
+, created_by
+, last_update_date
+, last_updated_by
+, start_date
+, end_date
+, person_type
+, email_address
+, web_password2
+, web_password_version
+, last_login
+, builder_login_count
+, last_agent
+, last_ip
+, account_locked
+, account_expiry
+, failed_access_attempts
+, last_failed_login
+, first_password_use_occurred
+, change_password_on_first_use
+, allow_app_building_yn
+, allow_sql_workshop_yn
+, allow_websheet_dev_yn
+, allow_team_development_yn
+, default_schema
+, allow_access_to_schemas
+, description
+, web_password
+, web_password_raw
+, password_date
+, password_accesses_left
+, password_lifespan_accesses
+, password_lifespan_days
+, default_date_format
+, known_as
+, employee_id
+, person_id
+, profile_image
+, profile_image_name
+, profile_mimetype
+, profile_filename
+, profile_last_update
+, profile_charset
+, attribute_01
+, attribute_02
+, attribute_03
+, attribute_04
+, attribute_05
+, attribute_06
+, attribute_07
+, attribute_08
+, attribute_09
+, attribute_10
+) values (
+  l_user_id
+, l_security_group_id
+, l_user_name
+, l_first_name
+, l_last_name
+, l_app_id
+, l_creation_date
+, l_created_by
+, l_last_update_date
+, l_last_updated_by
+, l_start_date
+, l_end_date
+, l_person_type
+, l_email_address
+, l_web_password2
+, l_web_password_version
+, l_last_login
+, l_builder_login_count
+, l_last_agent
+, l_last_ip
+, l_account_locked
+, l_account_expiry
+, l_failed_access_attempts
+, l_last_failed_login
+, l_first_password_use_occurred
+, l_change_password_on_first_use
+, l_allow_app_building_yn
+, l_allow_sql_workshop_yn
+, l_allow_websheet_dev_yn
+, l_allow_team_development_yn
+, l_default_schema
+, l_allow_access_to_schemas
+, l_description
+, l_web_password
+, l_web_password_raw
+, l_password_date
+, l_password_accesses_left
+, l_password_lifespan_accesses
+, l_password_lifespan_days
+, l_default_date_format
+, l_known_as
+, l_employee_id
+, l_person_id
+, l_profile_image
+, l_profile_image_name
+, l_profile_mimetype
+, l_profile_filename
+, l_profile_last_update
+, l_profile_charset
+, l_attribute_01
+, l_attribute_02
+, l_attribute_03
+, l_attribute_04
+, l_attribute_05
+, l_attribute_06
+, l_attribute_07
+, l_attribute_08
+, l_attribute_09
+, l_attribute_10
+);
 
 
-alter system set job_queue_processes= 100 scope=both;
 
+-- Update Existing with Input Values if different
+set
+, user_id                        = coalesce(l_user_id, user_id)
+, security_group_id              = coalesce(l_security_group_id, security_group_id)
+, user_name                      = coalesce(l_user_name, user_name)
+, first_name                     = coalesce(l_first_name, first_name)
+, last_name                      = coalesce(l_last_name, last_name)
+, creation_date                  = coalesce(l_creation_date, creation_date)
+, created_by                     = coalesce(l_created_by, created_by)
+, last_update_date               = coalesce(l_last_update_date, last_update_date)
+, last_updated_by                = coalesce(l_last_updated_by, last_updated_by)
+, start_date                     = coalesce(l_start_date, start_date)
+, end_date                       = coalesce(l_end_date, end_date)
+, person_type                    = coalesce(l_person_type, person_type)
+, email_address                  = coalesce(l_email_address, email_address)
+, web_password2                  = coalesce(l_web_password2, web_password2)
+, web_password_version           = coalesce(l_web_password_version, web_password_version)
+, last_login                     = coalesce(l_last_login, last_login)
+, builder_login_count            = coalesce(l_builder_login_count, builder_login_count)
+, last_agent                     = coalesce(l_last_agent, last_agent)
+, last_ip                        = coalesce(l_last_ip, last_ip)
+, account_locked                 = coalesce(l_account_locked, account_locked)
+, account_expiry                 = coalesce(l_account_expiry, account_expiry)
+, failed_access_attempts         = coalesce(l_failed_access_attempts, failed_access_attempts)
+, last_failed_login              = coalesce(l_last_failed_login, last_failed_login)
+, first_password_use_occurred    = coalesce(l_first_password_use_occurred, first_password_use_occurred)
+, change_password_on_first_use   = coalesce(l_change_password_on_first_use, change_password_on_first_use)
+, allow_app_building_yn          = coalesce(l_allow_app_building_yn, allow_app_building_yn)
+, allow_sql_workshop_yn          = coalesce(l_allow_sql_workshop_yn, allow_sql_workshop_yn)
+, allow_websheet_dev_yn          = coalesce(l_allow_websheet_dev_yn, allow_websheet_dev_yn)
+, allow_team_development_yn      = coalesce(l_allow_team_development_yn, allow_team_development_yn)
+, default_schema                 = coalesce(l_default_schema, default_schema)
+, allow_access_to_schemas        = coalesce(l_allow_access_to_schemas, allow_access_to_schemas)
+, description                    = coalesce(l_description, description)
+, web_password                   = coalesce(l_web_password, web_password)
+, web_password_raw               = coalesce(l_web_password_raw, web_password_raw)
+, password_date                  = coalesce(l_password_date, password_date)
+, password_accesses_left         = coalesce(l_password_accesses_left, password_accesses_left)
+, password_lifespan_accesses     = coalesce(l_password_lifespan_accesses, password_lifespan_accesses)
+, password_lifespan_days         = coalesce(l_password_lifespan_days, password_lifespan_days)
+, default_date_format            = coalesce(l_default_date_format, default_date_format)
+, known_as                       = coalesce(l_known_as, known_as)
+, employee_id                    = coalesce(l_employee_id, employee_id)
+, person_id                      = coalesce(l_person_id, person_id)
+, profile_image                  = coalesce(l_profile_image, profile_image)
+, profile_image_name             = coalesce(l_profile_image_name, profile_image_name)
+, profile_mimetype               = coalesce(l_profile_mimetype, profile_mimetype)
+, profile_filename               = coalesce(l_profile_filename, profile_filename)
+, profile_last_update            = coalesce(l_profile_last_update, profile_last_update)
+, profile_charset                = coalesce(l_profile_charset, profile_charset)
+, attribute_01                   = coalesce(l_attribute_01, attribute_01)
+, attribute_02                   = coalesce(l_attribute_02, attribute_02)
+, attribute_03                   = coalesce(l_attribute_03, attribute_03)
+, attribute_04                   = coalesce(l_attribute_04, attribute_04)
+, attribute_05                   = coalesce(l_attribute_05, attribute_05)
+, attribute_06                   = coalesce(l_attribute_06, attribute_06)
+, attribute_07                   = coalesce(l_attribute_07, attribute_07)
+, attribute_08                   = coalesce(l_attribute_08, attribute_08)
+, attribute_09                   = coalesce(l_attribute_09, attribute_09)
+, attribute_10                   = coalesce(l_attribute_10, attribute_10)
 
-select * from apex_debug_messages where id >= 809000
-order by message_timestamp asc;
+-- Merge Existing NULLs with Inputs if not NULL
+set
+, user_id                        = coalesce(user_id, l_user_id)
+, security_group_id              = coalesce(security_group_id, l_security_group_id)
+, user_name                      = coalesce(user_name, l_user_name)
+, first_name                     = coalesce(first_name, l_first_name)
+, last_name                      = coalesce(last_name, l_last_name)
+, creation_date                  = coalesce(creation_date, l_creation_date)
+, created_by                     = coalesce(created_by, l_created_by)
+, last_update_date               = coalesce(last_update_date, l_last_update_date)
+, last_updated_by                = coalesce(last_updated_by, l_last_updated_by)
+, start_date                     = coalesce(start_date, l_start_date)
+, end_date                       = coalesce(end_date, l_end_date)
+, person_type                    = coalesce(person_type, l_person_type)
+, email_address                  = coalesce(email_address, l_email_address)
+, web_password2                  = coalesce(web_password2, l_web_password2)
+, web_password_version           = coalesce(web_password_version, l_web_password_version)
+, last_login                     = coalesce(last_login, l_last_login)
+, builder_login_count            = coalesce(builder_login_count, l_builder_login_count)
+, last_agent                     = coalesce(last_agent, l_last_agent)
+, last_ip                        = coalesce(last_ip, l_last_ip)
+, account_locked                 = coalesce(account_locked, l_account_locked)
+, account_expiry                 = coalesce(account_expiry, l_account_expiry)
+, failed_access_attempts         = coalesce(failed_access_attempts, l_failed_access_attempts)
+, last_failed_login              = coalesce(last_failed_login, l_last_failed_login)
+, first_password_use_occurred    = coalesce(first_password_use_occurred, l_first_password_use_occurred)
+, change_password_on_first_use   = coalesce(change_password_on_first_use, l_change_password_on_first_use)
+, allow_app_building_yn          = coalesce(allow_app_building_yn, l_allow_app_building_yn)
+, allow_sql_workshop_yn          = coalesce(allow_sql_workshop_yn, l_allow_sql_workshop_yn)
+, allow_websheet_dev_yn          = coalesce(allow_websheet_dev_yn, l_allow_websheet_dev_yn)
+, allow_team_development_yn      = coalesce(allow_team_development_yn, l_allow_team_development_yn)
+, default_schema                 = coalesce(default_schema, l_default_schema)
+, allow_access_to_schemas        = coalesce(allow_access_to_schemas, l_allow_access_to_schemas)
+, description                    = coalesce(description, l_description)
+, web_password                   = coalesce(web_password, l_web_password)
+, web_password_raw               = coalesce(web_password_raw, l_web_password_raw)
+, password_date                  = coalesce(password_date, l_password_date)
+, password_accesses_left         = coalesce(password_accesses_left, l_password_accesses_left)
+, password_lifespan_accesses     = coalesce(password_lifespan_accesses, l_password_lifespan_accesses)
+, password_lifespan_days         = coalesce(password_lifespan_days, l_password_lifespan_days)
+, default_date_format            = coalesce(default_date_format, l_default_date_format)
+, known_as                       = coalesce(known_as, l_known_as)
+, employee_id                    = coalesce(employee_id, l_employee_id)
+, person_id                      = coalesce(person_id, l_person_id)
+, profile_image                  = coalesce(profile_image, l_profile_image)
+, profile_image_name             = coalesce(profile_image_name, l_profile_image_name)
+, profile_mimetype               = coalesce(profile_mimetype, l_profile_mimetype)
+, profile_filename               = coalesce(profile_filename, l_profile_filename)
+, profile_last_update            = coalesce(profile_last_update, l_profile_last_update)
+, profile_charset                = coalesce(profile_charset, l_profile_charset)
+, attribute_01                   = coalesce(attribute_01, l_attribute_01)
+, attribute_02                   = coalesce(attribute_02, l_attribute_02)
+, attribute_03                   = coalesce(attribute_03, l_attribute_03)
+, attribute_04                   = coalesce(attribute_04, l_attribute_04)
+, attribute_05                   = coalesce(attribute_05, l_attribute_05)
+, attribute_06                   = coalesce(attribute_06, l_attribute_06)
+, attribute_07                   = coalesce(attribute_07, l_attribute_07)
+, attribute_08                   = coalesce(attribute_08, l_attribute_08)
+, attribute_09                   = coalesce(attribute_09, l_attribute_09)
+, attribute_10                   = coalesce(attribute_10, l_attribute_10)
 
 
 

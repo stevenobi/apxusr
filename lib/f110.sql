@@ -27,7 +27,7 @@ prompt APPLICATION 110 - User Management
 -- Application Export:
 --   Application:     110
 --   Name:            User Management
---   Date and Time:   22:44 Monday February 12, 2018
+--   Date and Time:   23:57 Sunday February 18, 2018
 --   Exported By:     ADMIN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -39,7 +39,7 @@ prompt APPLICATION 110 - User Management
 --   Pages:                     17
 --     Items:                   52
 --     Validations:              1
---     Processes:               21
+--     Processes:               22
 --     Regions:                 41
 --     Buttons:                 35
 --     Dynamic Actions:         48
@@ -111,10 +111,11 @@ wwv_flow_api.create_flow(
 ,p_exact_substitutions_only=>'Y'
 ,p_browser_cache=>'N'
 ,p_browser_frame=>'D'
+,p_runtime_api_usage=>'T:O:W'
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212224344'
+,p_last_upd_yyyymmddhh24miss=>'20180218235723'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -11283,7 +11284,7 @@ wwv_flow_api.create_page(
 ,p_rejoin_existing_sessions=>'P'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212214358'
+,p_last_upd_yyyymmddhh24miss=>'20180218235723'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(12826221698767930)
@@ -11738,40 +11739,83 @@ wwv_flow_api.create_page_da_action(
 ,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'declare',
-'    l_result           number          := 0;',
-'    l_app_id           number          := v(''APP_ID'');',
-'    l_username         varchar2(200)   := v(''NEUSER'');',
-'    l_web_password     varchar2(200)   := v(''NUPWV'');',
-'    l_email_address    varchar2(200)   := v(''NEWUSER'');',
-'    l_token            varchar2(200)   := v(''TOKEN'');',
-'    l_default_schema   varchar2(200)   := ''APXUSR'';',
+'    l_result           number           := 0;',
+'    l_app_id           varchar2(100)    := :APP_ID;',
+'    l_username         varchar2(200)    := :NEWUSER;',
+'    l_firstname        varchar2(100)    := null;',
+'    l_lastname         varchar2(100)    := null;',
+'    l_web_password     varchar2(200)    := :NUPWV;',
+'    l_email_address    varchar2(200)    := :NEWUSER;',
+'    l_token            varchar2(200)    := :TOKEN;',
+'    l_default_schema   varchar2(200)    := ''APXUSR'';',
 'begin',
-'/*',
-'raise_application_error(-20001, ''In Create User Function''|| v(''NUPWV'')|| '' ''|| l_result ||',
-'l_username ||'' ''||',
-'l_web_password||'' ''||',
-'l_email_address||'' ''||',
-'l_token||'' ''||',
-'l_app_id||'' ''||',
-'l_default_schema);',
-'*/',
-'"APEX_CREATE_USER" (',
-'    p_result           => l_result',
-'  , p_username         => l_username',
-'  , p_web_password     => l_web_password',
-'  , p_email_address    => l_email_address',
-'  , p_token            => l_token',
-'  , p_app_id           => l_app_id',
-'  , p_default_schema   => l_default_schema',
+'',
+'     for c1 in (',
+'            select workspace_id',
+'            from apex_applications',
+'            where application_id = l_app_id ) loop',
+'            apex_util.set_security_group_id(',
+'                p_security_group_id => c1.workspace_id',
+'                );',
+'        end loop;',
+'',
+'    for i in (select  apx_user_first_name',
+'                    , apx_user_last_name',
+'              from "APX$USER_REG"',
+'              where   upper(trim(apx_username)) = upper(trim(l_username))',
+'              and     upper(trim(apx_user_token)) = upper(trim(l_token))',
+'             )',
+'    loop',
+'        l_firstname := i.apx_user_first_name;',
+'        l_lastname  := i.apx_user_last_name;',
+'    end loop;',
+'',
+'    apex_util.set_session_state(''P0_USER_REG_STATUS'', ''PRECREATED'');',
+'',
+'    /*',
+'    raise_application_error(-20001, ''In Create User Function: ''||',
+'    l_result ||'' ''||',
+'    l_username ||'' ''||',
+'    l_firstname ||'' ''||',
+'    l_lastname ||'' ''||',
+'    regexp_replace(nvl(l_web_password, ''EMPTY''), ''.'', ''?'')||'' ''||',
+'    l_email_address||'' ''||',
+'    l_token||'' ''||',
+'    l_app_id||'' ''||',
+'    l_default_schema ||'' ''||',
+'    apex_util.get_session_state(''P0_USER_REG_STATUS'')',
 '    );',
-'if (l_result = ''0'') then    ',
-'    apex_util.set_session_state(''P0_USER_REG_STATUS'', ''CREATED'');',
-'else    ',
-'    apex_util.set_session_state(''P0_USER_REG_STATUS'', l_result);',
-'end if;',
-'--raise_application_error(-20001, ''In Create User Function "''||l_result||''" P0STAT: ''||v(''P0_USER_REG_STATUS''));    ',
-'end;  '))
-,p_attribute_02=>'NEWUSER,TOKEN'
+'    */',
+'',
+'    "APEX_CREATE_USER" (',
+'        p_result           => l_result',
+'      , p_username         => l_username',
+'      , p_first_name       => l_firstname',
+'      , p_last_name        => l_lastname',
+'      , p_web_password     => l_web_password',
+'      , p_email_address    => l_email_address',
+'      , p_token            => l_token',
+'      , p_app_id           => l_app_id',
+'      , p_default_schema   => l_default_schema',
+'    );',
+'',
+'    if (l_result = 0) then',
+'        apex_util.set_session_state(''P0_USER_REG_STATUS'', ''CREATED'');',
+'    else',
+'        apex_util.set_session_state(''P0_USER_REG_STATUS'', to_char(l_result));',
+'    end if;',
+'',
+'commit;',
+'',
+'--raise_application_error(-20001, ''In Create User Function "''||to_char(l_result)||''" P0STAT: ''||v(''P0_USER_REG_STATUS''));',
+'',
+'exception when others then',
+'raise;',
+'end;',
+''))
+,p_attribute_02=>'NEWUSER,TOKEN,NUPWV'
+,p_attribute_03=>'P0_USER_REG_STATUS'
+,p_attribute_04=>'N'
 ,p_stop_execution_on_error=>'N'
 ,p_wait_for_result=>'Y'
 );
@@ -11783,15 +11827,15 @@ wwv_flow_api.create_page_da_action(
 ,p_execute_on_page_init=>'N'
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#P0_USER_REG_STATUS'').val($(''#P0_USER_REG_STATUS'').val());',
+'//$(''#P0_USER_REG_STATUS'').val($(''#P0_USER_REG_STATUS'').val());',
 'var result = $v(''P0_USER_REG_STATUS'');',
 'console.log(''RegDoneResult: '' + (result ? result : ''unknown''));',
 '$(regRegion).delay(1000).fadeOut(400, function(){    ',
 '    if (result && result == ''CREATED'') {',
-'    $(successRegion).fadeIn(400);',
-'        } else {',
-'    $(errorRegion).fadeIn(400);',
-'        } ',
+'        $(successRegion).fadeIn(400);',
+'    } else {',
+'        $(errorRegion).fadeIn(400);',
+'    } ',
 '});'))
 );
 wwv_flow_api.create_page_da_event(
@@ -11837,6 +11881,17 @@ wwv_flow_api.create_page_da_action(
 '$(pwFieldV + ''-error'').fadeOut();',
 '$(pwFieldV + '' > div.t-Form-inputContainer > div > span'').css(''color'', ''#333'');',
 ''))
+);
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(7082718295069520)
+,p_process_sequence=>40
+,p_process_point=>'AFTER_HEADER'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'Set_P0_USER_REG_STATUS'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'apex_util.set_session_state(''P0_USER_REG_STATUS'', ''PRECREATED'');',
+'        '))
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
 );
 wwv_flow_api.create_page_process(
  p_id=>wwv_flow_api.id(5745969188174811)
@@ -11913,7 +11968,7 @@ wwv_flow_api.create_page(
 ,p_rejoin_existing_sessions=>'P'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180211143457'
+,p_last_upd_yyyymmddhh24miss=>'20180215222831'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(20001602097049666)
@@ -12070,7 +12125,7 @@ wwv_flow_api.create_page_branch(
 ,p_branch_action=>'f?p=&APP_ID.:104:&SESSION.:SIGNEDUP:&DEBUG.:RP,104:P104_NEWUSER,P104_TOKEN:&NEWUSER.,&TOKEN.&success_msg=#SUCCESS_MSG#'
 ,p_branch_point=>'BEFORE_COMPUTATION'
 ,p_branch_type=>'REDIRECT_URL'
-,p_branch_when_button_id=>wwv_flow_api.id(5742791851174785)
+,p_branch_when_button_id=>wwv_flow_api.id(7176025100281737)
 ,p_branch_sequence=>20
 ,p_branch_condition_type=>'PLSQL_EXPRESSION'
 ,p_branch_condition=>':P104_PASSWORD_CONFIRM = :P104_PASSWORD'
@@ -13021,7 +13076,7 @@ wwv_flow_api.create_page(
 ,p_rejoin_existing_sessions=>'P'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180212224344'
+,p_last_upd_yyyymmddhh24miss=>'20180216004911'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(20069435705195293)
@@ -13132,7 +13187,7 @@ wwv_flow_api.create_page_button(
 ,p_button_is_hot=>'Y'
 ,p_button_image_alt=>'Finish'
 ,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP:P101_USERNAME:&NEWUSER.'
+,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTERED:&DEBUG.:RP,106:P101_USERNAME:&RESETUSER.'
 );
 wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(7248405433427366)
@@ -13146,7 +13201,7 @@ wwv_flow_api.create_page_button(
 ,p_button_is_hot=>'Y'
 ,p_button_image_alt=>'Finish'
 ,p_button_position=>'REGION_TEMPLATE_NEXT'
-,p_button_redirect_url=>'f?p=&APP_ID.:106:&SESSION.:REGISTER:&DEBUG.:RP::'
+,p_button_redirect_url=>'f?p=&APP_ID.:101:&SESSION.:REGISTER:&DEBUG.:RP,106:P101_USERNAME:&RESETUSER.'
 );
 wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(7243963784427363)
@@ -13320,6 +13375,7 @@ wwv_flow_api.create_page_da_event(
 ,p_triggering_button_id=>wwv_flow_api.id(7243963784427363)
 ,p_bind_type=>'bind'
 ,p_bind_event_type=>'click'
+,p_display_when_type=>'NEVER'
 );
 wwv_flow_api.create_page_da_action(
  p_id=>wwv_flow_api.id(7252889482427367)
@@ -13441,7 +13497,7 @@ wwv_flow_api.create_page_da_action(
 );
 wwv_flow_api.create_page_da_event(
  p_id=>wwv_flow_api.id(7256054281427369)
-,p_name=>'SignUp'
+,p_name=>'ResetPassword'
 ,p_event_sequence=>20
 ,p_triggering_element_type=>'BUTTON'
 ,p_triggering_button_id=>wwv_flow_api.id(7243963784427363)
@@ -13456,12 +13512,11 @@ wwv_flow_api.create_page_da_action(
 ,p_execute_on_page_init=>'N'
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'$(''#NEWUSER'').attr(''disabled'', ''disabled'');',
-'$(''#NUPW'').attr(''disabled'', ''disabled'');',
-'$(''#NUPWV'').attr(''disabled'', ''disabled'');',
-'$(''#SIGNUP'').attr(''disabled'', ''disabled'');',
+'$(''#RESETUSER'').attr(''disabled'', ''disabled'');',
+'$(''#RNUPW'').attr(''disabled'', ''disabled'');',
+'$(''#RNUPWV'').attr(''disabled'', ''disabled'');',
+'$(''#RESETP'').attr(''disabled'', ''disabled'');',
 '$(regRegion + '' > div.t-Login-header > span'').removeClass(''fa-sign-in'').addClass(''fa-circle-o-notch fa-spin fa-3x fa-fw'');'))
-,p_stop_execution_on_error=>'Y'
 );
 wwv_flow_api.create_page_da_action(
  p_id=>wwv_flow_api.id(7256551540427369)
@@ -13471,12 +13526,23 @@ wwv_flow_api.create_page_da_action(
 ,p_execute_on_page_init=>'N'
 ,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
 ,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'declare',
+'l_result number := 1;',
 'begin',
-'--raise_application_error(-20001, ''In Func'');',
-'--null; -- apx_user_signup();',
-'apex_util.set_session_state(''P0_USER_REG_STATUS'', ''0'');',
-'end;  '))
-,p_attribute_02=>'NEWUSER,TOKEN'
+'',
+'--raise_application_error(-20001, ''In Reset: ''||:RESETUSER ||'' ''||:RTOKEN||'' ''||:RNUPWV);',
+'',
+'"APX_EDIT_USER" (',
+'      p_username        => :RESETUSER',
+'    , p_token           => :RTOKEN',
+'    , p_new_password    => :RNUPWV',
+'    , p_result          => l_result    ',
+'    );',
+'    ',
+'apex_util.set_session_state(''P0_USER_REG_STATUS'', to_char(l_result));',
+'',
+'end;'))
+,p_attribute_02=>'RUSER,RNUPWV,RTOKEN,P0_USER_REG_STATUS'
 ,p_stop_execution_on_error=>'N'
 ,p_wait_for_result=>'Y'
 );
@@ -15630,7 +15696,7 @@ wwv_flow_api.create_page(
 ,p_browser_cache=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20180211162141'
+,p_last_upd_yyyymmddhh24miss=>'20180217202306'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6146977460406210)
@@ -15705,11 +15771,18 @@ wwv_flow_api.create_page_process(
 '    --    raise_application_error(-20001, ''In Proc: ''||l_usr||'',''||l_token||'',''||l_request);',
 '    ',
 '    ',
-'if (l_request = ''REGISTER'') then    ',
+'if (l_request = ''CONFIRM'') then    ',
 '    if (is_valid_user_token(l_usr, l_token)) then',
-'',
 '        htp.init;',
 '        owa_util.redirect_url(''f?p=&APP_ID.:USRREG_CONFIRM:0:''||v(''REQUEST'')||'':::NEWUSER,TOKEN:''||l_usr||'',''||l_token);',
+'        apex_application.stop_apex_engine;',
+'    else',
+'        redirect(''f?p=&APP_ID.:ERRPAGE:0:TOKEN_INVALID:::P501_USR:''||l_usr);',
+'    end if;    ',
+'elsif (l_request = ''RESETPWD'') then    ',
+'    if (is_valid_user_token(l_usr, l_token)) then',
+'        htp.init;',
+'        owa_util.redirect_url(''f?p=&APP_ID.:USRESET:0:''||v(''REQUEST'')||'':::NEWUSER,TOKEN:''||l_usr||'',''||l_token);',
 '        apex_application.stop_apex_engine;',
 '    else',
 '        redirect(''f?p=&APP_ID.:ERRPAGE:0:TOKEN_INVALID:::P501_USR:''||l_usr);',
