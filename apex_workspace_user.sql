@@ -52,13 +52,13 @@ create or replace procedure "APX_APEX_USER_EDIT" (
    , p_created_by                           varchar2    := null
    , p_last_update_date                     date        := sysdate
    , p_last_updated_by                      varchar2    := null
-   , p_start_date                           date	    := null
+   , p_start_date                           date        := null
    , p_end_date                             date        := null
    , p_person_type                          varchar2    := null
    , p_email_address                        varchar2    := null
    , p_web_password2                        raw         := null
    , p_web_password_version                 varchar2    := apex_crypto.get_current_password_version
-   , p_last_login                           date	    := null
+   , p_last_login                           date        := null
    , p_builder_login_count                  number      := null
    , p_last_agent                           varchar2    := null
    , p_last_ip                              varchar2    := null
@@ -77,7 +77,7 @@ create or replace procedure "APX_APEX_USER_EDIT" (
    , p_description                          varchar2    := null
    , p_web_password                         varchar2    := null
    , p_web_password_raw                     raw	        := null
-   , p_password_date                        date	    := null
+   , p_password_date                        date        := null
    , p_password_accesses_left               number      := null
    , p_password_lifespan_accesses           number      := null
    , p_password_lifespan_days               number      := null
