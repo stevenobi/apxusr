@@ -452,7 +452,7 @@ is
 
     exception when others then
         l_result_code := sqlcode;
-        l_result_text := 'LOCK_USER - '|| sqlerrm;
+        l_result_text := 'EXPIRE_USER - '|| sqlerrm;
         raise apex_user_edit_error;
     end "EXPIRE_USER";
 
