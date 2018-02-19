@@ -191,7 +191,7 @@ is
     C_D                                     constant    date            := C_NOW;
     C_Y                                     constant    varchar2(10)    := 'Y';
     C_N                                     constant    varchar2(10)    := 'N';
-    C_APP_ID                                constant    number          := 100;
+    C_APP_ID                                constant    number          := 100000;
     C_RESULT_CODE                           constant    number          := -1;
     C_RESULT_TEXT                           constant    varchar2(4000)  := 'APX Edit Apex User';
     C_EDIT_ACTION                           constant    varchar2(30)    := 'FETCH';
@@ -985,7 +985,7 @@ begin
    "APX_APEX_USER_EDIT"(
        p_result => l_result
      , p_edit_action => 'DROP'
-     , p_user_name => 'stefan.obermeyer@t-online.de'
+     , p_user_name => 'Trivadis@bfarm.de'
    );
    dbms_output.put_line('Result: '||l_result); -- Result: 0
 end;
@@ -1193,3 +1193,10 @@ commit;
 exception when others then
 raise;
 end;
+/
+
+
+grant execute on  "APX_APEX_USER_EDIT" to ras_intern;
+
+
+
