@@ -4733,7 +4733,7 @@ begin
 
             -- get a fresh ID from sequence
             if (l_userid is null) then 
-                select "RAS_INTERN"."BFARM_APEX_APP_USER_ID_SEQ".nextval
+                select "RAS_INTERN"."APEX_APP_USER_ID_SEQ".nextval
                 into l_userid
                 from dual;
             end if; 
@@ -4787,7 +4787,7 @@ begin
             
             begin
                 -- create local app user first
-                insert into "RAS_INTERN"."BFARM_APEX_APP_USER"  (
+                insert into "RAS_INTERN"."APEX_APP_USER"  (
                     APP_USER_ID,
                     APP_USERNAME,
                     APP_USER_EMAIL,
@@ -4823,7 +4823,7 @@ begin
                     APX_USER_PHONE2,
                     APX_USER_DESCRIPTION,
                     (select  STATUS_ID
-                        from "RAS_INTERN"."BFARM_APEX_STATUS"
+                        from "RAS_INTERN"."APEX_STATUS"
                         where status = 'OPEN' 
                         and status_scope = 'ACCOUNT'),
                     APX_USER_PARENT_USER_ID,
@@ -5045,7 +5045,7 @@ drop sequence "VALID_DOMAINS_ID_SEQ";
 create sequence "VALID_DOMAINS_ID_SEQ"  increment by 1 start with 69 nocache noorder nocycle;
 
 -- regular before Update Insert Trigger
-create or replace trigger "BFARM_VALID_DOMAINS_BIU_TRG" 
+create or replace trigger "VALID_DOMAINS_BIU_TRG" 
 before insert or update on "RAS_DOMAINEN"
 referencing old as old new as new
 for each row
@@ -5067,18 +5067,18 @@ begin
 end;
 /
 
-drop trigger "BFARM_VALID_DOMAINS_BD_TRG" ;
+drop trigger "VALID_DOMAINS_BD_TRG" ;
 
-create or replace trigger "BFARM_VALID_DOMAINS_BD_TRG" 
+create or replace trigger "VALID_DOMAINS_BD_TRG" 
 before delete on "RAS_DOMAINEN"
 referencing old as old new as new
 for each row
   declare
   pragma autonomous_transaction;
   begin
-    UPDATE  "BFARM_APEX_APP_USER"
+    UPDATE  "APEX_APP_USER"
     SET APP_USER_STATUS_ID = (select app_status_id 
-                                                  from "BFARM_APEX_APP_STATUS" 
+                                                  from "APEX_APP_STATUS" 
                                                   where app_status = 'LOCKED' )
     WHERE domain_id = :old.domain_id;
     UPDATE  "RAS_DOMAINEN"
@@ -5136,7 +5136,7 @@ CREATE SEQUENCE  "RAS_DOMAINS_ID_SEQ"  INCREMENT BY 1 START WITH 70 NOCACHE  NOO
 
 CREATE SEQUENCE  "RAS_INTERN"."APX$APP_USERS_ID_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;
 
-CREATE OR REPLACE TRIGGER "BFARM_VALID_DOMAINS_BIU_TRG" 
+CREATE OR REPLACE TRIGGER "VALID_DOMAINS_BIU_TRG" 
 before insert or update on "RAS_DOMAINEN"
 referencing old as old new as new
 for each row
@@ -5175,8 +5175,8 @@ on (r.DOMAIN_GROUP_ID = g.GRUPPEN_ID);
 
 
 alter table AMF_VORGANG modify AMF_MELDUNG_STATUS default 1;
-alter table BFARM_APEX_APP_USER add APP_USER_DOMAIN_ID number;
-alter table BFARM_APEX_APP_USER add constraint "APP_USER_DOMAIN_FK" foreign key (APP_USER_DOMAIN_ID) references  "RAS_DOMAINEN"(domain_id);
+alter table APEX_APP_USER add APP_USER_DOMAIN_ID number;
+alter table APEX_APP_USER add constraint "APP_USER_DOMAIN_FK" foreign key (APP_USER_DOMAIN_ID) references  "RAS_DOMAINEN"(domain_id);
 
 
 
@@ -5207,14 +5207,14 @@ alter table AMF_VORGANG add ART_DER_ZUSTAENDIGKEIT varchar2(200);
 alter table AMF_VORGANG add ART_DER_ZUSTAENDIGKEIT_SONST varchar2(1000);
 
 
-create or replace trigger "BFARM_APEX_APP_USER_BIU_TRG"
-before insert or update on "BFARM_APEX_APP_USER"
+create or replace trigger "APEX_APP_USER_BIU_TRG"
+before insert or update on "APEX_APP_USER"
 referencing old as old new as new
 for each row
 begin
   if inserting then
     if (:new.app_user_id is null) then
-        select bfarm_apex_app_user_id_seq.nextval
+        select apex_app_user_id_seq.nextval
         into :new.app_user_id
         from dual;
     end if;
@@ -5236,7 +5236,7 @@ end;
 /
 
 
-update "BFARM_APEX_APP_USER" u set u.app_user_domain_id = 
+update "APEX_APP_USER" u set u.app_user_domain_id = 
 (select d.domain_id 
 from "RAS_DOMAINEN" d 
 where lower(d.domain) = lower(substr(u.app_user_email, instr(u.app_user_email, '@') +1))
@@ -5245,7 +5245,7 @@ where lower(d.domain) = lower(substr(u.app_user_email, instr(u.app_user_email, '
 commit;
 
 --- Status View New
-create or replace view "BFARM_APEX_STATUS"
+create or replace view "APEX_STATUS"
 as 
   select 
   app_id,
@@ -5258,12 +5258,12 @@ as
   created_by,
   modified,
   modified_by
-from "BFARM_APEX_APP_STATUS"
+from "APEX_APP_STATUS"
 where app_id = nvl(v('APP_ID'), app_id)
 order by 1, 3;
 
 
-create or replace view "BFARM_APEX_STATUS_DEFAULT"
+create or replace view "APEX_STATUS_DEFAULT"
 as 
   select 
   app_id,
@@ -5276,13 +5276,13 @@ as
   created_by,
   modified,
   modified_by
-from "BFARM_APEX_APP_STATUS"
+from "APEX_APP_STATUS"
 where app_id = nvl(v('APP_ID'), app_id)
 and is_default = 1
 order by 1, 3;
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_ALL_USERS"
+CREATE OR REPLACE VIEW "APEX_ALL_USERS"
   AS 
   select distinct
   u.APP_ID as APP_ID, 
@@ -5296,7 +5296,7 @@ CREATE OR REPLACE VIEW "BFARM_APEX_ALL_USERS"
   ar.APP_ROLENAME as DEFAULT_ROLE, 
   u.APP_USER_PARENT_USER_ID, 
   (select au.app_username  
-  from "BFARM_APEX_APP_USER" au 
+  from "APEX_APP_USER" au 
   where au.app_user_id = u.app_user_parent_user_id) as parent_username, 
   max(rm.app_role_id) over (partition by rm.app_user_id) as max_security_level,  
   min(rm.app_role_id) over (partition by rm.app_user_id) as min_security_level, 
@@ -5307,23 +5307,23 @@ CREATE OR REPLACE VIEW "BFARM_APEX_ALL_USERS"
   u.MODIFIED_BY,
   u.DELETED,
   u.DELETED_BY
-from "BFARM_APEX_APP_USER" u  
-left outer join  "BFARM_APEX_ACCOUNT_STATUS" a 
+from "APEX_APP_USER" u  
+left outer join  "APEX_ACCOUNT_STATUS" a 
 on (u.APP_USER_STATUS_ID = a.status_id 
    and u.APP_ID = a.APP_ID) 
-left outer join  "BFARM_APEX_ROLES" ar 
+left outer join  "APEX_ROLES" ar 
 on (ar.APP_ROLE_ID = u.APP_USER_DEFAULT_ROLE_ID 
     and ar.APP_ID = u.APP_ID) 
-left outer join "BFARM_APEX_APP_USER_ROLE_MAP" rm 
+left outer join "APEX_APP_USER_ROLE_MAP" rm 
 on (u.APP_USER_ID = rm.APP_USER_ID 
     and u.APP_ID = rm.APP_ID)
 ;
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_ALL_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_ALL_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_APPLICATION_USERS"
+CREATE OR REPLACE VIEW "APEX_APPLICATION_USERS"
 AS 
   select APP_ID,
   APP_USER_ID,
@@ -5346,13 +5346,13 @@ AS
   MODIFIED_BY,
   DELETED,
   DELETED_BY
-from "BFARM_APEX_ALL_USERS"
+from "APEX_ALL_USERS"
 where APP_ID = nvl(v('APP_ID'), app_id)
 order by 2 desc
 ;
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APPLICATION_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_APPLICATION_USERS" TO "APEX_ADMIN";
 
 
 alter table DOKUMENTE add DELETED date;
@@ -5362,7 +5362,7 @@ alter table BOB_LAENDER_ROW_ERGAENZUNGEN add DELETED date;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add DELETED_BY varchar2(30);
 
 
-create or replace procedure "BFARM_RAS_SOFT_DELETE" (
+create or replace procedure "RAS_SOFT_DELETE" (
 p_table in varchar2,
 p_id number,
 p_msg in varchar2 :=' k�nnen nicht gel�scht werden!',
@@ -5373,12 +5373,12 @@ l_status_id pls_integer;
 l_msg varchar2(1000);
 begin
     select app_status_id into l_status_id
-    from "BFARM_APEX_APP_STATUS"
+    from "APEX_APP_STATUS"
     where app_status = upper(nvl(p_new_status, 'LOCKED'));
-    if (upper(p_table) = 'BFARM_APEX_APP_USER') then
+    if (upper(p_table) = 'APEX_APP_USER') then
         l_msg := 'Benutzer'||p_msg;
         commit;
-        update  "BFARM_APEX_APP_USER"
+        update  "APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
@@ -5386,7 +5386,7 @@ begin
     elsif  (upper(p_table) = 'RAS_DOMAINEN') then
         l_msg := 'Domainen'||p_msg;
         commit;
-        update  "BFARM_APEX_APP_USER"
+        update  "APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
@@ -5432,113 +5432,113 @@ end;
 
 /*
 
-begin "BFARM_RAS_SOFT_DELETE" ('BFARM_APEX_APP_USER', 4); end;
+begin "RAS_SOFT_DELETE" ('APEX_APP_USER', 4); end;
 /
 
-begin "BFARM_RAS_SOFT_DELETE" ('RAS_DOMAINEN', 70); end;
+begin "RAS_SOFT_DELETE" ('RAS_DOMAINEN', 70); end;
 /
 
-begin "BFARM_RAS_SOFT_DELETE" ('AMF_VORGANG', 73); end;
+begin "RAS_SOFT_DELETE" ('AMF_VORGANG', 73); end;
 /
 
-delete from bfarm_apex_app_user where app_user_id = 4; -- testuser
+delete from apex_app_user where app_user_id = 4; -- testuser
 delete from RAS_DOMAINEN where domain_id = 70; -- testuser
 
 */
 
 
 -- Dokumente Soft Delete Trigger
---drop  trigger "BFARM_DOKUMENTE_BD_TRG";
+--drop  trigger "DOKUMENTE_BD_TRG";
 
-create or replace trigger "BFARM_DOKUMENTE_BD_TRG" 
+create or replace trigger "DOKUMENTE_BD_TRG" 
 before delete on "DOKUMENTE"
 referencing old as old new as new
 for each row
   declare
   pragma autonomous_transaction;
   begin
-      "BFARM_RAS_SOFT_DELETE" ('DOKUMENTE', :old.id_vorgang);
+      "RAS_SOFT_DELETE" ('DOKUMENTE', :old.id_vorgang);
   end;
 /
 
 
 -- Dokumente Soft Delete Trigger
---drop  trigger "BFARM_BOBLR_DOKUMENTE_BD_TRG";
+--drop  trigger "BOBLR_DOKUMENTE_BD_TRG";
 
-create or replace trigger "BFARM_BOBLR_DOKUMENTE_BD_TRG" 
+create or replace trigger "BOBLR_DOKUMENTE_BD_TRG" 
 before delete on "BOB_LAENDER_ROW_DOKUMENTE"
 referencing old as old new as new
 for each row
   declare
   pragma autonomous_transaction;
   begin
-      "BFARM_RAS_SOFT_DELETE" ('BOB_LAENDER_ROW_DOKUMENTE', :old.id_vorgang);
+      "RAS_SOFT_DELETE" ('BOB_LAENDER_ROW_DOKUMENTE', :old.id_vorgang);
   end;
 /
 
 -- Dokumente Soft Delete Trigger
---drop  trigger "BFARM_BOBLR_DOKUMENTE_BD_TRG";
+--drop  trigger "BOBLR_DOKUMENTE_BD_TRG";
 
-create or replace trigger "BFARM_BOBLR_ERGAENZ_BD_TRG" 
+create or replace trigger "BOBLR_ERGAENZ_BD_TRG" 
 before delete on "BOB_LAENDER_ROW_ERGAENZUNGEN"
 referencing old as old new as new
 for each row
   declare
   pragma autonomous_transaction;
   begin
-      "BFARM_RAS_SOFT_DELETE" ('BOB_LAENDER_ROW_ERGAENZUNGEN', :old.id_vorgang);
+      "RAS_SOFT_DELETE" ('BOB_LAENDER_ROW_ERGAENZUNGEN', :old.id_vorgang);
   end;
 /
 
 -- Domain Soft Delete Trigger
---drop  trigger "BFARM_VALID_DOMAINS_BD_TRG";
+--drop  trigger "VALID_DOMAINS_BD_TRG";
 
-create or replace trigger "BFARM_VALID_DOMAINS_BD_TRG" 
+create or replace trigger "VALID_DOMAINS_BD_TRG" 
 before delete on "RAS_DOMAINEN"
 referencing old as old new as new
 for each row
   declare
   pragma autonomous_transaction;
   begin
-      "BFARM_RAS_SOFT_DELETE" ('RAS_DOMAINEN', :old.domain_id);
+      "RAS_SOFT_DELETE" ('RAS_DOMAINEN', :old.domain_id);
   end;
 /
 
 
 -- User Soft Delete Trigger
---drop trigger "BFARM_USER_BD_TRG" ;
+--drop trigger "USER_BD_TRG" ;
 
-create or replace trigger "BFARM_USER_BD_TRG" 
-before delete on "BFARM_APEX_APP_USER"
+create or replace trigger "USER_BD_TRG" 
+before delete on "APEX_APP_USER"
 referencing old as old new as new
 for each row
 declare
   pragma autonomous_transaction;
 begin
-  "BFARM_RAS_SOFT_DELETE" ('BFARM_APEX_APP_USER', :old.app_user_id);
+  "RAS_SOFT_DELETE" ('APEX_APP_USER', :old.app_user_id);
 end;
 /
 
 
 -- RAS Meldung Soft Delete Trigger
---drop  trigger "BFARM_AMF_MELDUNG_BD_TRG";
+--drop  trigger "AMF_MELDUNG_BD_TRG";
 
-create or replace trigger "BFARM_AMF_MELDUNG_BD_TRG" 
+create or replace trigger "AMF_MELDUNG_BD_TRG" 
 before delete on "AMF_VORGANG"
 referencing old as old new as new
 for each row
 declare
   pragma autonomous_transaction;
 begin
-      "BFARM_RAS_SOFT_DELETE" ('AMF_VORGANG', :old.id_vorgang);
+      "RAS_SOFT_DELETE" ('AMF_VORGANG', :old.id_vorgang);
 end;
 /
 
 
 -- User Soft Delete Trigger
-drop trigger "BFARM_AMF_STATUS_TRG" ;
+drop trigger "AMF_STATUS_TRG" ;
 
-create or replace trigger "BFARM_AMF_STATUS_TRG" 
+create or replace trigger "AMF_STATUS_TRG" 
 before update of AMF_MELDUNG_STATUS on "AMF_VORGANG"
 referencing old as old new as new
 for each row
@@ -5554,9 +5554,9 @@ end;
 /
 
 
-drop trigger "BFARM_AMF_DEL_TRG" ;
+drop trigger "AMF_DEL_TRG" ;
 
-create or replace trigger "BFARM_AMF_DEL_TRG" 
+create or replace trigger "AMF_DEL_TRG" 
 before update of DELETED, DELETED_BY on "AMF_VORGANG"
 referencing old as old new as new
 for each row
@@ -5584,7 +5584,7 @@ commit;
 alter table dokumente add user_id number;  
 alter table dokumente add domain_id number;  
   
-alter table dokumente add constraint "DOK_USER_ID_FK" foreign key(user_id) references BFARM_APEX_APP_USER(app_user_id);  
+alter table dokumente add constraint "DOK_USER_ID_FK" foreign key(user_id) references APEX_APP_USER(app_user_id);  
 alter table dokumente add constraint "DOK_DOMAIN_ID_FK" foreign key(domain_id) references RAS_DOMAINEN(domain_id);
 
 drop view "RAS_ALLE_DOKUMENTE";
@@ -5682,7 +5682,7 @@ from "MIME_TYPES" b join "MIME_ICONS" a
 on (a.icon_id = b.icon_id);
 
 
-  GRANT SELECT ON "BFARM_APEX_ADMIN"."MIME_TYPE_ICONS" TO PUBLIC;
+  GRANT SELECT ON "APEX_ADMIN"."MIME_TYPE_ICONS" TO PUBLIC;
 
 with 
 "VORGANG" as (
@@ -5726,7 +5726,7 @@ LEFT OUTER JOIN "MASSN" ma
 ON ( );
 
 
-create or replace view "BFARM_APEX_ALL_USERS"
+create or replace view "APEX_ALL_USERS"
 as 
   select distinct
   u.APP_ID as APP_ID, 
@@ -5744,7 +5744,7 @@ as
   rg.INFO_GRUPPE as GRUPPE,
   u.APP_USER_PARENT_USER_ID, 
   (select au.app_username  
-  from "BFARM_APEX_APP_USER" au 
+  from "APEX_APP_USER" au 
   where au.app_user_id = u.app_user_parent_user_id) as parent_username, 
   max(rm.app_role_id) over (partition by rm.app_user_id) as max_security_level,  
   min(rm.app_role_id) over (partition by rm.app_user_id) as min_security_level, 
@@ -5757,26 +5757,26 @@ as
   u.MODIFIED_BY,
   u.DELETED,
   u.DELETED_BY
-from "BFARM_APEX_APP_USER" u  
-left outer join  "BFARM_APEX_ACCOUNT_STATUS" a 
+from "APEX_APP_USER" u  
+left outer join  "APEX_ACCOUNT_STATUS" a 
 on (u.APP_USER_STATUS_ID = a.status_id 
    and u.APP_ID = a.APP_ID) 
-left outer join  "BFARM_APEX_ROLES" ar 
+left outer join  "APEX_ROLES" ar 
 on (ar.APP_ROLE_ID = u.APP_USER_DEFAULT_ROLE_ID 
     and ar.APP_ID = u.APP_ID) 
 left outer join  "RAS_DOMAINEN" vd 
 on (vd.DOMAIN_ID = u.APP_USER_DOMAIN_ID)
 left outer join  "RAS_GRUPPEN" rg 
 on (rg.GRUPPEN_ID = u.APP_USER_GROUP_ID)
-left outer join "BFARM_APEX_APP_USER_ROLE_MAP" rm 
+left outer join "APEX_APP_USER_ROLE_MAP" rm 
 on (u.APP_USER_ID = rm.APP_USER_ID 
     and u.APP_ID = rm.APP_ID);
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_ALL_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_ALL_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_SYS_BUILTINS"
+CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."APEX_APP_SYS_BUILTINS"
 AS 
   select  
   b.APP_ID, 
@@ -5789,7 +5789,7 @@ AS
   b.IS_PUBLIC, 
   b.IS_DEFAULT, 
   'USER' as APP_BUILTIN_TYPE 
-FROM "BFARM_APEX_SYS_BUILTINS" b join "BFARM_APEX_USERS" u 
+FROM "APEX_SYS_BUILTINS" b join "APEX_USERS" u 
 on (b.APP_USER_ID = u.APP_USER_ID) 
 where b.APP_USER_ID is not null 
   and b.APP_ID = v('APP_ID') 
@@ -5805,14 +5805,14 @@ select
   b.IS_PUBLIC, 
   b.IS_DEFAULT, 
   'ROLE' as APP_BUILTIN_TYPE 
-FROM "BFARM_APEX_SYS_BUILTINS" b join "BFARM_APEX_ROLES" r 
+FROM "APEX_SYS_BUILTINS" b join "APEX_ROLES" r 
 on (b.APP_ROLE_ID = r.APP_ROLE_ID) 
 where b.APP_ROLE_ID is not null 
   and b.APP_ID = v('APP_ID')
 ;
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_USERS"
+CREATE OR REPLACE VIEW "APEX_USERS"
 AS 
   select 
   APP_ID,
@@ -5828,16 +5828,16 @@ AS
   USER_DEFAULT_SECURITY_LEVEL as DEFAULT_SECURITY_LEVEL,
   USER_MAX_SECURITY_LEVEL as MAX_SECURITY_LEVEL,
   USER_MIN_SECURITY_LEVEL as MIN_SECURITY_LEVEL
-from "BFARM_APEX_APPLICATION_USERS"
+from "APEX_APPLICATION_USERS"
 order by 1, 2
 ;
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_USERS" TO "APEX_ADMIN";
 
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_APPLICATION_USERS"
+CREATE OR REPLACE VIEW "APEX_APPLICATION_USERS"
 AS 
   select APP_ID,
   APP_USER_ID,
@@ -5864,27 +5864,27 @@ AS
   MODIFIED_BY,
   DELETED,
   DELETED_BY
-from "BFARM_APEX_ALL_USERS"
+from "APEX_ALL_USERS"
 where APP_ID = nvl(v('APP_ID'), app_id)
 order by 2 desc;
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APPLICATION_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_APPLICATION_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE VIEW "BFARM_APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
+CREATE OR REPLACE VIEW "APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
 select app_builtin_name as "APP_USERNAME", 'APPLICATION_BUILTIN_ADMIN_USER' as "APPLICATION_ROLE" 
-from "BFARM_APEX_APP_SYS_BUILTINS" 
+from "APEX_APP_SYS_BUILTINS" 
 where   app_builtin_type = 'USER' 
 and is_admin = 1;
 
-CREATE OR REPLACE VIEW "BFARM_APEX_APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
+CREATE OR REPLACE VIEW "APEX_APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
 select app_builtin_name as "APP_USERNAME", 'APPLICATION_BUILTIN_ADMIN_USER' as "APPLICATION_ROLE" 
-from "BFARM_APEX_APP_SYS_BUILTINS" 
+from "APEX_APP_SYS_BUILTINS" 
 where   app_builtin_type = 'USER' 
 and is_admin = 1;
 
 
-create or replace view "BFARM_APEX_APP_SYS_ROLES"
+create or replace view "APEX_APP_SYS_ROLES"
 as 
   select
   APP_BUILTIN_ID,
@@ -5893,12 +5893,12 @@ as
   APP_USER_ID,
   APP_BUILTIN_NAME as APP_ROLENAME,
   APP_BUILTIN_CODE as APP_ROLE_CODE
-from "BFARM_APEX_APP_SYS_BUILTINS"
+from "APEX_APP_SYS_BUILTINS"
 where APP_BUILTIN_TYPE = 'ROLE';
 
-GRANT SELECT ON "BFARM_APEX_APP_SYS_ROLES" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "APEX_APP_SYS_ROLES" TO "APEX_ADMIN";
 
-create or replace view "BFARM_APEX_APP_SYS_USERS"
+create or replace view "APEX_APP_SYS_USERS"
 as 
   select
   APP_BUILTIN_ID,
@@ -5907,13 +5907,13 @@ as
   APP_USER_ID,
   APP_BUILTIN_NAME as APP_USERNAME,
   APP_BUILTIN_CODE as APP_USER_CODE
-from "BFARM_APEX_APP_SYS_BUILTINS"
+from "APEX_APP_SYS_BUILTINS"
 where APP_BUILTIN_TYPE = 'USER';
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APP_SYS_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_APP_SYS_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_ALL_USERS"
+CREATE OR REPLACE VIEW "APEX_ALL_USERS"
 AS 
   select distinct
   u.APP_ID as APP_ID, 
@@ -5931,7 +5931,7 @@ AS
   rg.INFO_GRUPPE as GRUPPE,
   u.APP_USER_PARENT_USER_ID, 
   (select au.app_username  
-  from "BFARM_APEX_APP_USER" au 
+  from "APEX_APP_USER" au 
   where au.app_user_id = u.app_user_parent_user_id) as parent_username, 
   max(rm.app_role_id) over (partition by rm.app_user_id) as max_security_level,  
   min(rm.app_role_id) over (partition by rm.app_user_id) as min_security_level, 
@@ -5944,25 +5944,25 @@ AS
   u.MODIFIED_BY,
   u.DELETED,
   u.DELETED_BY
-from "BFARM_APEX_APP_USER" u  
-left outer join  "BFARM_APEX_ACCOUNT_STATUS" a 
+from "APEX_APP_USER" u  
+left outer join  "APEX_ACCOUNT_STATUS" a 
 on (u.APP_USER_STATUS_ID = a.status_id 
    and u.APP_ID = a.APP_ID) 
-left outer join  "BFARM_APEX_ROLES" ar 
+left outer join  "APEX_ROLES" ar 
 on (ar.APP_ROLE_ID = u.APP_USER_DEFAULT_ROLE_ID 
     and ar.APP_ID = u.APP_ID) 
 left outer join  "RAS_DOMAINEN" vd 
 on (vd.DOMAIN_ID = u.APP_USER_DOMAIN_ID)
 left outer join  "RAS_GRUPPEN" rg 
 on (rg.GRUPPEN_ID = u.APP_USER_GROUP_ID)
-left outer join "BFARM_APEX_APP_USER_ROLE_MAP" rm 
+left outer join "APEX_APP_USER_ROLE_MAP" rm 
 on (u.APP_USER_ID = rm.APP_USER_ID 
     and u.APP_ID = rm.APP_ID);
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_ALL_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_ALL_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE FORCE VIEW "BFARM_APEX_APPLICATION_USERS"
+CREATE OR REPLACE FORCE VIEW "APEX_APPLICATION_USERS"
 AS 
   select APP_ID,
   APP_USER_ID,
@@ -5989,12 +5989,12 @@ AS
   MODIFIED_BY,
   DELETED,
   DELETED_BY
-from "BFARM_APEX_ALL_USERS"
+from "APEX_ALL_USERS"
 where APP_ID = nvl(v('APP_ID'), app_id)
 order by 1, 2;
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APPLICATION_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_APPLICATION_USERS" TO "APEX_ADMIN";
 
 
 CREATE OR REPLACE VIEW "RAS_DOMAIN_GRUPPEN"
@@ -6027,7 +6027,7 @@ as
   rd.created_by,
   rd.deleted,
   rd.deleted_by
-from "RAS_DOMAINEN" rd LEFT OUTER JOIN "BFARM_APEX_STATUS" s
+from "RAS_DOMAINEN" rd LEFT OUTER JOIN "APEX_STATUS" s
 on (rd.status_id = s.status_id)
 order by 1;
 
@@ -6049,14 +6049,14 @@ FROM "RAS_DOMAINS"
 WHERE STATUS = 'VALID';
 
 
-create or replace view "BFARM_APEX_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") 
+create or replace view "APEX_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") 
 as 
-select app_username, application_role from "BFARM_APPLICATION_ADMINS"
+select app_username, application_role from "APPLICATION_ADMINS"
 union
-select user_name, application_role from "BFARM_WORKSPACE_ADMINS";
+select user_name, application_role from "WORKSPACE_ADMINS";
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_ADMINS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_ADMINS" TO "APEX_ADMIN";
 
 
 SELECT BEZEICHNUNG as d,
@@ -6064,23 +6064,23 @@ SELECT BEZEICHNUNG as d,
 FROM "AMF_VORGANG" ;
 
 
-alter table "BFARM_APEX_APP_USER" drop column DOMAIN_ID;
+alter table "APEX_APP_USER" drop column DOMAIN_ID;
 
-alter table "BFARM_APEX_APP_USER" add APP_USER_DOMAIN_ID number;
-alter table "BFARM_APEX_APP_USER" add APP_USER_GROUP_ID number;
+alter table "APEX_APP_USER" add APP_USER_DOMAIN_ID number;
+alter table "APEX_APP_USER" add APP_USER_GROUP_ID number;
 
-alter table "BFARM_APEX_APP_USER" add constraint "APP_USER_DOMAIN_FK" foreign key (APP_USER_DOMAIN_ID) references RAS_DOMAINEN (domain_id);
-alter table "BFARM_APEX_APP_USER" add constraint "APP_USER_GROUP_FK" foreign key (APP_USER_GROUP_ID) references RAS_GRUPPEN (gruppen_id);
+alter table "APEX_APP_USER" add constraint "APP_USER_DOMAIN_FK" foreign key (APP_USER_DOMAIN_ID) references RAS_DOMAINEN (domain_id);
+alter table "APEX_APP_USER" add constraint "APP_USER_GROUP_FK" foreign key (APP_USER_GROUP_ID) references RAS_GRUPPEN (gruppen_id);
 
 
-update BFARM_APEX_APP_USER u
+update APEX_APP_USER u
 set u.app_user_domain_id = (
 select d.domain_id
 from RAS_DOMAINEN d
 where d.domain = substr(u.app_user_email, instr(u.app_user_email, '@')+1)
 );
 
-update BFARM_APEX_APP_USER u
+update APEX_APP_USER u
 set u.app_user_group_id = (
 select d.domain_group_id
 from RAS_DOMAINEN d
@@ -6090,14 +6090,14 @@ where d.domain = substr(u.app_user_email, instr(u.app_user_email, '@')+1)
 commit;
 
 
-create or replace trigger "BFARM_APEX_APP_USER_BIU_TRG"
-before insert or update on "BFARM_APEX_APP_USER"
+create or replace trigger "APEX_APP_USER_BIU_TRG"
+before insert or update on "APEX_APP_USER"
 referencing old as old new as new
 for each row
 begin
   if inserting then
     if (:new.app_user_id is null) then
-        select bfarm_apex_app_user_id_seq.nextval
+        select apex_app_user_id_seq.nextval
         into :new.app_user_id
         from dual;
     end if;
@@ -6126,7 +6126,7 @@ alter table RAS_DOMAINEN add constraint  "RAS_DOMAIN_BL_FK" foreign key(domain_b
 
 
 
-create or replace view "BFARM_RAS_USERS"
+create or replace view "RAS_USERS"
 as
 select 
   usr.app_user_id,
@@ -6136,16 +6136,16 @@ select
   usr.app_user_account_status,
   usr.domain_code,
   usr.gruppen_code
-from "BFARM_APEX_APPLICATION_USERS" usr
+from "APEX_APPLICATION_USERS" usr
 where usr.app_user_email = (select u.APP_USER_EMAIL 
-                                            from "BFARM_APEX_APPLICATION_USERS" u
+                                            from "APEX_APPLICATION_USERS" u
                                             where upper(trim(u.app_username)) = 
                                                        upper(trim(nvl(v('APP_USER'), usr.app_username))))
 and usr.app_user_account_status = 'OPEN'
 ;
 
 
-create or replace view "RAS_INTERN"."BFARM_APEX_ALL_USERS" 
+create or replace view "RAS_INTERN"."APEX_ALL_USERS" 
 as 
   select distinct
   u.APP_ID as APP_ID, 
@@ -6163,7 +6163,7 @@ as
   rg.INFO_GRUPPE as GRUPPE,
   u.APP_USER_PARENT_USER_ID, 
   (select au.app_username  
-  from "BFARM_APEX_APP_USER" au 
+  from "APEX_APP_USER" au 
   where au.app_user_id = u.app_user_parent_user_id) as parent_username, 
   max(rm.app_role_id) over (partition by rm.app_user_id) as max_security_level,  
   min(rm.app_role_id) over (partition by rm.app_user_id) as min_security_level, 
@@ -6176,28 +6176,28 @@ as
   u.MODIFIED_BY,
   u.DELETED,
   u.DELETED_BY
-from "BFARM_APEX_APP_USER" u  
-left outer join  "BFARM_APEX_ACCOUNT_STATUS" a 
+from "APEX_APP_USER" u  
+left outer join  "APEX_ACCOUNT_STATUS" a 
 on (u.APP_USER_STATUS_ID = a.status_id 
    and u.APP_ID = a.APP_ID) 
-left outer join  "BFARM_APEX_ROLES" ar 
+left outer join  "APEX_ROLES" ar 
 on (ar.APP_ROLE_ID = u.APP_USER_DEFAULT_ROLE_ID 
     and ar.APP_ID = u.APP_ID) 
 left outer join  "RAS_DOMAINS" vd 
 on (vd.DOMAIN_ID = u.APP_USER_DOMAIN_ID)
 left outer join  "RAS_GRUPPEN" rg 
 on (rg.GRUPPEN_ID = u.APP_USER_GROUP_ID)
-left outer join "BFARM_APEX_APP_USER_ROLE_MAP" rm 
+left outer join "APEX_APP_USER_ROLE_MAP" rm 
 on (u.APP_USER_ID = rm.APP_USER_ID 
     and u.APP_ID = rm.APP_ID);
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_ALL_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_ALL_USERS" TO "APEX_ADMIN";
 
 
 
 
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_SYS_BUILTINS"
+CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."APEX_APP_SYS_BUILTINS"
 AS 
   select  
   b.APP_ID, 
@@ -6210,7 +6210,7 @@ AS
   b.IS_PUBLIC, 
   b.IS_DEFAULT, 
   'USER' as APP_BUILTIN_TYPE 
-FROM "BFARM_APEX_SYS_BUILTINS" b join "BFARM_APEX_USERS" u 
+FROM "APEX_SYS_BUILTINS" b join "APEX_USERS" u 
 on (b.APP_USER_ID = u.APP_USER_ID) 
 where b.APP_USER_ID is not null 
   and b.APP_ID = v('APP_ID') 
@@ -6226,14 +6226,14 @@ select
   b.IS_PUBLIC, 
   b.IS_DEFAULT, 
   'ROLE' as APP_BUILTIN_TYPE 
-FROM "BFARM_APEX_SYS_BUILTINS" b join "BFARM_APEX_ROLES" r 
+FROM "APEX_SYS_BUILTINS" b join "APEX_ROLES" r 
 on (b.APP_ROLE_ID = r.APP_ROLE_ID) 
 where b.APP_ROLE_ID is not null 
   and b.APP_ID = v('APP_ID')
 ;
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_USERS"
+CREATE OR REPLACE VIEW "APEX_USERS"
 AS 
   select 
   APP_ID,
@@ -6249,16 +6249,16 @@ AS
   USER_DEFAULT_SECURITY_LEVEL as DEFAULT_SECURITY_LEVEL,
   USER_MAX_SECURITY_LEVEL as MAX_SECURITY_LEVEL,
   USER_MIN_SECURITY_LEVEL as MIN_SECURITY_LEVEL
-from "BFARM_APEX_APPLICATION_USERS"
+from "APEX_APPLICATION_USERS"
 order by 1, 2
 ;
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_USERS" TO "APEX_ADMIN";
 
 
 
-CREATE OR REPLACE VIEW "BFARM_APEX_APPLICATION_USERS"
+CREATE OR REPLACE VIEW "APEX_APPLICATION_USERS"
 AS 
   select APP_ID,
   APP_USER_ID,
@@ -6285,28 +6285,28 @@ AS
   MODIFIED_BY,
   DELETED,
   DELETED_BY
-from "BFARM_APEX_ALL_USERS"
+from "APEX_ALL_USERS"
 where APP_ID = nvl(v('APP_ID'), app_id)
 order by 2 desc;
 
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APPLICATION_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_APPLICATION_USERS" TO "APEX_ADMIN";
 
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
+CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
 select app_builtin_name as "APP_USERNAME", 'APPLICATION_BUILTIN_ADMIN_USER' as "APPLICATION_ROLE" 
-from "BFARM_APEX_APP_SYS_BUILTINS" 
+from "APEX_APP_SYS_BUILTINS" 
 where   app_builtin_type = 'USER' 
 and is_admin = 1
 ;
 
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
+CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."APEX_APP_BUILTIN_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
 select app_builtin_name as "APP_USERNAME", 'APPLICATION_BUILTIN_ADMIN_USER' as "APPLICATION_ROLE" 
-from "BFARM_APEX_APP_SYS_BUILTINS" 
+from "APEX_APP_SYS_BUILTINS" 
 where   app_builtin_type = 'USER' 
 and is_admin = 1
 ;
 
-  CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_SYS_ROLES" ("APP_BUILTIN_ID", "APP_BUILTIN_PARENT_ID", "APP_ID", "APP_USER_ID", "APP_ROLENAME", "APP_ROLE_CODE") AS 
+  CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."APEX_APP_SYS_ROLES" ("APP_BUILTIN_ID", "APP_BUILTIN_PARENT_ID", "APP_ID", "APP_USER_ID", "APP_ROLENAME", "APP_ROLE_CODE") AS 
   select
   APP_BUILTIN_ID,
   APP_BUILTIN_PARENT_ID,
@@ -6314,13 +6314,13 @@ and is_admin = 1
   APP_USER_ID,
   APP_BUILTIN_NAME as APP_ROLENAME,
   APP_BUILTIN_CODE as APP_ROLE_CODE
-from "BFARM_APEX_APP_SYS_BUILTINS"
+from "APEX_APP_SYS_BUILTINS"
 where APP_BUILTIN_TYPE = 'ROLE'
 ;
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APP_SYS_ROLES" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_APP_SYS_ROLES" TO "APEX_ADMIN";
 
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_SYS_USERS" ("APP_BUILTIN_ID", "APP_BUILTIN_PARENT_ID", "APP_ID", "APP_USER_ID", "APP_USERNAME", "APP_USER_CODE") AS 
+CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."APEX_APP_SYS_USERS" ("APP_BUILTIN_ID", "APP_BUILTIN_PARENT_ID", "APP_ID", "APP_USER_ID", "APP_USERNAME", "APP_USER_CODE") AS 
   select
   APP_BUILTIN_ID,
   APP_BUILTIN_PARENT_ID,
@@ -6328,19 +6328,19 @@ CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_SYS_USERS" ("APP_BUILT
   APP_USER_ID,
   APP_BUILTIN_NAME as APP_USERNAME,
   APP_BUILTIN_CODE as APP_USER_CODE
-from "BFARM_APEX_APP_SYS_BUILTINS"
+from "APEX_APP_SYS_BUILTINS"
 where APP_BUILTIN_TYPE = 'USER';
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_APP_SYS_USERS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_APP_SYS_USERS" TO "APEX_ADMIN";
 
 
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") 
+CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."APEX_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") 
 AS 
-select app_username, application_role from "BFARM_APPLICATION_ADMINS"
+select app_username, application_role from "APPLICATION_ADMINS"
 union
-select user_name, application_role from "BFARM_WORKSPACE_ADMINS";
+select user_name, application_role from "WORKSPACE_ADMINS";
 
-GRANT SELECT ON "RAS_INTERN"."BFARM_APEX_ADMINS" TO "BFARM_APEX_ADMIN";
+GRANT SELECT ON "RAS_INTERN"."APEX_ADMINS" TO "APEX_ADMIN";
 
 
 SELECT ID_VORGANG,
@@ -6395,12 +6395,12 @@ create index BLR_DOKU_USER_ID_IDX on BOB_LAENDER_ROW_DOKUMENTE (user_id);
 alter table BOB_LAENDER_ROW_MASSNAHMEN modify user_id number;
 alter table BOB_LAENDER_ROW_MASSNAHMEN drop constraint "BOB_MASSN_MELDER_ID_FK";
 alter table BOB_LAENDER_ROW_MASSNAHMEN add constraint "BLR_MASSNAHME_USER_ID_FK" foreign key (user_id)
-references "BFARM_APEX_APP_USER" (app_user_id);
+references "APEX_APP_USER" (app_user_id);
 
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN modify user_id number;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN drop constraint BOB_ERGAENZ_USER_ID_FK;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add constraint "ERGAENZ_BOB_LNDR_ROW_USER_ID" foreign key (user_id)
-references "BFARM_APEX_APP_USER" (app_user_id);
+references "APEX_APP_USER" (app_user_id);
 
 alter table BOB_LAENDER_ROW_DOKUMENTE add domain_id number;
 alter table BOB_LAENDER_ROW_DOKUMENTE add constraint "DOKU_ERGAENZ_DOMAIN_ID_FK" foreign key (domain_id)
@@ -6435,12 +6435,12 @@ create index BLR_DOKU_USER_ID_IDX on BOB_LAENDER_ROW_DOKUMENTE (user_id);
 alter table BOB_LAENDER_ROW_MASSNAHMEN modify user_id number;
 alter table BOB_LAENDER_ROW_MASSNAHMEN drop constraint "BOB_MASSN_MELDER_ID_FK";
 alter table BOB_LAENDER_ROW_MASSNAHMEN add constraint "BLR_MASSNAHME_USER_ID_FK" foreign key (user_id)
-references "BFARM_APEX_APP_USER" (app_user_id);
+references "APEX_APP_USER" (app_user_id);
 
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN modify user_id number;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN drop constraint BOB_ERGAENZ_USER_ID_FK;
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add constraint "ERGAENZ_BOB_LNDR_ROW_USER_ID" foreign key (user_id)
-references "BFARM_APEX_APP_USER" (app_user_id);
+references "APEX_APP_USER" (app_user_id);
 
 
 SELECT ID,
@@ -6564,7 +6564,7 @@ alter table BOB_LAENDER_ROW_DOKUMENTE add MELDENDE_STELLE_CODE varchar2(200);
 alter table BOB_LAENDER_ROW_ERGAENZUNGEN add MELDENDE_STELLE_CODE varchar2(200);
 
 
---CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_RAS_USERS"
+--CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."RAS_USERS"
 --AS 
   select 
   usr.app_user_id,
@@ -6575,9 +6575,9 @@ alter table BOB_LAENDER_ROW_ERGAENZUNGEN add MELDENDE_STELLE_CODE varchar2(200);
   usr.domain_code,
   usr.gruppen_code,
  (select nvl(DOMAIN_BUNDESLAND_ID, 0) from RAS_DOMAINEN where domain_code = usr.domain_code)
-from "BFARM_APEX_APPLICATION_USERS" usr
+from "APEX_APPLICATION_USERS" usr
 where usr.app_user_email = (select u.APP_USER_EMAIL 
-                                            from "BFARM_APEX_APPLICATION_USERS" u
+                                            from "APEX_APPLICATION_USERS" u
                                             where upper(trim(u.app_username)) = 
                                                        upper(trim(nvl(v('APP_USER'), usr.app_username))))
 and usr.app_user_account_status = 'OPEN';
@@ -6586,7 +6586,7 @@ and usr.app_user_account_status = 'OPEN';
 select ras_bl_code 
 from RAS_DOMAIN_GRUPPEN
 where domain_code = (select domain_code
-from BFARM_RAS_USERS
+from RAS_USERS
 where upper(trim(app_username)) = upper(trim(:APP_USER)));
 
 alter table BOB_LAENDER_ROW_DOKUMENTE modify melder_id number;
@@ -6608,8 +6608,8 @@ update BOB_LAENDER_ROW_DOKUMENTE set melder_id = 1;
 
 commit;
 
-alter table BFARM_APEX_APP_USER drop constraint APP_USER_MELDER_ID;
-alter table BFARM_APEX_APP_USER add constraint "APEXAPPUSER_MELDER_ID" foreign key (app_user_melder_id) references RAS_MELDER(ras_melder_id);
+alter table APEX_APP_USER drop constraint APP_USER_MELDER_ID;
+alter table APEX_APP_USER add constraint "APEXAPPUSER_MELDER_ID" foreign key (app_user_melder_id) references RAS_MELDER(ras_melder_id);
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -6685,7 +6685,7 @@ as
   rd.created_by,
   rd.deleted,
   rd.deleted_by
-from "RAS_DOMAINEN" rd LEFT OUTER JOIN "BFARM_APEX_STATUS" s
+from "RAS_DOMAINEN" rd LEFT OUTER JOIN "APEX_STATUS" s
 on (rd.status_id = s.status_id)
  left outer join "RAS_MELDER" m
 on (rd.domain_melder_id = m.ras_melder_id)
@@ -6737,7 +6737,7 @@ order by m.sort_seq, m.app_id, m.ras_melder_id;
 
 
 
-create or replace view "BFARM_APEX_ALL_USERS"
+create or replace view "APEX_ALL_USERS"
 as 
   select distinct
   u.app_id as app_id, 
@@ -6757,7 +6757,7 @@ as
   g.ras_gruppe_code as ras_gruppe_code,
   u.app_user_parent_user_id, 
   (select au.app_username  
-  from "BFARM_APEX_APP_USER" au 
+  from "APEX_APP_USER" au 
   where au.app_user_id = u.app_user_parent_user_id) as parent_username, 
   max(rm.app_role_id) over (partition by rm.app_user_id) as max_security_level,  
   min(rm.app_role_id) over (partition by rm.app_user_id) as min_security_level, 
@@ -6771,11 +6771,11 @@ as
   u.modified_by,
   u.deleted,
   u.deleted_by
-from "BFARM_APEX_APP_USER" u  
-left outer join  "BFARM_APEX_ACCOUNT_STATUS" a 
+from "APEX_APP_USER" u  
+left outer join  "APEX_ACCOUNT_STATUS" a 
 on (u.app_user_status_id = a.status_id 
    and u.app_id = a.app_id) 
-left outer join  "BFARM_APEX_ROLES" ar 
+left outer join  "APEX_ROLES" ar 
 on (ar.app_role_id = u.app_user_default_role_id 
     and ar.app_id = u.app_id) 
 left outer join  "RAS_DOMAINEN" vd 
@@ -6784,13 +6784,13 @@ left outer join  "RAS_MELDER" m
 on (m.ras_melder_id = u.app_user_melder_id)
 left outer join "RAS_GRUPPEN" g
 on (m.ras_gruppen_id = g.gruppen_id)
-left outer join "BFARM_APEX_APP_USER_ROLE_MAP" rm 
+left outer join "APEX_APP_USER_ROLE_MAP" rm 
 on (u.app_user_id = rm.app_user_id 
       and u.app_id = rm.app_id)
 order by 1, 2;
 
 
-create or replace view "BFARM_APEX_APPLICATION_USERS"
+create or replace view "APEX_APPLICATION_USERS"
 as 
   select APP_ID,
   APP_USER_ID,
@@ -6822,13 +6822,13 @@ as
   MODIFIED_BY,
   DELETED,
   DELETED_BY
-from "BFARM_APEX_ALL_USERS"
+from "APEX_ALL_USERS"
 where APP_ID = nvl(v('APP_ID'), app_id)
 order by 1, 2;
 
 
 
-create or replace view "BFARM_RAS_USERS"
+create or replace view "RAS_USERS"
 as 
   select 
   usr.app_user_id,
@@ -6845,7 +6845,7 @@ as
   usr.domain_id,
   usr.ras_melder_id,
   usr.ras_gruppe_id
-from "BFARM_APEX_APPLICATION_USERS" usr
+from "APEX_APPLICATION_USERS" usr
 where usr.app_user_account_status = 'OPEN';
 
 
@@ -7016,14 +7016,14 @@ http://testapex.bfarm.de:8080/apex/f?p=100002:38:12259384022904::NO:RP,38:P38_ID
 #P120_DATEIINHALT_DISPLAY_CONTAINER > div.t-Form-inputContainer.col.col-9 { width: 75%; }
 
 
-trigger "BFARM_APEX_APP_USER_BIU_TRG"
-before insert or update on "BFARM_APEX_APP_USER"
+trigger "APEX_APP_USER_BIU_TRG"
+before insert or update on "APEX_APP_USER"
 referencing old as old new as new
 for each row
 begin
   if inserting then
     if (:new.app_user_id is null) then
-        select bfarm_apex_app_user_id_seq.nextval
+        select apex_app_user_id_seq.nextval
         into :new.app_user_id
         from dual;
     end if;
@@ -7050,11 +7050,11 @@ select d.domain_id, d.domain_melder_id
         from "RAS_DOMAINEN" d
         where lower(trim(d.domain)) =lower(substr(:app_user_email, instr(:app_user_email, '@') +1));
         
-         select bfarm_apex_app_user_id_seq.nextval from dual;
+         select apex_app_user_id_seq.nextval from dual;
          
-drop sequence bfarm_apex_app_user_id_seq;         
+drop sequence apex_app_user_id_seq;         
 
-create sequence bfarm_apex_app_user_id_seq start with 100 increment by 1 nocache noorder nocycle;         
+create sequence apex_app_user_id_seq start with 100 increment by 1 nocache noorder nocycle;         
 
 
 create index BLR_DOKU_RAS_MELDER_ID_IDX on BOB_LAENDER_ROW_DOKUMENTE(ras_melder_id);
@@ -7068,8 +7068,8 @@ drop index BLR_MASSN_DOMAIN_ID_IDX;
 create index BLR_MASSN_RAS_MELDER_ID_IDX on  BOB_LAENDER_ROW_MASSNAHMEN(ras_melder_id);
 create index BLR_MASSN_DEL_IDX on  BOB_LAENDER_ROW_MASSNAHMEN(deleted);
 
-create index BFARM_APEX_USER_DOMAIN_ID_IDX on BFARM_APEX_APP_USER(APP_USER_DOMAIN_ID);
-create index BFARM_APEX_USER_MELDER_ID_IDX on BFARM_APEX_APP_USER(APP_USER_MELDER_ID);
+create index APEX_USER_DOMAIN_ID_IDX on APEX_APP_USER(APP_USER_DOMAIN_ID);
+create index APEX_USER_MELDER_ID_IDX on APEX_APP_USER(APP_USER_MELDER_ID);
 
 create index AMF_VORGANG_DEL_IDX on AMF_VORGANG(deleted);
 
@@ -7099,7 +7099,7 @@ end;
 td > p { font-size: 13px; line-height: 0.2 };
 
 select ras_gruppe_code
-from BFARM_RAS_USERS
+from RAS_USERS
 where upper(trim(app_username)) = upper(trim(:APP_USER));
 
 
@@ -7117,7 +7117,7 @@ SELECT APP_USER_ID,
   DOMAIN_ID,
   RAS_MELDER_ID,
   RAS_GRUPPE_ID
-FROM BFARM_RAS_USERS ;
+FROM RAS_USERS ;
 
 SELECT RAS_MELDER_ID,
   RAS_MELDER,
@@ -7207,9 +7207,9 @@ select * from USER_ROLE_PRIVS;
 select count(*) from user_objects where status != 'VALID';
 
 -- old
-CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APP_USERNAME_FORMAT" ("USERNAME_FORMAT") AS 
+CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."APEX_APP_USERNAME_FORMAT" ("USERNAME_FORMAT") AS 
   select app_setting_value as username_format
-from "BFARM_APEX_APP_SETTINGS"
+from "APEX_APP_SETTINGS"
 where app_id = v('APP_ID') 
 and app_setting_category = 'AUTHENTICATION'
 and app_setting_name = 'USERNAME_FORMAT'
@@ -7221,13 +7221,13 @@ CREATE OR REPLACE FORCE VIEW "APEX_USERNAME_FORMAT" ("USERNAME_FORMAT") AS
 from "APEX_CONFIGURATION"
 where apex_config_item = 'USERNAME_FORMAT';
 
-create or replace view "BFARM_APEX_APP_USERNAME_FORMAT" ("USERNAME_FORMAT") 
+create or replace view "APEX_APP_USERNAME_FORMAT" ("USERNAME_FORMAT") 
 as 
 select USERNAME_FORMAT
 from "APEX_USERNAME_FORMAT";
 
 -- old
-  CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."BFARM_APEX_APPLICATION" ("WORKSPACE_ID", "WORKSPACE", "APPLICATION_ID", "OWNER", "APPLICATION_NAME", "COMPATIBILITY_MODE", "HOME_LINK", "HOME_LINK_APEX", "LOGIN_URL", "THEME_NUMBER", "ALIAS", "PAGES", "APPLICATION_ITEMS", "LAST_UPDATED_BY", "LAST_UPDATED_ON", "AUTHENTICATION_SCHEMES", "AUTHENTICATION_SCHEME_TYPE", "AUTHORIZATION_SCHEMES", "AUTHORIZATION_SCHEME") AS 
+  CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."APEX_APPLICATION" ("WORKSPACE_ID", "WORKSPACE", "APPLICATION_ID", "OWNER", "APPLICATION_NAME", "COMPATIBILITY_MODE", "HOME_LINK", "HOME_LINK_APEX", "LOGIN_URL", "THEME_NUMBER", "ALIAS", "PAGES", "APPLICATION_ITEMS", "LAST_UPDATED_BY", "LAST_UPDATED_ON", "AUTHENTICATION_SCHEMES", "AUTHENTICATION_SCHEME_TYPE", "AUTHORIZATION_SCHEMES", "AUTHORIZATION_SCHEME") AS 
   SELECT WORKSPACE_ID,
   WORKSPACE,
   APPLICATION_ID,
@@ -7247,11 +7247,11 @@ from "APEX_USERNAME_FORMAT";
   AUTHENTICATION_SCHEME_TYPE,
   AUTHORIZATION_SCHEMES,
   AUTHORIZATION_SCHEME
-FROM "BFARM_APEX_ALL_APPLICATIONS"
+FROM "APEX_ALL_APPLICATIONS"
 WHERE APPLICATION_ID = v('APP_ID');
 
 -- new
-create or replace view "BFARM_APEX_APPLICATION" 
+create or replace view "APEX_APPLICATION" 
 as 
   select workspace_id,
   workspace,
@@ -7280,7 +7280,7 @@ where application_id = nvl(v('APP_ID'), application_id);
   application_id,
   owner,
   application_name
-  from "BFARM_APEX_APPLICATION" ;
+  from "APEX_APPLICATION" ;
 
 
 declare
@@ -7297,7 +7297,7 @@ begin
     then 'Oracle Datenbank'    
     end
 --  into l_auth_type
-FROM "BFARM_APEX_APPLICATION" 
+FROM "APEX_APPLICATION" 
 where AUTHENTICATION_SCHEME_TYPE in ('Application Express Accounts', 'LDAP Directory', 'Database Accounts');
 --return l_auth_type;
 exception when no_data_found then
@@ -7306,20 +7306,20 @@ end;
 /
 
 select application_name
-from "BFARM_APEX_APPLICATION";
+from "APEX_APPLICATION";
 
-select * from  "BFARM_APEX_APPLICATION" ;
+select * from  "APEX_APPLICATION" ;
 
 
-select * from "BFARM_APEX_APPLICATION" ;
+select * from "APEX_APPLICATION" ;
 
-select owner, object_type from all_objects where object_name = 'BFARM_APEX_APP_USERNAME_FORMAT';
+select owner, object_type from all_objects where object_name = 'APEX_APP_USERNAME_FORMAT';
 
 select username_format
-from "BFARM_APEX_APP_USERNAME_FORMAT";
+from "APEX_APP_USERNAME_FORMAT";
 
 select upper(username_format)
-from "BFARM_APEX_APP_USERNAME_FORMAT";
+from "APEX_APP_USERNAME_FORMAT";
 
 
 select user_status + valid_domain as user_status
@@ -7562,25 +7562,25 @@ end;
 /
 ALTER TRIGGER "AMF_VORGANG_BIU_TRG" ENABLE;
 --------------------------------------------------------
---  DDL for Trigger BFARM_AMF_MELDUNG_BD_TRG
+--  DDL for Trigger AMF_MELDUNG_BD_TRG
 --------------------------------------------------------
 
-  CREATE OR REPLACE TRIGGER "BFARM_AMF_MELDUNG_BD_TRG" 
+  CREATE OR REPLACE TRIGGER "AMF_MELDUNG_BD_TRG" 
 before delete on "AMF_VORGANG"
 referencing old as old new as new
 for each row
 declare
   pragma autonomous_transaction;
 begin
-      "BFARM_RAS_SOFT_DELETE" ('AMF_VORGANG', :old.id_vorgang);
+      "RAS_SOFT_DELETE" ('AMF_VORGANG', :old.id_vorgang);
 end;
 /
-ALTER TRIGGER "BFARM_AMF_MELDUNG_BD_TRG" ENABLE;
+ALTER TRIGGER "AMF_MELDUNG_BD_TRG" ENABLE;
 --------------------------------------------------------
---  DDL for Trigger BFARM_AMF_STATUS_TRG
+--  DDL for Trigger AMF_STATUS_TRG
 --------------------------------------------------------
 
-  CREATE OR REPLACE TRIGGER "BFARM_AMF_STATUS_TRG" 
+  CREATE OR REPLACE TRIGGER "AMF_STATUS_TRG" 
 before update of AMF_MELDUNG_STATUS on "AMF_VORGANG"
 referencing old as old new as new
 for each row
@@ -7594,12 +7594,12 @@ begin
     end if;
 end;
 /
-ALTER TRIGGER "BFARM_AMF_STATUS_TRG" ENABLE;
+ALTER TRIGGER "AMF_STATUS_TRG" ENABLE;
 --------------------------------------------------------
---  DDL for Trigger BFARM_AMF_DEL_TRG
+--  DDL for Trigger AMF_DEL_TRG
 --------------------------------------------------------
 
-  CREATE OR REPLACE TRIGGER "BFARM_AMF_DEL_TRG" 
+  CREATE OR REPLACE TRIGGER "AMF_DEL_TRG" 
 before update of DELETED, DELETED_BY on "AMF_VORGANG"
 referencing old as old new as new
 for each row
@@ -7609,13 +7609,13 @@ begin
     end if;
 end;
 /
-ALTER TRIGGER "BFARM_AMF_DEL_TRG" ENABLE;
+ALTER TRIGGER "AMF_DEL_TRG" ENABLE;
 --------------------------------------------------------
---  DDL for Procedure BFARM_RAS_SOFT_DELETE
+--  DDL for Procedure RAS_SOFT_DELETE
 --------------------------------------------------------
 set define off;
 
-  CREATE OR REPLACE PROCEDURE "BFARM_RAS_SOFT_DELETE" (
+  CREATE OR REPLACE PROCEDURE "RAS_SOFT_DELETE" (
 p_table in varchar2,
 p_id number,
 p_msg in varchar2 :=' k�nnen nicht gel�scht werden!',
@@ -7626,12 +7626,12 @@ l_status_id pls_integer;
 l_msg varchar2(1000);
 begin
     select app_status_id into l_status_id
-    from "BFARM_APEX_APP_STATUS"
+    from "APEX_APP_STATUS"
     where app_status = upper(nvl(p_new_status, 'LOCKED'));
-    if (upper(p_table) = 'BFARM_APEX_APP_USER') then
+    if (upper(p_table) = 'APEX_APP_USER') then
         l_msg := 'Benutzer'||p_msg;
         commit;
-        update  "BFARM_APEX_APP_USER"
+        update  "APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
@@ -7639,7 +7639,7 @@ begin
     elsif  (upper(p_table) = 'RAS_DOMAINEN') then
         l_msg := 'Domainen'||p_msg;
         commit;
-        update  "BFARM_APEX_APP_USER"
+        update  "APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
@@ -7961,7 +7961,7 @@ for each row
   pragma autonomous_transaction;
   begin
     -- now soft delete
-      "BFARM_RAS_SOFT_DELETE" ('RAS_DOMAINEN', :old.domain_id);
+      "RAS_SOFT_DELETE" ('RAS_DOMAINEN', :old.domain_id);
   end;
 /
 
@@ -8111,7 +8111,7 @@ begin
     if (l_token is not null) then
         if ("IS_VALID_USER_TOKEN"(l_username, l_token)) then
             if (l_userid is null) then -- get a fresh ID from sequence
-                select ras_intern.bfarm_apex_app_user_id_seq.nextval
+                select ras_intern.apex_app_user_id_seq.nextval
                 into l_userid
                 from dual;
             end if;    
@@ -8188,7 +8188,7 @@ begin
             -- returning apx_user_id, apx_username, apx_user_email
             -- into l_userid, l_username, l_email_address;
    */
-            insert into "RAS_INTERN"."BFARM_APEX_APP_USER"  (
+            insert into "RAS_INTERN"."APEX_APP_USER"  (
                 APP_USER_ID,
                 APP_USERNAME,
                 APP_USER_EMAIL,
@@ -8224,7 +8224,7 @@ begin
               APX_USER_PHONE2,
               APX_USER_DESCRIPTION,
               (select  STATUS_ID
-               from "RAS_INTERN"."BFARM_APEX_STATUS"
+               from "RAS_INTERN"."APEX_STATUS"
                where status = 'OPEN' 
                and status_scope = 'ACCOUNT'),
               APX_USER_PARENT_USER_ID,
@@ -8629,10 +8629,10 @@ procedure do_reset_pwd (
 p_username in varchar2 )
 is
 begin
-apex_util.set_security_group_id(apex_util.find_security_group_id('BFARM_APEX_TEST'));
+apex_util.set_security_group_id(apex_util.find_security_group_id('APEX_TEST'));
 apex_util.reset_pw (
 p_user => p_username,
-p_msg => p_username||', your password in workspace BFARM_APEX_TEST has been reset.' );
+p_msg => p_username||', your password in workspace APEX_TEST has been reset.' );
        insert into LOGT values (1, 'Before Creating Apex User');
        commit;
 end do_reset_pwd;
@@ -9045,7 +9045,7 @@ begin
     l_username   := upper(trim(p_username));
     l_token      := p_token;
     for c1 in (select count(1) as token_valid
-               from "RAS_INTERN"."BFARM_APEX_APP_USER"
+               from "RAS_INTERN"."APEX_APP_USER"
                where upper(trim(app_username)) = l_username
                  and app_user_token = l_token
                  and app_user_token_last_update +1 >= sysdate) loop
@@ -9072,7 +9072,7 @@ begin
     l_username   := upper(trim(p_username));
     l_token      := p_token;
     for c1 in (select count(1) as token_valid
-               from "RAS_INTERN"."BFARM_APEX_APP_USER"
+               from "RAS_INTERN"."APEX_APP_USER"
                where upper(trim(app_username)) = l_username
                  and app_user_token = l_token
                  and app_user_token_last_update +1 >= sysdate) loop
@@ -13516,7 +13516,7 @@ REFERENCES "RAS_INTERN"."_APEX_APP_USER" ("APP_USER_ID") ON DELETE CASCADE ENABL
 
 
 
-create or replace procedure "BFARM_RAS_SOFT_DELETE" (
+create or replace procedure "RAS_SOFT_DELETE" (
 p_table in varchar2,
 p_id number,
 p_msg in varchar2 :=' können nicht gelöscht werden!',
@@ -13529,19 +13529,19 @@ l_result number;
 l_username varchar2(128);
 begin
     select app_status_id into l_status_id
-    from "BFARM_APEX_APP_STATUS"
+    from "APEX_APP_STATUS"
     where app_status = upper(nvl(p_new_status, 'LOCKED'));
-    if (upper(p_table) = 'BFARM_APEX_APP_USER') then
+    if (upper(p_table) = 'APEX_APP_USER') then
         l_msg := 'Benutzer'||p_msg;
         commit;
-        update  "BFARM_APEX_APP_USER"
+        update  "APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
         where APP_USER_ID = p_id;
         -- get the username
         for u in (select upper(trim(app_username)) username
-                     from  "BFARM_APEX_APP_USER"
+                     from  "APEX_APP_USER"
                     where  APP_USER_ID = p_id) loop
             l_username := u.username;
         end loop;    
@@ -13558,7 +13558,7 @@ begin
     elsif  (upper(p_table) = 'RAS_DOMAINEN') then
         l_msg := 'Domainen'||p_msg;
         commit;
-        update  "BFARM_APEX_APP_USER"
+        update  "APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = l_status_id
@@ -14041,7 +14041,7 @@ end;
 
   ALTER TABLE "RAS"."APX$USER_REG" DROP CONSTRAINT "APX$USREG_APP_USER_ID_FK";
   ALTER TABLE "RAS"."APX$USER_REG" ADD CONSTRAINT "APX$USREG_APP_USER_ID_FK" FOREIGN KEY ("APX_APP_USER_ID")
-	  REFERENCES "RAS_INTERN"."BFARM_APEX_APP_USER" ("APP_USER_ID") ON DELETE CASCADE ENABLE;
+	  REFERENCES "RAS_INTERN"."APEX_APP_USER" ("APP_USER_ID") ON DELETE CASCADE ENABLE;
     
     
 create synonym RAS_INTERN.APEX_USER_REGISTRATION for  "RAS"."APX$USER_REG";    
@@ -14275,7 +14275,7 @@ select "APX$MAIL_CONTENT_ID_SEQ".NEXTVAL from dual;
 
 
 select 1 as cnt, app_user_id, upper(trim(app_username)) as username
-                         from "RAS_INTERN"."BFARM_APEX_APP_USER"
+                         from "RAS_INTERN"."APEX_APP_USER"
                          where upper(trim(app_username)) = :l_username;
 
 
@@ -14440,7 +14440,7 @@ begin
         if ("IS_VALID_USER_TOKEN"(l_username, l_token)) then
         
             if (l_userid is null) then -- get a fresh ID from sequence
-                select "RAS_INTERN"."BFARM_APEX_APP_USER_ID_SEQ".nextval
+                select "RAS_INTERN"."APEX_APP_USER_ID_SEQ".nextval
                 into l_userid
                 from dual;
             end if;    
@@ -14518,7 +14518,7 @@ begin
             -- returning apx_user_id, apx_username, apx_user_email
             -- into l_userid, l_username, l_email_address;
    */
-            insert into "RAS_INTERN"."BFARM_APEX_APP_USER"  (
+            insert into "RAS_INTERN"."APEX_APP_USER"  (
                 APP_USER_ID,
                 APP_USERNAME,
                 APP_USER_EMAIL,
@@ -14554,7 +14554,7 @@ begin
               APX_USER_PHONE2,
               APX_USER_DESCRIPTION,
               (select  STATUS_ID
-               from "RAS_INTERN"."BFARM_APEX_STATUS"
+               from "RAS_INTERN"."APEX_STATUS"
                where status = 'OPEN' 
                and status_scope = 'ACCOUNT'),
               APX_USER_PARENT_USER_ID,
@@ -15063,7 +15063,7 @@ end;
 /
 
 
-#WORKSPACE_IMAGES#js/BFARM_FOOTER.min.js?v=20180205.#APEX_VERSION#
+#WORKSPACE_IMAGES#js/FOOTER.min.js?v=20180205.#APEX_VERSION#
 #WORKSPACE_IMAGES#js/validate/jquery.validate.min.js?v=20180205.#APEX_VERSION#
 #WORKSPACE_IMAGES#js/validate/messages_de.min.js?v=20180205.#APEX_VERSION#
 #WORKSPACE_IMAGES#js/validateFormGlobals.min.js?v=20180205.#APEX_VERSION#
@@ -15072,7 +15072,7 @@ end;
 // set BFARM Footer
 setFooter();
 
-#WORKSPACE_IMAGES#css/BFARM_Theme101.min.css?v=20180118.#APEX_VERSION#
+#WORKSPACE_IMAGES#css/Theme101.min.css?v=20180118.#APEX_VERSION#
 #WORKSPACE_IMAGES#css/validate/screen.min.css?v=20180129.#APEX_VERSION#
 #WORKSPACE_IMAGES#css/validateForm.min.css?v=20180129.#APEX_VERSION#
 
@@ -15230,22 +15230,22 @@ FROM "MIME_TYPES" B JOIN "MIME_ICONS" A
 ON (A.ICON_ID = B.ICON_ID);
 
 
-  GRANT SELECT ON "BFARM_APEX_ADMIN"."MIME_TYPE_ICONS" TO PUBLIC;
+  GRANT SELECT ON "APEX_ADMIN"."MIME_TYPE_ICONS" TO PUBLIC;
 
-CREATE OR REPLACE FORCE VIEW "BFARM_APEX_ADMIN"."BFARM_APEX_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
-  select app_username, application_role from "BFARM_APPLICATION_ADMINS" 
+CREATE OR REPLACE FORCE VIEW "APEX_ADMIN"."APEX_ADMINS" ("APP_USERNAME", "APPLICATION_ROLE") AS 
+  select app_username, application_role from "APPLICATION_ADMINS" 
 union 
-select user_name, application_role from "BFARM_WORKSPACE_ADMINS"
+select user_name, application_role from "WORKSPACE_ADMINS"
 ;
 
 
-CREATE OR REPLACE FORCE VIEW "BFARM_APEX_ADMIN"."BFARM_WORKSPACE_ADMINS" ("USER_NAME", "APPLICATION_ROLE") AS 
+CREATE OR REPLACE FORCE VIEW "APEX_ADMIN"."WORKSPACE_ADMINS" ("USER_NAME", "APPLICATION_ROLE") AS 
   select user_name, 'WORKSPACE_ADMIN_USER' as "APPLICATION_ROLE" 
-from "BFARM_APEX_WORKSPACE_USERS" 
+from "APEX_WORKSPACE_USERS" 
 where IS_ADMIN = 'Yes' 
 union 
 select owner, 'APPLICATION_OWNER'  as "APPLICATION_ROLE" 
-from "BFARM_APEX_WORKSPACE"
+from "APEX_WORKSPACE"
 ;
 
 select * from user_objects where status != 'VALID';
@@ -15316,14 +15316,14 @@ ON (A.ICON_ID = B.ICON_ID);
 
 
 
-       update  "BFARM_APEX_APP_USER"
+       update  "APEX_APP_USER"
         set deleted  = sysdate,
               deleted_by  = nvl(v('APP_USER'), user),
               app_user_status_id = 1  --need to unlock to delete
         where APP_USER_ID = p_id; 
         -- get the username
         for u in (select upper(trim(app_username)) username
-                     from  "BFARM_APEX_APP_USER"
+                     from  "APEX_APP_USER"
                     where  APP_USER_ID = p_id) loop
             l_username := u.username;
         end loop;    
@@ -15363,38 +15363,38 @@ begin
 end;
 /
 
- select "RAS_INTERN"."BFARM_APEX_APP_USER_ID_SEQ".nextval
+ select "RAS_INTERN"."APEX_APP_USER_ID_SEQ".nextval
                 --into l_userid
                 from dual;
 
   ALTER TABLE "RAS_INTERN"."DOKUMENTE" drop CONSTRAINT "DOK_USER_ID_FK";                
   ALTER TABLE "RAS_INTERN"."DOKUMENTE" ADD CONSTRAINT "DOK_USER_ID_FK" FOREIGN KEY ("USER_ID")
-	  REFERENCES "RAS_INTERN"."BFARM_APEX_APP_USER" ("APP_USER_ID") ON DELETE SET NULL;                
+	  REFERENCES "RAS_INTERN"."APEX_APP_USER" ("APP_USER_ID") ON DELETE SET NULL;                
       
       
       commit;
       
 begin
-  "BFARM_RAS_SOFT_DELETE" ('BFARM_APEX_APP_USER', :P98_APP_USER_ID);
+  "RAS_SOFT_DELETE" ('APEX_APP_USER', :P98_APP_USER_ID);
   commit;
 end;
 /
       
       
-create or replace  TRIGGER "RAS_INTERN"."BFARM_USER_BD_TRG" 
-before delete on "BFARM_APEX_APP_USER"
+create or replace  TRIGGER "RAS_INTERN"."USER_BD_TRG" 
+before delete on "APEX_APP_USER"
 referencing old as old new as new
 for each row
 declare
   pragma autonomous_transaction;
 begin
-  "BFARM_RAS_SOFT_DELETE" ('BFARM_APEX_APP_USER', :old.app_user_id);
+  "RAS_SOFT_DELETE" ('APEX_APP_USER', :old.app_user_id);
   commit;
 end;
 /
 
 
-DELETE FROM "RAS_INTERN"."BFARM_APEX_APP_USER" WHERE ROWID = 'AAAGhBAAJAAAAFjAAK';
+DELETE FROM "RAS_INTERN"."APEX_APP_USER" WHERE ROWID = 'AAAGhBAAJAAAAFjAAK';
 
 
 
@@ -15418,7 +15418,7 @@ DELETE FROM "RAS_INTERN"."BFARM_APEX_APP_USER" WHERE ROWID = 'AAAGhBAAJAAAAFjAAK
   AUTHENTICATION_SCHEME_TYPE,
   AUTHORIZATION_SCHEMES,
   AUTHORIZATION_SCHEME
-FROM "BFARM_APEX_ALL_APPLICATIONS";
+FROM "APEX_ALL_APPLICATIONS";
 
 
 select apex_util.get_user_id(:l_username) from dual;
@@ -15442,7 +15442,7 @@ l_result number;
 
 
       select  STATUS_ID
-                        from "RAS_INTERN"."BFARM_APEX_STATUS"
+                        from "RAS_INTERN"."APEX_STATUS"
                         where status = 'OPEN' 
                         and status_scope = 'ACCOUNT';
 
@@ -15471,7 +15471,75 @@ l_result number;
         end;    
         /      
 
-
+create or replace procedure "RAS_SOFT_DELETE" (
+p_table in varchar2,
+p_id number,
+p_msg in varchar2 :=' können nicht gelöscht werden!',
+p_new_status varchar2 := 'LOCKED'
+) is
+pragma autonomous_transaction;
+l_status_id pls_integer;
+l_msg varchar2(1000);
+l_result number;
+l_username varchar2(128);
+l_userid  number;
+begin
+    select app_status_id into l_status_id
+    from "APEX_APP_STATUS"
+    where app_status = upper(nvl(p_new_status, 'LOCKED'));
+    if (upper(p_table) = 'APEX_APP_USER') then
+        l_msg := 'Benutzer'||p_msg;
+       commit;
+       update  "APEX_APP_USER"
+        set deleted  = sysdate,
+              deleted_by  = nvl(v('APP_USER'), user),
+              app_user_status_id = 1  --need to unlock to delete
+        where APP_USER_ID = p_id; 
+        -- get the username
+        for u in (select upper(trim(app_username)) username
+                     from  "APEX_APP_USER"
+                    where  APP_USER_ID = p_id) loop
+            l_username := u.username;
+        end loop;    
+       -- get APEX User Id by Name
+       l_userid := apex_util.get_user_id(l_username);        
+        -- remove user from apex
+        begin
+               "RAS"."APX_APEX_USER_EDIT"(
+                       p_result => l_result
+                     , p_edit_action => 'DROP'
+                     , p_user_id    => null
+                     , p_app_id => 100002
+                     , p_user_name => l_username
+                   );
+        exception when others then
+            null;
+        end;    
+        -- remove user from registration table
+        delete from "RAS"."APX$USER_REG"
+        where upper(trim(apx_username)) =  nvl(l_username, '');   
+        -- now set deleted status
+        update  "APEX_APP_USER"
+        set deleted  = sysdate,
+              deleted_by  = nvl(v('APP_USER'), user),
+              app_user_status_id = l_status_id
+        where APP_USER_ID = p_id;
+    elsif  (upper(p_table) = 'RAS_DOMAINEN') then
+        l_msg := 'Domainen'||p_msg;
+        commit;
+        update  "APEX_APP_USER"
+        set deleted  = sysdate,
+              deleted_by  = nvl(v('APP_USER'), user),
+              app_user_status_id = l_status_id
+        where app_user_domain_id  = p_id;
+        update "RAS_DOMAINEN"
+        set deleted = sysdate,
+              deleted_by     = nvl(v('APP_USER'), user)
+        where domain_id = p_id;
+    end if;
+    commit;
+    RAISE_APPLICATION_ERROR (-20002, l_msg, TRUE);
+end;
 
 
 
