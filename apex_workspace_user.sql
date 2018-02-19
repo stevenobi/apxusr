@@ -185,7 +185,7 @@ is
     APEX_USER_EDIT_ERROR                    exception;
 
     -- Custom Attributes
-    C_DEFAULT_SCHEMA                        constant    varchar2(100)   := 'APXUSR';
+    C_DEFAULT_SCHEMA                        constant    varchar2(100)   := 'RAS_INTERN';
     C_TODAY                                 constant    date            := trunc(sysdate);
     C_NOW                                   constant    date            := sysdate;
     C_D                                     constant    date            := C_NOW;
@@ -204,7 +204,7 @@ is
     -- Apex User Constants
     C_USER_ID	                            constant    number          := 0;  -- UNKNOWN
     C_SECURITY_GROUP_ID	                    constant    number          := 10; -- INTERNAL
-    C_USER_NAME                             constant    varchar2(100)   := 'NOBODY';
+    C_USER_NAME                             constant    varchar2(100)   := 'USR';
     C_CREATION_DATE                         constant    date            := C_D;
     C_LAST_UPDATE_DATE                      constant    date            := C_D;
     C_EXPIRY_DATE                           constant    date            := C_D;
@@ -229,7 +229,7 @@ is
         l_user_id   := p_user_id;
         l_username  := upper(trim(p_username));
         select
-            , coalesce(security_group_id, l_security_group_id)
+              coalesce(security_group_id, l_security_group_id)
             , coalesce(user_name, l_user_name)
             , coalesce(first_name, l_first_name)
             , coalesce(last_name, l_last_name)
