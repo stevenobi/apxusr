@@ -229,63 +229,63 @@ is
         l_user_id   := p_user_id;
         l_username  := upper(trim(p_username));
         select
-              security_group_id
-            , user_name
-            , first_name
-            , last_name
-            , creation_date
-            , created_by
-            , last_update_date
-            , last_updated_by
-            , start_date
-            , end_date
-            , person_type
-            , email_address
-            , web_password2
-            , web_password_version
-            , last_login
-            , builder_login_count
-            , last_agent
-            , last_ip
-            , account_locked
-            , account_expiry
-            , failed_access_attempts
-            , last_failed_login
-            , first_password_use_occurred
-            , change_password_on_first_use
-            , allow_app_building_yn
-            , allow_sql_workshop_yn
-            , allow_websheet_dev_yn
-            , allow_team_development_yn
-            , default_schema
-            , allow_access_to_schemas
-            , description
-            , web_password
-            , web_password_raw
-            , password_date
-            , password_accesses_left
-            , password_lifespan_accesses
-            , password_lifespan_days
-            , default_date_format
-            , known_as
-            , employee_id
-            , person_id
-            , profile_image
-            , profile_image_name
-            , profile_mimetype
-            , profile_filename
-            , profile_last_update
-            , profile_charset
-            , attribute_01
-            , attribute_02
-            , attribute_03
-            , attribute_04
-            , attribute_05
-            , attribute_06
-            , attribute_07
-            , attribute_08
-            , attribute_09
-            , attribute_10
+            , coalesce(security_group_id, l_security_group_id)
+            , coalesce(user_name, l_user_name)
+            , coalesce(first_name, l_first_name)
+            , coalesce(last_name, l_last_name)
+            , coalesce(creation_date, l_creation_date)
+            , coalesce(created_by, l_created_by)
+            , coalesce(last_update_date, l_last_update_date)
+            , coalesce(last_updated_by, l_last_updated_by)
+            , coalesce(start_date, l_start_date)
+            , coalesce(end_date, l_end_date)
+            , coalesce(person_type, l_person_type)
+            , coalesce(email_address, l_email_address)
+            , coalesce(web_password2, l_web_password2)
+            , coalesce(web_password_version, l_web_password_version)
+            , coalesce(last_login, l_last_login)
+            , coalesce(builder_login_count, l_builder_login_count)
+            , coalesce(last_agent, l_last_agent)
+            , coalesce(last_ip, l_last_ip)
+            , coalesce(account_locked, l_account_locked)
+            , coalesce(account_expiry, l_account_expiry)
+            , coalesce(failed_access_attempts, l_failed_access_attempts)
+            , coalesce(last_failed_login, l_last_failed_login)
+            , coalesce(first_password_use_occurred, l_first_password_use_occurred)
+            , coalesce(change_password_on_first_use, l_change_password_on_first_use)
+            , coalesce(allow_app_building_yn, l_allow_app_building_yn)
+            , coalesce(allow_sql_workshop_yn, l_allow_sql_workshop_yn)
+            , coalesce(allow_websheet_dev_yn, l_allow_websheet_dev_yn)
+            , coalesce(allow_team_development_yn, l_allow_team_development_yn)
+            , coalesce(default_schema, l_default_schema)
+            , coalesce(allow_access_to_schemas, l_allow_access_to_schemas)
+            , coalesce(description, l_description)
+            , coalesce(web_password, l_web_password)
+            , coalesce(web_password_raw, l_web_password_raw)
+            , coalesce(password_date, l_password_date)
+            , coalesce(password_accesses_left, l_password_accesses_left)
+            , coalesce(password_lifespan_accesses, l_password_lifespan_accesses)
+            , coalesce(password_lifespan_days, l_password_lifespan_days)
+            , coalesce(default_date_format, l_default_date_format)
+            , coalesce(known_as, l_known_as)
+            , coalesce(employee_id, l_employee_id)
+            , coalesce(person_id, l_person_id)
+            , coalesce(profile_image, l_profile_image)
+            , coalesce(profile_image_name, l_profile_image_name)
+            , coalesce(profile_mimetype, l_profile_mimetype)
+            , coalesce(profile_filename, l_profile_filename)
+            , coalesce(profile_last_update, l_profile_last_update)
+            , coalesce(profile_charset, l_profile_charset)
+            , coalesce(attribute_01, l_attribute_01)
+            , coalesce(attribute_02, l_attribute_02)
+            , coalesce(attribute_03, l_attribute_03)
+            , coalesce(attribute_04, l_attribute_04)
+            , coalesce(attribute_05, l_attribute_05)
+            , coalesce(attribute_06, l_attribute_06)
+            , coalesce(attribute_07, l_attribute_07)
+            , coalesce(attribute_08, l_attribute_08)
+            , coalesce(attribute_09, l_attribute_09)
+            , coalesce(attribute_10, l_attribute_10)
         into
               l_security_group_id
             , l_user_name
@@ -578,8 +578,7 @@ begin
                     -- Update Existing with Input Values if different
                     update "APEX_WORKSPACE_USER"
                     set
-                          user_id                        = coalesce(l_user_id, user_id)
-                        , security_group_id              = coalesce(l_security_group_id, security_group_id)
+                          security_group_id              = coalesce(l_security_group_id, security_group_id)
                         , user_name                      = coalesce(l_user_name, user_name)
                         , first_name                     = coalesce(l_first_name, first_name)
                         , last_name                      = coalesce(l_last_name, last_name)
@@ -655,8 +654,7 @@ begin
                     -- Merge Existing NULLs with Inputs if not NULL
                     update "APEX_WORKSPACE_USER"
                     set
-                          user_id                        = coalesce(user_id, l_user_id)
-                        , security_group_id              = coalesce(security_group_id, l_security_group_id)
+                          security_group_id              = coalesce(security_group_id, l_security_group_id)
                         , user_name                      = coalesce(user_name, l_user_name)
                         , first_name                     = coalesce(first_name, l_first_name)
                         , last_name                      = coalesce(last_name, l_last_name)
@@ -881,7 +879,6 @@ begin
                     end;
                 elsif (l_drop_if_exists) then
                     begin
-
                         delete from "APEX_WORKSPACE_USER"
                         where user_id = l_user_id;
 
@@ -953,13 +950,13 @@ begin
             l_result_code := 0;
         else
             l_result_code := 2;
-            l_result_text := 'No valid action: "'||coalesce(l_edit_action, '(NULL)')||'"';
+            l_result_text := 'No valid action: "'|| coalesce(l_edit_action, '(NULL)') ||'"';
             raise apex_user_edit_error;
         end if;
 
     else
         l_result_code := 1;
-        l_result_text := 'No valid Workspace ID: "'||l_security_group_id||'"';
+        l_result_text := 'No valid Workspace ID: "'|| l_security_group_id ||'"';
         raise apex_user_edit_error;
     end if;
 
