@@ -967,7 +967,7 @@ begin
 exception when apex_user_edit_error then
     p_result  := l_result_code;
     rollback;
-    raise_application_error(-20000, to_char(l_result_code) ||' - '|| l_result_text);
+    raise_application_error(-20000, to_char(l_result_code) ||' - '|| coalesce(l_result_text, sqlerrm));
 when others then
     p_result  := l_result_code;
     rollback;
