@@ -107,7 +107,7 @@ create or replace procedure "APX_APEX_USER_EDIT" (
    , p_drop_if_exists                       boolean     := null
    , p_unlock_if_exists                     varchar2    := null
    , p_unexpire_if_exists                   varchar2    := null
-) authid current_user
+) authid definer
 is
     -- Local Variables
     l_user_id	                            number;
@@ -1009,7 +1009,11 @@ l_result number;
 begin
    "APX_APEX_USER_EDIT"(
        p_result => l_result
-     , p_user_name => 'stefan.obermeyer@t-online.de'
+     , p_user_id => 177  
+     , p_user_name => ' TRIVADIS@BFARM.DE'
+     , p_web_password => 'Secret123#'
+     , p_first_name =>  'Tri'
+     , p_last_name => 'Vadis'     
      , p_edit_action => 'INSERT'
    );
    dbms_output.put_line('Result: '||l_result); -- Result: 0
