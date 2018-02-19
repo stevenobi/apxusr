@@ -564,7 +564,6 @@ begin
 
         -- set action
         if    (l_edit_action = 'FETCH')     then
-
             -- fetch User by ID or Name
             "FETCH_APEX_USER"(l_user_id, l_user_name);
 
@@ -648,7 +647,7 @@ begin
         -- UPDATE END
 
         elsif (l_edit_action = 'MERGE')    then
-            -- only update if exists
+            -- only merge if exists
             if (l_user_exists = 1) then
                 begin
                     -- Merge Existing NULLs with Inputs if not NULL
@@ -968,11 +967,11 @@ begin
 exception when apex_user_edit_error then
     p_result  := l_result_code;
     rollback;
-    raise_application_error(-20001, to_char(l_result_code) ||' - '|| l_result_text);
+    raise_application_error(-20000, to_char(l_result_code) ||' - '|| l_result_text);
 when others then
     p_result  := l_result_code;
     rollback;
-    raise_application_error(sqlcode, to_char(l_result_code) ||' - '|| sqlerrm);
+    raise_application_error(-20001, to_char(l_result_code) ||' - '|| sqlerrm);
 end "APX_APEX_USER_EDIT";
 /
 
@@ -986,7 +985,7 @@ begin
    "APX_APEX_USER_EDIT"(
        p_result => l_result
      , p_edit_action => 'DROP'
-     , p_user_name => 's.obermeyer@t-online.de'
+     , p_user_name => 'stefan.obermeyer@t-online.de'
    );
    dbms_output.put_line('Result: '||l_result); -- Result: 0
 end;
