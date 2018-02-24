@@ -985,7 +985,7 @@ begin
    "APX_APEX_USER_EDIT"(
        p_result => l_result
      , p_edit_action => 'DROP'
-     , p_user_name => 'Trivadis@bfarm.de'
+     , p_user_name => 'Trivadis@TRIVADIS.COM'
    );
    dbms_output.put_line('Result: '||l_result); -- Result: 0
 end;
@@ -1010,7 +1010,7 @@ begin
    "APX_APEX_USER_EDIT"(
        p_result => l_result
      , p_user_id => 177
-     , p_user_name => ' TRIVADIS@BFARM.DE'
+     , p_user_name => ' TRIVADIS@TRIVADIS.COM'
      , p_web_password => 'Secret123#'
      , p_first_name =>  'Tri'
      , p_last_name => 'Vadis'
