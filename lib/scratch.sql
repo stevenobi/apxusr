@@ -15597,6 +15597,41 @@ end;
 
 <span class="t-Reset-info">Passwort zurücksetzen</span>
 
+select count(*) , upper(trim(domain_owner))
+from ras_domainen
+group by upper(trim(domain_owner));
+
+
+alter table ras_domainen add domain_description varchar2(4000);
+alter table ras_domainen modify DNS_NOT_RESOLVED number default 0;
+
+create or replace trigger "RAS_DOMAINEN_BIUD_TRG" 
+before insert or update or delete on "RAS_DOMAINEN"
+referencing new as new old as old
+for each row
+begin
+  if inserting then
+    insert into "RAS"."APX$DOMAIN" (apx_domain_id, apx_domain, apx_domain_name, apx_domain_code, apx_domain_description)
+    values (:new.DOMAIN_ID,  :new.DOMAIN, :new.DOMAIN_OWNER||' ' ||:new.DOMAIN_CODE, :new.DOMAIN_CODE, :new.DOMAIN_OWNER);
+  elsif updating then
+    update "RAS"."APX$DOMAIN"
+    set   apx_domain                   =  :new.DOMAIN
+          , apx_domain_name         =  nvl(nvl(:new.DOMAIN_OWNER, :new.DOMAIN), 'DOMAIN_'||to_char(:new.DOMAIN_ID))
+          , apx_domain_code          = :new.DOMAIN_CODE
+          , apx_domain_description = :new.DOMAIN_OWNER|| ' ' ||:new.DOMAIN_CODE
+    where upper(trim(apx_domain)) = upper(trim(:new.DOMAIN));
+  elsif deleting then
+        update "RAS"."APX$DOMAIN"
+    set   apx_domain_status_id =  5
+    where upper(trim(apx_domain)) = upper(trim(:new.DOMAIN));
+  end if;
+end;
+/
+
+
+
+
+
 
 
 
