@@ -15567,6 +15567,9 @@ group by d.id_vorgang, g.ras_melder_id;
 
 
 
+ORA-00001: unique constraint (RAS.APX$DOMAIN_UNQ2) violated 
+ORA-06512: at "RAS_INTERN.RAS_DOMAINEN_BIUD_TRG", line 6 
+ORA-04088: error during execution of trigger 'RAS_INTERN.RAS_DOMAINEN_BIUD_TRG'
 
 
 
@@ -15580,8 +15583,8 @@ begin
     values (:new.DOMAIN_ID,  :new.DOMAIN, :new.DOMAIN_OWNER||' ' ||:new.DOMAIN_CODE, :new.DOMAIN_CODE, :new.DOMAIN_OWNER);
   elsif updating then
     update "RAS"."APX$DOMAIN"
-    set   apx_domain                   =  :new.DOMAIN
-          , apx_domain_name         =  :new.DOMAIN_OWNER||' ' ||:new.DOMAIN_CODE
+    set     apx_domain               =  :new.DOMAIN
+          , apx_domain_name          =  :new.DOMAIN_OWNER||' ' ||:new.DOMAIN_CODE
           , apx_domain_code          = :new.DOMAIN_CODE
           , apx_domain_description = :new.DOMAIN_OWNER
     where apx_domain_id = :new.DOMAIN_ID;
@@ -15591,4 +15594,9 @@ begin
     where apx_domain_id = :old.DOMAIN_ID;
   end if;
 end;
+
+<span class="t-Reset-info">Passwort zurücksetzen</span>
+
+
+
 
