@@ -15541,5 +15541,28 @@ begin
     RAISE_APPLICATION_ERROR (-20002, l_msg, TRUE);
 end;
 
+create or replace force view "RAS_RUECKMELDUNG_STATS" ("NOTE_TYPE", "NUM_NOTES", "ID_VORGANG", "RAS_MELDER_ID") 
+as 
+with dg
+as (
+    select distinct ras_melder_id from RAS_DOMAIN_GRUPPEN
+)
+select 'DOKUMENTE' as note_type, count(1) as num_notes, d.id_vorgang, g.ras_melder_id
+from BOB_LAENDER_ROW_DOKUMENTE d JOIN DG g
+on (d.ras_melder_id = g.ras_melder_id)
+where d.deleted is null
+group by d.id_vorgang , g.ras_melder_id
+union --notes
+select 'ANMERKUNGEN' as mtype, count(1) as num_notes, d.id_vorgang, g.ras_melder_id
+from BOB_LAENDER_ROW_ERGAENZUNGEN d JOIN DG g
+on (d.ras_melder_id = g.ras_melder_id)
+where d.deleted is null
+group by d.id_vorgang, g.ras_melder_id
+union --notes
+select 'MASSNAHMEN' as mtype, count(1) as num_notes, d.id_vorgang, g.ras_melder_id
+from BOB_LAENDER_ROW_MASSNAHMEN d JOIN DG g
+on (d.ras_melder_id = g.ras_melder_id)
+where d.deleted is null
+group by d.id_vorgang, g.ras_melder_id;
 
 
