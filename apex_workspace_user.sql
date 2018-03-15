@@ -185,7 +185,7 @@ is
     APEX_USER_EDIT_ERROR                    exception;
 
     -- Custom Attributes
-    C_DEFAULT_SCHEMA                        constant    varchar2(100)   := 'RAS_INTERN';
+    C_DEFAULT_SCHEMA                        constant    varchar2(100)   := 'APXUSR';
     C_TODAY                                 constant    date            := trunc(sysdate);
     C_NOW                                   constant    date            := sysdate;
     C_D                                     constant    date            := C_NOW;
@@ -985,7 +985,7 @@ begin
    "APX_APEX_USER_EDIT"(
        p_result => l_result
      , p_edit_action => 'DROP'
-     , p_user_name => 'Trivadis@bfarm.de'
+     , p_user_name => 'Trivadis@TRIVADIS.COM'
    );
    dbms_output.put_line('Result: '||l_result); -- Result: 0
 end;
@@ -1009,11 +1009,11 @@ l_result number;
 begin
    "APX_APEX_USER_EDIT"(
        p_result => l_result
-     , p_user_id => 177  
-     , p_user_name => ' TRIVADIS@BFARM.DE'
+     , p_user_id => 177
+     , p_user_name => ' TRIVADIS@TRIVADIS.COM'
      , p_web_password => 'Secret123#'
      , p_first_name =>  'Tri'
-     , p_last_name => 'Vadis'     
+     , p_last_name => 'Vadis'
      , p_edit_action => 'INSERT'
    );
    dbms_output.put_line('Result: '||l_result); -- Result: 0
@@ -1200,7 +1200,7 @@ end;
 /
 
 
-grant execute on  "APX_APEX_USER_EDIT" to ras_intern;
+grant execute on  "APX_APEX_USER_EDIT" to apxusr;
 
 
 

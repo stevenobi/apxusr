@@ -15566,3 +15566,29 @@ where d.deleted is null
 group by d.id_vorgang, g.ras_melder_id;
 
 
+
+
+
+
+TRIGGER "RAS_INTERN"."RAS_DOMAINEN_BIUD_TRG" 
+before insert or update or delete on "RAS_DOMAINEN"
+referencing new as new old as old
+for each row
+begin
+  if inserting then
+    insert into "RAS"."APX$DOMAIN" (apx_domain_id, apx_domain, apx_domain_name, apx_domain_code, apx_domain_description)
+    values (:new.DOMAIN_ID,  :new.DOMAIN, :new.DOMAIN_OWNER||' ' ||:new.DOMAIN_CODE, :new.DOMAIN_CODE, :new.DOMAIN_OWNER);
+  elsif updating then
+    update "RAS"."APX$DOMAIN"
+    set   apx_domain                   =  :new.DOMAIN
+          , apx_domain_name         =  :new.DOMAIN_OWNER||' ' ||:new.DOMAIN_CODE
+          , apx_domain_code          = :new.DOMAIN_CODE
+          , apx_domain_description = :new.DOMAIN_OWNER
+    where apx_domain_id = :new.DOMAIN_ID;
+  elsif deleting then
+        update "RAS"."APX$DOMAIN"
+    set   apx_domain_status_id =  5
+    where apx_domain_id = :old.DOMAIN_ID;
+  end if;
+end;
+
