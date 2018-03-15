@@ -15628,7 +15628,14 @@ begin
 end;
 /
 
+update apx$domain set apx_domain_description = apx_domain_name, apx_domain_name = apx_domain_description;
+commit;
 
+
+select count(*) , upper(trim(apx_domain_code))
+from apx$domain
+group by upper(trim(apx_domain_code))
+having count(*) > 1;
 
 
 
