@@ -15637,8 +15637,15 @@ from apx$domain
 group by upper(trim(apx_domain_code))
 having count(*) > 1;
 
+begin 
+begin  
+select "MASSNAHME_ID",to_char("MASSNAHME_UMGESETZT_AM", :p$_format_mask1),"MASSNAHME_BEMERKUNG","ID_VORGANG","ID",
+       "MASSNAHME_UMGESETZT","MELDENDE_BEHOERDE","USER_ID","RAS_MELDER_ID" 
+       into wwv_flow.g_column_values(1),wwv_flow.g_column_values(2),wwv_flow.g_column_values(3),wwv_flow.g_column_values(4),wwv_flow.g_column_values(5),wwv_flow.g_column_values(6),wwv_flow.g_column_values(7),wwv_flow.g_column_values(8),wwv_flow.g_column_values(9) 
+       from "RAS_INTERN"."BOB_LAENDER_ROW_MASSNAHMEN" 
+       where "ID" = :p_rowid and RAS_MELDER_ID = nvl(v('LOGIN_RAS_MELDER_ID'), 1); end;
+end;
 
-
-
+http://172.16.3.226:8080/apex/f?p=100002:38:5815851041917::NO:RP,38:P38_ID,P0_P38_ID_VORGANG,P0_P38_FROM_PAGE:44,142,19
 
 
