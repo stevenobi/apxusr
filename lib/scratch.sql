@@ -15649,3 +15649,57 @@ end;
 http://172.16.3.226:8080/apex/f?p=100002:38:5815851041917::NO:RP,38:P38_ID,P0_P38_ID_VORGANG,P0_P38_FROM_PAGE:44,142,19
 
 
+P35_AM,
+P35_STAAT_ID,
+P35_BUNDESLAND,
+P35_AM_PNR,
+P35_AM_ENR,
+P35_ZNR,
+P35_AM,
+P35_MAH
+:AVACAN,
+37,
+10,
+3000621,
+0000253,
+,
+AVACAN,
+ASTA Medica GmbH   [HIST]
+
+declare
+l_bl_id number := null;
+l_country_id number := null;
+begin
+for a in (SELECT znr, enr, am, mah, pnr, iso, regbez, pnraeanz, pnrstm, fstr, fport, fplzo, zubpnr
+              from "RAS_AMIS_MAH"
+              where PNR = :P35_AM_PNR
+              and ENR = :P35_AM_ENR) loop
+              
+    -- setting country          
+    for c in (select STAAT_ID 
+              from BUNDESSTAATEN 
+              where ISO_2 = replace(a.ISO, 'UK', 'GB')) loop
+        l_country_id := c.STAAT_ID;
+    end loop;    
+    
+    -- setting district
+    if (a.ISO = 'DE') then 
+      for b in (select max(BUNDESLAND_ID) as BL_ID
+                from "BUNDESLAENDER_PLZ" 
+                 where a.FPLZO between PLZ_FROM and PLZ_TO) loop
+            l_bl_id := b.BL_ID;
+        end loop;
+    end if;    
+    
+    apex_util.set_session_state('P35_AM', a.am);
+    apex_util.set_session_state('P35_STAAT_ID', a.iso);
+    apex_util.set_session_state('P35_BUNDESLAND', a.fplzo);
+    apex_util.set_session_state('P35_AM_PNR', a.pnr);
+    apex_util.set_session_state('P35_AM_ENR', a.enr);
+    apex_util.set_session_state('P35_ZNR', a.znr);
+    apex_util.set_session_state('P35_AM', a.am);
+    apex_util.set_session_state('P35_MAH', a.mah);
+end loop;
+end;
+
+
