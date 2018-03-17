@@ -16011,6 +16011,11 @@ dbms_output.put_line(l_return);
 end;
 /
 
+begin
+  dbms_stats.gather_schema_stats('RAS_INTERN');
+end;
+/
+
 create or replace TRIGGER "RAS"."APX$USRREG_BIU_TRG" 
 before insert or update on "APX$USER_REG"
 referencing old as old new as new
@@ -16365,7 +16370,7 @@ select * from RAS_RUECKMELDUNG_STATS;
 select BLR_MASSNAHMEN_SEQ.nextval from dual;
 
 
-
+x
     select count(1)
     --into l_exists
     from BOB_LAENDER_ROW_MASSNAHMEN
@@ -16373,4 +16378,17 @@ select BLR_MASSNAHMEN_SEQ.nextval from dual;
     and ras_melder_id = :LOGIN_RAS_MELDER
     and deleted is null;
 
+TRIGGER "RAS_INTERN"."BFARM_AMF_MELDUNG_BD_TRG" 
+before delete on "AMF_VORGANG"
+referencing old as old new as new
+for each row
+declare
+  pragma autonomous_transaction;
+begin
+      "BFARM_RAS_SOFT_DELETE" ('AMF_VORGANG', :old.id_vorgang);
+end;
 
+begin begin  
+select "MASSNAHME_ID",to_char("MASSNAHME_UMGESETZT_AM", :p$_format_mask1),"MASSNAHME_BEMERKUNG","ID_VORGANG","ID","MASSNAHME_UMGESETZT","MELDENDE_BEHOERDE","USER_ID","RAS_MELDER_ID" into wwv_flow.g_column_values(1),wwv_flow.g_column_values(2),wwv_flow.g_column_values(3),wwv_flow.g_column_values(4),wwv_flow.g_column_values(5),wwv_flow.g_column_values(6),wwv_flow.g_column_values(7),wwv_flow.g_column_values(8),wwv_flow.g_column_values(9) 
+from "RAS_INTERN"."BOB_LAENDER_ROW_MASSNAHMEN" where "ID" = :p_rowid; end;
+end;
