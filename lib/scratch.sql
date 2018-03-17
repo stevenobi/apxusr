@@ -15706,5 +15706,671 @@ end;
 javascript:apex.navigation.dialog.close(true,'f?p=100002:35:7114475874415::NO::P35_AM_PNR,P35_AM_ENR:3083819,2171717');
 
 
+BFARM_AMF_MELDUNG_BD_TRG	        AMF_VORGANG
+BFARM_USER_BD_TRG	                BFARM_APEX_APP_USER
+BFARM_BOBLR_DOKUMENTE_BD_TRG	    BOB_LAENDER_ROW_DOKUMENTE
+BOB_LAENDER_ROW_MASSN_BD_TRG	    BOB_LAENDER_ROW_MASSNAHMEN
+BFARM_DOKUMENTE_BD_TRG	            DOKUMENTE
+RAS_DOMAINEN_BD_TRG	                AS_DOMAINEN
+
+
+
+create or replace TRIGGER "RAS"."APX$USRREG_BIU_TRG" 
+before insert or update on "APX$USER_REG"
+referencing old as old new as new
+for each row
+declare
+l_domain varchar2(100);
+l_token_valid_for_hours pls_integer;
+l_enforce_valid_domain pls_integer;
+C_DEFAULT_TOKEN_VALID_FOR_HOUR pls_integer := 24;
+invalid_domain exception;
+begin
+  if inserting then
+    if (:new.apx_user_id is null) then
+        select "APX$USREG_ID_SEQ".NEXTVAL
+        into :new.apx_user_id
+        from dual;
+    end if;
+    if (:new.app_id is null) then
+        select nvl2(v('FB_FLOW_ID'), v('FB_FLOW_ID'), v('APP_ID'))
+        into :new.app_id
+        from dual;
+    end if;
+    if (nullif(:new.apx_user_domain_id, 0) is null) then
+      begin
+--        select apx_domain_id, apx_domain
+--        into :new.apx_user_domain_id, l_domain
+--        from "APX$DOMAIN"
+--        where upper(trim(apx_domain)) =
+--        upper(trim("PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email)))
+--        and apx_domain_status_id = (select apx_status_id
+--                                    from "APX$STATUS"
+--                                    where apx_status = 'VALID'
+--                                    and apx_status_ctx_id = (select apx_context_id
+--                                                             from "APX$CTX"
+--                                                             where apx_context = 'DOMAIN'));
+         select apex_domain_id, apex_domain
+         into :new.apx_user_domain_id, l_domain
+         from "BFARM_VALID_DOMAINS"
+          where upper(trim(apex_domain)) = upper(trim("PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email)));
+      exception when no_data_found then
+        begin
+          select count(1)
+          into l_enforce_valid_domain
+          from "APEX_CONFIGURATION"
+          where apex_config_item = 'ENFORCE_VALID_DOMAIN'
+          and apex_config_item_value = 'TRUE';
+        exception when no_data_found then
+            l_enforce_valid_domain := 0;
+        end;
+        if (l_enforce_valid_domain = 0) then
+            -- accept user's domain
+            l_domain := "PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email);
+        else
+            raise invalid_domain;
+        end if;
+      end;
+    end if;
+    if (:new.apx_user_context_id is null) then
+      begin
+        select apx_context_id
+        into :new.apx_user_context_id
+        from "APX$CTX"
+        where apx_context = 'USER';
+        exception when no_data_found then
+            :new.apx_user_context_id := 0;
+      end;
+    end if;
+    if (:new.apx_user_token is null) then
+      begin
+        select  apex_config_item_value
+        into l_token_valid_for_hours
+        from "APEX_CONFIGURATION"
+        where  apex_config_item = 'USER_TOKEN_VALID_FOR_HOURS';
+      exception when no_data_found then
+        l_token_valid_for_hours := C_DEFAULT_TOKEN_VALID_FOR_HOUR;
+      end;
+      -- set token data
+      select sysdate,
+             sysdate + l_token_valid_for_hours / 24,
+             systimestamp,
+             "APX_GET_TOKEN"(l_domain)
+        into
+             :new.apx_user_token_created,
+             :new.apx_user_token_valid_until,
+             :new.apx_user_token_ts,
+             :new.apx_user_token
+      from dual;
+    end if;
+    if (:new.apx_username is null or :new.apx_username = 'NewAppUser') then
+      begin
+        if (:new.apx_user_first_name is not null or :new.apx_user_last_name is not null) then
+            select :new.apx_user_first_name||' '||:new.apx_user_last_name
+            into :new.apx_username
+            from dual;
+        elsif (:new.apx_user_email is not null) then
+            :new.apx_username := :new.apx_user_email;
+        end if;
+        exception when no_data_found then
+          select 'NewAppUser '||
+          nvl(:new.apx_user_id, to_number(SYS_GUID(),'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'))
+          into :new.apx_username
+          from dual;
+      end;
+    end if;
+    select sysdate, nvl(v('APX_USER'), user)
+    into :new.created, :new.created_by
+    from dual;
+  elsif updating then
+    select sysdate, nvl(v('APX_USER'), user)
+    into :new.modified, :new.modified_by
+    from dual;
+  end if;
+exception when invalid_domain
+          then RAISE_APPLICATION_ERROR (-20201, 'No valid Domain found!');
+when others then
+  raise;
+end;
+
+
+    if (nullif(:new.apx_user_domain_id, 0) is null) then
+      begin
+--        select apx_domain_id, apx_domain
+--        into :new.apx_user_domain_id, l_domain
+--        from "APX$DOMAIN"
+--        where upper(trim(apx_domain)) =
+--        upper(trim("PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email)))
+--        and apx_domain_status_id = (select apx_status_id
+--                                    from "APX$STATUS"
+--                                    where apx_status = 'VALID'
+--                                    and apx_status_ctx_id = (select apx_context_id
+--                                                             from "APX$CTX"
+--                                                             where apx_context = 'DOMAIN'));
+         select apex_domain_id, apex_domain
+         into :new.apx_user_domain_id, l_domain
+         from "BFARM_VALID_DOMAINS"
+          where upper(trim(apex_domain)) = upper(trim("PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email)));
+          raise_application_error(-20001, 'NO Domain found for '|| upper(trim("PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email)))||' '|| :new.apx_user_domain_id||' '|| l_domain);
+      exception when no_data_found then
+      
+        begin
+          select count(1)
+          into l_enforce_valid_domain
+          from "APEX_CONFIGURATION"
+          where apex_config_item = 'ENFORCE_VALID_DOMAIN'
+          and apex_config_item_value = 'TRUE';
+        exception when no_data_found then
+            l_enforce_valid_domain := 0;
+        end;
+        if (l_enforce_valid_domain = 0) then
+            -- accept user's domain
+            l_domain := "PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email);
+        else
+            raise invalid_domain;
+        end if;
+      end;
+    end if;
+
+create or replace view "BFARM_VALID_DOMAINS"
+as
+  select DOMAIN_ID as APEX_DOMAIN_ID,
+  DOMAIN as APEX_DOMAIN,
+  DOMAIN_OWNER as APEX_DOMAIN_OWNER,
+  DOMAIN_CODE as APEX_DOMAIN_CODE,
+  DNS_GUELTIG as APEX_DOMAIN_DNS_VALID,
+  CASE STATUS WHEN 'VALID' Then 'Gueltig' else 'Ungueltig' end as APEX_DOMAIN_STATUS,
+  MODIFIED,
+  MODIFIED_BY,
+  CREATED,
+  CREATED_BY,
+  DELETED,
+  DELETED_BY
+FROM "RAS_INTERN"."RAS_DOMAINS" 
+WHERE STATUS = 'VALID';
+
+
+select * from "BFARM_VALID_DOMAINS";
+
+create or replace function "IS_VALID_BFARM_DOMAIN" (
+    p_domain varchar2,
+    p_return_as_offset varchar2 := 'FALSE',
+    p_return_offset pls_integer := null
+) return pls_integer
+is
+l_return pls_integer;
+l_domain varchar2(1000);
+l_config_value pls_integer;
+l_return_offset pls_integer;
+C_RETURN_OFFSET pls_integer := -1; -- Default Offset if none specified by p_return_offset
+begin
+    -- check if domain conatins email characters
+    if instr(p_domain, '@') > 0 then
+        l_domain := "PARSE_DOMAIN_FROM_EMAIL"(p_domain);
+    else
+        l_domain := p_domain;
+    end if;
+
+    -- check if domain is in valid_domains
+    select count(1) as domain_is_valid
+    into l_return
+    from "BFARM_VALID_DOMAINS"
+    where upper(trim(apex_domain)) = upper(trim(l_domain));
+
+    -- if called by ajax in apex we reduce return by 1
+    -- since 0 is reserved for ok instead of "not found"
+    if (upper(trim(p_return_as_offset)) = 'TRUE') then
+        if (p_return_offset) is null then
+            begin
+              select count(1) * C_RETURN_OFFSET
+              into l_return_offset
+              from "APEX_CONFIGURATION"
+              where apex_config_item = 'ENFORCE_VALID_DOMAIN'
+              and apex_config_item_value = 'TRUE';
+            exception when no_data_found then
+            l_return_offset := 0;
+            end;
+        else
+            l_return_offset := p_return_offset;
+        end if;
+    else
+        l_return_offset := 0;
+    end if;
+
+    -- honor local config value by adding (-1 for ajax callbacks)
+    l_return := l_return + l_return_offset;
+
+    -- return final result
+    return (l_return);
+
+exception when no_data_found then
+return null;
+when others then
+raise;
+return null;
+end;
+/
+
+select * from bfarm_valid_domains
+where upper(trim(apex_domain)) = 'REG1-OB.BAYERN.DE';
+
+        select apex_domain_id, apex_domain
+         --into :new.apx_user_domain_id, l_domain
+         from "BFARM_VALID_DOMAINS"
+          where upper(trim(apex_domain)) = upper(trim("PARSE_DOMAIN_FROM_EMAIL"(:new_apx_user_email)));
+          
+          
+          
+          
+    l_domain :=  upper(trim("PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email)));
+        select apex_domain_id, apex_domain
+         --into :new.apx_user_domain_id, l_domain
+         from BFARM_VALID_DOMAINS
+          where upper(trim(apex_domain)) = 'REG1-OB.BAYERN.DE';          
+
+
+grant select, references on "RAS_DOMAINEN" to ras;
+grant select on  "BFARM_APEX_STATUS" to ras;
+grant select on "RAS_VALID_DOMAINS" to ras;
+
+
+begin
+for a in (SELECT znr, enr, am, mah, pnr, iso, regbez, pnraeanz, pnrstm, fstr, fport, fplzo, zubpnr
+              from "RAS_AMIS_MAH"
+              where PNR = 3000621
+              and ENR = 0000253) loop
+    apex_util.set_session_state('P35_AM', a.am);
+    apex_util.set_session_state('P35_STAAT_ID', a.iso);
+    apex_util.set_session_state('P35_BUNDESLAND', a.fplzo);
+    apex_util.set_session_state('P35_AM_PNR', a.pnr);
+    apex_util.set_session_state('P35_AM_ENR', a.enr);
+    apex_util.set_session_state('P35_ZNR', a.znr);
+    apex_util.set_session_state('P35_AM', a.am);
+    apex_util.set_session_state('P35_MAH', a.mah);
+end loop;
+end;
+/
+
+SELECT znr, enr, am, mah, pnr, iso, regbez, pnraeanz, pnrstm, fstr, fport, fplzo, zubpnr
+              from "RAS_AMIS_MAH"
+              where PNR = 3083819
+              and ENR = 2171717;
+              
+SELECT
+    am_name,
+    am_znr,
+    am_pu
+FROM
+    amf_vorgang;
+
+              declare
+l_return number;
+begin
+    l_return := "RAS"."IS_VALID_DOMAIN"(upper(trim(:USERNAME)), p_return_as_offset => 'TRUE', p_return_offset => -1);
+dbms_output.put_line(l_return);
+end;
+/
+
+create or replace TRIGGER "RAS"."APX$USRREG_BIU_TRG" 
+before insert or update on "APX$USER_REG"
+referencing old as old new as new
+for each row
+declare
+l_domain varchar2(100);
+l_token_valid_for_hours pls_integer;
+l_enforce_valid_domain pls_integer;
+C_DEFAULT_TOKEN_VALID_FOR_HOUR pls_integer := 24;
+invalid_domain exception;
+begin
+  if inserting then
+    if (:new.apx_user_id is null) then
+        select "APX$USREG_ID_SEQ".NEXTVAL
+        into :new.apx_user_id
+        from dual;
+    end if;
+    if (:new.app_id is null) then
+        select nvl2(v('FB_FLOW_ID'), v('FB_FLOW_ID'), v('APP_ID'))
+        into :new.app_id
+        from dual;
+    end if;
+    if (nullif(:new.apx_user_domain_id, 0) is null) then
+      begin
+--        select apx_domain_id, apx_domain
+--        into :new.apx_user_domain_id, l_domain
+--        from "APX$DOMAIN"
+--        where upper(trim(apx_domain)) =
+--        upper(trim("PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email)))
+--        and apx_domain_status_id = (select apx_status_id
+--                                    from "APX$STATUS"
+--                                    where apx_status = 'VALID'
+--                                    and apx_status_ctx_id = (select apx_context_id
+--                                                             from "APX$CTX"
+--                                                             where apx_context = 'DOMAIN'));
+         select apex_domain_id, apex_domain
+         into :new.apx_user_domain_id, l_domain
+         from "BFARM_VALID_DOMAINS"
+          where upper(trim(apex_domain)) = upper(trim("PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email)));
+      exception when no_data_found then
+        begin
+          select count(1)
+          into l_enforce_valid_domain
+          from "APEX_CONFIGURATION"
+          where apex_config_item = 'ENFORCE_VALID_DOMAIN'
+          and apex_config_item_value = 'TRUE';
+        exception when no_data_found then
+            l_enforce_valid_domain := 0;
+        end;
+        if (l_enforce_valid_domain = 0) then
+            -- accept user's domain
+            l_domain := "PARSE_DOMAIN_FROM_EMAIL"(:new.apx_user_email);
+        else
+            raise invalid_domain;
+        end if;
+      end;
+    end if;
+    if (:new.apx_user_context_id is null) then
+      begin
+        select apx_context_id
+        into :new.apx_user_context_id
+        from "APX$CTX"
+        where apx_context = 'USER';
+        exception when no_data_found then
+            :new.apx_user_context_id := 0;
+      end;
+    end if;
+    if (:new.apx_user_token is null) then
+      begin
+        select  apex_config_item_value
+        into l_token_valid_for_hours
+        from "APEX_CONFIGURATION"
+        where  apex_config_item = 'USER_TOKEN_VALID_FOR_HOURS';
+      exception when no_data_found then
+        l_token_valid_for_hours := C_DEFAULT_TOKEN_VALID_FOR_HOUR;
+      end;
+      -- set token data
+      select sysdate,
+             sysdate + l_token_valid_for_hours / 24,
+             systimestamp,
+             "APX_GET_TOKEN"(l_domain)
+        into
+             :new.apx_user_token_created,
+             :new.apx_user_token_valid_until,
+             :new.apx_user_token_ts,
+             :new.apx_user_token
+      from dual;
+    end if;
+    if (:new.apx_username is null or :new.apx_username = 'NewAppUser') then
+      begin
+        if (:new.apx_user_first_name is not null or :new.apx_user_last_name is not null) then
+            select :new.apx_user_first_name||' '||:new.apx_user_last_name
+            into :new.apx_username
+            from dual;
+        elsif (:new.apx_user_email is not null) then
+            :new.apx_username := :new.apx_user_email;
+        end if;
+        exception when no_data_found then
+          select 'NewAppUser '||
+          nvl(:new.apx_user_id, to_number(SYS_GUID(),'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'))
+          into :new.apx_username
+          from dual;
+      end;
+    end if;
+    select sysdate, nvl(v('APX_USER'), user)
+    into :new.created, :new.created_by
+    from dual;
+  elsif updating then
+    select sysdate, nvl(v('APX_USER'), user)
+    into :new.modified, :new.modified_by
+    from dual;
+  end if;
+exception when invalid_domain
+          then RAISE_APPLICATION_ERROR (-20201, 'No valid Domain found!');
+when others then
+  raise;
+end;
+/
+
+select "PARSE_DOMAIN_FROM_EMAIL"(:new_apx_user_email) from dual;
+
+         select apex_domain_id, apex_domain
+        -- into :new.apx_user_domain_id, l_domain
+         from "BFARM_VALID_DOMAINS"
+        where upper(trim(apex_domain)) = upper(trim("PARSE_DOMAIN_FROM_EMAIL"(:new_apx_user_email)));
+        
+        
+        
+        
+declare
+l_domain varchar2(200);
+l_domain_id number;
+new_apx_user_email varchar2(200) := 'hn@reg1-ob.bayern.de';
+begin
+  l_domain :=  upper(trim("PARSE_DOMAIN_FROM_EMAIL"(new_apx_user_email)));
+    --raise_application_error(-20001, '##'||l_domain||'##');  
+    select apex_domain_id, apex_domain
+     into l_domain_id, l_domain
+     from "RAS"."BFARM_VALID_DOMAINS"
+      where upper(trim(apex_domain)) = l_domain;
+exception when others then
+  raise_application_error(-20001, sqlcode ||' '||sqlerrm);  
+end;
+/
+
+  select domain_id, domain
+     --into l_domain_id, l_domain
+     from "RAS_INTERN"."RAS_VALID_DOMAINS"
+      where upper(trim(domain)) = 'REG1-OB.BAYERN.DE';
+
+   select apex_domain_id, apex_domain
+    -- into l_domain_id, l_domain
+     from "RAS"."BFARM_VALID_DOMAINS"
+      where replace(upper(trim(apex_domain)), '-','') = :l_domain;
+      
+      
+      
+declare
+l_domain varchar2(200);
+l_domain_id number;
+new_apx_user_email varchar2(200) := :P110_EMAIL;
+begin
+  l_domain :=  upper(trim("PARSE_DOMAIN_FROM_EMAIL"(new_apx_user_email)));
+ -- raise_application_error(-20023, '##'||l_domain||'##');  
+    select apex_domain_id, apex_domain
+     into l_domain_id, l_domain
+     from "RAS"."BFARM_VALID_DOMAINS"
+     where upper(trim(apex_domain)) = l_domain;
+ dbms_output.put_line(l_domain_id||' '||l_domain);
+exception when others then
+  raise_application_error(-20034, sqlerrm||' ##'||l_domain||'##'); 
+end;
+/      
+      
+      
+      
+      
+declare
+l_domain VARCHAR2(256);
+l_domain_id number;
+new_apx_user_email varchar2(200) := :P110_EMAIL;
+begin
+  l_domain :=  "PARSE_DOMAIN_FROM_EMAIL"(new_apx_user_email);
+ -- raise_application_error(-20023, '##'||l_domain||'##');  
+    select apex_domain_id, apex_domain
+     into l_domain_id, l_domain
+     from "RAS"."BFARM_VALID_DOMAINS"
+     where apex_domain = l_domain;
+ 
+exception when others then
+  raise_application_error(-20034, sqlerrm||' ##'||l_domain||'##'); 
+end;
+/      
+
+
+create or replace function get_domain_id (
+  p_email in varchar2
+) return number 
+is
+l_domain VARCHAR2(256);
+l_domain_id number;
+new_apx_user_email varchar2(200) := p_email;
+begin
+  l_domain :=  "PARSE_DOMAIN_FROM_EMAIL"(p_email);
+ -- raise_application_error(-20023, '##'||l_domain||'##');  
+    select apex_domain_id, apex_domain
+     into l_domain_id, l_domain
+     from "RAS"."BFARM_VALID_DOMAINS"
+     where apex_domain = l_domain;
+     return l_domain_id;
+exception when others then
+  raise;
+end;
+/
+
+
+select get_domain_id('hn@reg1-ob.bayern.de') from dual;
+
+
+select domain_id, domain 
+from RAS_INTERN.RAS_DOMAINEN
+where domain =  "PARSE_DOMAIN_FROM_EMAIL"(:p_email);
+
+
+alter table APX$USER_REG add constraint "APX$USREG_DOMAIN_FK" foreign key (APX_USER_DOMAIN_ID) references "RAS_INTERN"."RAS_DOMAINEN"(domain_id) on delete set null;
+
+select ras_melder_id
+from BFARM_RAS_USERS
+where upper(trim(app_username)) = upper(trim(:APP_USER));
+
+select ras_melder_id
+from BFARM_RAS_USERS
+where upper(trim(app_username)) = upper(trim(:APP_USER));
+
+select "MASSNAHME_ID",to_char("MASSNAHME_UMGESETZT_AM", :p$_format_mask1),"MASSNAHME_BEMERKUNG","ID_VORGANG","ID",
+       "MASSNAHME_UMGESETZT","MELDENDE_BEHOERDE","USER_ID","RAS_MELDER_ID" 
+       --into wwv_flow.g_column_values(1),wwv_flow.g_column_values(2),wwv_flow.g_column_values(3),wwv_flow.g_column_values(4),wwv_flow.g_column_values(5),wwv_flow.g_column_values(6),wwv_flow.g_column_values(7),wwv_flow.g_column_values(8),wwv_flow.g_column_values(9) 
+       from "RAS_INTERN"."BOB_LAENDER_ROW_MASSNAHMEN" 
+       where "ID" = :p_rowid and RAS_MELDER_ID = 5; end;
+end;
+
+create unique index "AMF_VORGANG_UNQ" on AMF_VORGANG (case when deleted is null then 1 else id_vorgang end, vorgangsnummer);
+
+
+select count(*) , vorgangsnummer
+from amf_vorgang
+where deleted is null
+group by vorgangsnummer
+;
+
+
+
+declare
+l_count number;
+begin
+  select count(1)
+  into l_count
+  from AMF_VORGANG
+  where upper(trim(vorgangsnummer)) = upper(trim(:P35_VORGANGSNUMMER));
+  if (l_count = 0) then
+    --return false;
+    dbms_output.put_line('DOES NOT EXISTS');
+  else
+    --return true;
+    dbms_output.put_line('EXISTS');
+  end if;
+end;
+/
+
+update amf_vorgang set deleted = sysdate where deleted_by is not null and deleted is null;
+commit;
+
+
+
+SELECT VORGANGSNUMMER|| ' ' || BEZEICHNUNG as d,
+       ID_VORGANG as r
+FROM "AMF_VORGANG"
+WHERE DELETED is null
+order by 1;
+
+ select distinct ras_melder_id from RAS_DOMAIN_GRUPPEN;
+
+/*
+ CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."RAS_RUECKMELDUNG_STATS" ("NOTE_TYPE", "NUM_NOTES", "ID_VORGANG", "RAS_MELDER_ID") AS 
+  with dg
+as (
+    select distinct ras_melder_id from RAS_DOMAIN_GRUPPEN
+)
+select 'DOKUMENTE' as note_type, count(1) as num_notes, d.id_vorgang, g.ras_melder_id
+from BOB_LAENDER_ROW_DOKUMENTE d JOIN DG g
+on (d.ras_melder_id = g.ras_melder_id)
+where d.deleted is null
+group by d.id_vorgang , g.ras_melder_id
+union --notes
+select 'ANMERKUNGEN' as mtype, count(1) as num_notes, d.id_vorgang, g.ras_melder_id
+from BOB_LAENDER_ROW_ERGAENZUNGEN d JOIN DG g
+on (d.ras_melder_id = g.ras_melder_id)
+where d.deleted is null
+group by d.id_vorgang, g.ras_melder_id
+union --notes
+select 'MASSNAHMEN' as mtype, count(1) as num_notes, d.id_vorgang, g.ras_melder_id
+from BOB_LAENDER_ROW_MASSNAHMEN d JOIN DG g
+on (d.ras_melder_id = g.ras_melder_id)
+where d.deleted is null
+group by d.id_vorgang, g.ras_melder_id;
+
+*/
+
+  with dg
+as (
+    select distinct ras_melder_id from RAS_DOMAIN_GRUPPEN
+)
+--select 'DOKUMENTE' as note_type, count(1) as num_notes, d.id_vorgang, g.ras_melder_id
+--from BOB_LAENDER_ROW_DOKUMENTE d JOIN DG g
+--on (d.ras_melder_id = g.ras_melder_id)
+--where d.deleted is null
+--group by d.id_vorgang , g.ras_melder_id
+--union --notes
+--select 'ANMERKUNGEN' as mtype, count(1) as num_notes, d.id_vorgang, g.ras_melder_id
+--from BOB_LAENDER_ROW_ERGAENZUNGEN d JOIN DG g
+--on (d.ras_melder_id = g.ras_melder_id)
+--where d.deleted is null
+--group by d.id_vorgang, g.ras_melder_id
+--union --notes
+select 'MASSNAHMEN' as mtype, count(1) as num_notes, d.id_vorgang, g.ras_melder_id
+from BOB_LAENDER_ROW_MASSNAHMEN d LEFT JOIN DG g
+on (d.ras_melder_id = g.ras_melder_id)
+where d.deleted is null
+group by d.id_vorgang, g.ras_melder_id;
+
+
+CREATE OR REPLACE FORCE VIEW "RAS_INTERN"."RAS_RUECKMELDUNG_STATS" ("NOTE_TYPE", "NUM_NOTES", "ID_VORGANG", "RAS_MELDER_ID") 
+ AS 
+select 'DOKUMENTE' as note_type, count(1) as num_notes, d.id_vorgang, d.ras_melder_id
+from BOB_LAENDER_ROW_DOKUMENTE d
+where d.deleted is null
+group by d.id_vorgang , d.ras_melder_id
+union --notes
+select 'ANMERKUNGEN' as mtype, count(1) as num_notes, d.id_vorgang, d.ras_melder_id
+from BOB_LAENDER_ROW_ERGAENZUNGEN d
+where d.deleted is null
+group by d.id_vorgang, d.ras_melder_id
+union --notes
+select 'MASSNAHMEN' as mtype, count(1) as num_notes, d.id_vorgang, d.ras_melder_id
+from BOB_LAENDER_ROW_MASSNAHMEN d
+--where d.deleted is null
+group by d.id_vorgang, d.ras_melder_id;
+
+select * from RAS_RUECKMELDUNG_STATS;
+
+
+select BLR_MASSNAHMEN_SEQ.nextval from dual;
+
+
+
+    select count(1)
+    --into l_exists
+    from BOB_LAENDER_ROW_MASSNAHMEN
+    where  id_vorgang = nvl(:P0_P38_ID_VORGANG, :P38_ID_VORGANG)
+    and ras_melder_id = :LOGIN_RAS_MELDER
+    and deleted is null;
 
 
