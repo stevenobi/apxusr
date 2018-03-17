@@ -16392,3 +16392,61 @@ begin begin
 select "MASSNAHME_ID",to_char("MASSNAHME_UMGESETZT_AM", :p$_format_mask1),"MASSNAHME_BEMERKUNG","ID_VORGANG","ID","MASSNAHME_UMGESETZT","MELDENDE_BEHOERDE","USER_ID","RAS_MELDER_ID" into wwv_flow.g_column_values(1),wwv_flow.g_column_values(2),wwv_flow.g_column_values(3),wwv_flow.g_column_values(4),wwv_flow.g_column_values(5),wwv_flow.g_column_values(6),wwv_flow.g_column_values(7),wwv_flow.g_column_values(8),wwv_flow.g_column_values(9) 
 from "RAS_INTERN"."BOB_LAENDER_ROW_MASSNAHMEN" where "ID" = :p_rowid; end;
 end;
+
+
+CREATE OR REPLACE TRIGGER "RAS_INTERN"."RAS_DOMAINEN_BD_TRG" 
+before delete on "RAS_DOMAINEN"
+referencing old as old new as new
+for each row
+  begin
+     INSERT INTO "RAS_DOMAINEN_HIST" (
+        domain_id,
+        domain,
+        domain_owner,
+        domain_code,
+        dns_not_resolved,
+        domain_melder_id,
+        status_id,
+        modified,
+        modified_by,
+        created,
+        created_by,
+        deleted,
+        deleted_by
+    ) VALUES (
+        :old.domain_id,
+        :old.domain,
+        :old.domain_owner,
+        :old.domain_code,
+        :old.dns_not_resolved,
+        :old.domain_melder_id,
+        :old.status_id,
+        :old.modified,
+        :old.modified_by,
+        :old.created,
+        :old.created_by,
+        sysdate,
+        nvl(v('APP_USER'), user)
+    );
+    
+    begin
+        for i in (select upper(trim(app_username)) as username
+                    from BFARM_APEX_APP_USER
+                    where APP_USER_DOMAIN_ID = :old.domain_id) loop
+                    DELETE FROM apex_050100.wwv_flow_fnd_user
+                    WHERE user_name =  i.username;
+        end loop;
+    end;    
+
+    
+  end;
+/
+
+grant select, delete on apex_050100.wwv_flow_fnd_user to ras_intern;
+
+
+select upper(trim(app_username)) as username
+                    from BFARM_APEX_APP_USER
+                    where APP_USER_DOMAIN_ID = 241;
+                    
+select * from RAS.APEX_WORKSPACE_USER;
