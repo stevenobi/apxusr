@@ -16450,3 +16450,23 @@ select upper(trim(app_username)) as username
                     where APP_USER_DOMAIN_ID = 241;
                     
 select * from RAS.APEX_WORKSPACE_USER;
+
+
+declare
+l_return varchar2(200);
+begin
+  select upper(:BROWSER_LANG)|| lpad(nvl(max(id_vorgang),0)+1, 6, 0)
+  into l_return
+  from "AMF_VORGANG";
+return l_return;
+exception when no_data_found then
+return null;
+end;
+
+
+
+
+
+
+
+
