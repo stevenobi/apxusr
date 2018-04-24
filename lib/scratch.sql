@@ -16467,6 +16467,26 @@ end;
 
 AM_CHRG_PACK_TYPE_EQ_ORIGINAL
 
+margin-bottom: 10px;
+
+<span class="t-Form_Checkbox">Verpackung</span>
+
+#P16_PACKAGING_LABEL
+#P16_LABELING_LABEL
+#P16_DESCRIPTION_LABEL
+#P16_COMPOSITION_LABEL
+#P16_REMARKS_ON_ORIGIN_LABEL
+#P16_REMARKS_ON_DISTR_LABEL
+#P16_ACTIVE_COMPONENT_FRAUD_LABEL
+#P16_RAS_ALERT_LABEL
+
+CONTACT_NAME
+
+select * from dba_scheduler_running_jobs;
+alter system set shared_servers=20 scope=both;
+alter system set processes=500 scope=both;
 
 
+select * from dba_cpool_info;
 
+exec DBMS_CONNECTION_POOL.START_POOL;
