@@ -16512,3 +16512,12 @@ apex.event.trigger(sel, "apexrefresh" );
     <span class="t-Button-label">Parallelvertreiber hinzufügen</span>
 </button></a>
 
+
+Set you button to "Start New Row" = No and "New Column" = No
+Set the "Static ID" of your button to <page item name>_BUTTON
+In the Page Level attribute "Execute when Page Loads" add
+
+    $( "#P1_DEPTNOS" ).after( $( "#P1_DEPTNOS_BUTTON" ));  
+
+
+$('#P35_PARVER_DISPLAY').html($('#P35_PARVER_DISPLAY').html().replace(/\:/g,''));
