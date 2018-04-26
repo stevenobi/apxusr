@@ -16490,3 +16490,25 @@ alter system set processes=500 scope=both;
 select * from dba_cpool_info;
 
 exec DBMS_CONNECTION_POOL.START_POOL;
+
+
+BFARM_RAS_AMF.js
+
+select 1 as cnt from "AMF_CHARGEN_CONTACTS" 
+where ID_AM_CHARGE = :P16_ID_AM_CHARGE;
+
+
+javascript:apex.navigation.dialog('f?p=100002:42:1784927719753::NO:RP,42:P42_ID_AM_CHARGE:47\u0026p_dialog_cs=L6Ei2xPFAbEZg1cUbAV9d6OmZTs',{title:'Chargen%20Ansprechpartner',height:'600',width:'860',maxWidth:'840',modal:true,dialog:null},'t-Dialog--standard',apex.jQuery('#CHRG_INFOS'));
+
+
+<a href="f?p=123:42:21234::NO:RP,42:P42_ID_AM_CHARGE:39">Ansprechpartner</a>
+
+select * from dba_cpool_info;
+
+
+apex.event.trigger(sel, "apexrefresh" );
+
+<a href="f?p=&APP_ID.:44:&SESSION.::::P44_ID_VORGANG:&P35_ID_VORGANG."><button class="t-Button t-Button--icon js-ignoreChange t-Button--iconLeft" style="background-color: #890d49;color: #ffffff;margin-left: 12px; height: 22px;margin-bottom: 2px;vertical-align: top;padding-bottom: 4px;line-height: 0.8;padding-top: 2px; width: 180px;" type="button" id="ADD_DISTR">
+    <span class="t-Button-label">Parallelvertreiber hinzufügen</span>
+</button></a>
+
