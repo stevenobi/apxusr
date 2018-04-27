@@ -16442,7 +16442,84 @@ for each row
   end;
 /
 
+SELECT 
+    e.ID,
+    e.ID_VORGANG,
+    nvl(e.MELDENDE_BEHOERDE, :LOGIN_RAS_DOMAIN) as MELDENDE_BEHOERDE,
+    case when instr(mimetype, '/x-bzip') > 0 or  instr(mimetype, '/x-bzip2') > 0 or instr(mimetype, '/zip') > 0 
+    then '<i class="fa-file-archive-o" />'
+    when instr(mimetype, 'audio/') > 0
+    then '<i class="fa-file-audio-o" />'
+    when instr(mimetype, '/javascript') > 0 or instr(mimetype, '/json') > 0 or instr(mimetype, '/css') > 0 or instr(mimetype, 'sql') > 0 or instr(mimetype, 'java') > 0
+    then '<i class="fa-file-code-o" />'
+    when instr(mimetype, '/vnd.ms-excel') > 0 or instr(mimetype, '/vnd.openxmlformats-officedocument.spreadsheetml.sheet') > 0
+    then '<i class="fa-file-excel-o" />'
+    when instr(mimetype, 'image/') > 0
+    then '<span class="fa fa-file-image-o"></span>'
+    when instr(mimetype, 'application/pdf') > 0
+    then '<i class="fa-file-pdf-o" />'
+    when instr(mimetype, 'application/vnd.ms-powerpoint') > 0 or instr(mimetype, 'application/vnd.openxmlformats-officedocument.presentationml.presentation') > 0
+    then '<i class="fa-file-powerpoint-o" />'
+    when instr(mimetype, '/css') > 0 or  instr(mimetype, '/csv') > 0 or instr(mimetype, '/rtf') > 0  or instr(mimetype, 'text/') > 0
+    then '<i class="fa-file-text-o" />'
+    when instr(mimetype, 'video/') > 0
+    then '<i class="fa-file-video-o" />'
+    when instr(mimetype, 'application/x-abiword') > 0 or instr(mimetype, 'application/msword') > 0 or instr(mimetype, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') > 0 
+    then '<i class="fa-file-word-o" />'
+    else '<i class="fa-file-o" />'
+    end as mime_icon,
+    dbms_lob.getlength(e.DATEIINHALT)||' Bytes' as DATEIGROESSE,
+    e.DATEINAME,
+    e.DOKUMENTEN_INHALT,
+    e.MIMETYPE,
+    e.CREATED,
+    e.CREATED_BY,
+    nvl(e.MODIFIED, e.CREATED) as MODIFIED,
+    e.MODIFIED_BY
+FROM "BOB_LAENDER_ROW_DOKUMENTE" e
+WHERE e.ID_VORGANG = :P125_ID_VORGANG
+AND e.RAS_MELDER_ID = :P125_RAS_MELDER_ID
+AND e.DELETED is null;
+
+
+
+SELECT 
+  e.ID,
+  e.ID_VORGANG,
+  nvl(e.MELDENDE_BEHOERDE, :LOGIN_RAS_DOMAIN) as MELDENDE_BEHOERDE,
+  dbms_lob.getlength(e.DATEIINHALT)||' Bytes' as DATEIGROESSE,
+  e.DATEINAME,
+  e.DOKUMENTEN_INHALT,
+  e.MIMETYPE,
+ '<img src="'||apex_util.get_blob_file_src('P132_ICON', i.icon_id)||'" style="width:32px; height:32px;" alt="'||i.ICON_FILE_NAME||'"/>' as ICON_DISPLAY,
+ I.ICON_ID,
+ e.USER_ID
+FROM "BOB_LAENDER_ROW_DOKUMENTE" e left outer join "MIME_TYPE_ICONS" i
+ON (e.MIMETYPE = I.MIME_TYPE)
+WHERE e.ID_VORGANG = :P38_ID_VORGANG
+AND e.RAS_MELDER_ID = :LOGIN_RAS_MELDER_ID
+AND e.DELETED is null;
+
+
 grant select, delete on apex_050100.wwv_flow_fnd_user to ras_intern;
+
+SELECT 
+  e.ID,
+  e.ID_VORGANG,
+  nvl(e.MELDENDE_BEHOERDE, :LOGIN_RAS_DOMAIN) as MELDENDE_BEHOERDE,
+  dbms_lob.getlength(e.DATEIINHALT)||' Bytes' as DATEIGROESSE,
+  e.DATEINAME,
+  e.DOKUMENTEN_INHALT,
+  e.MIMETYPE,
+ '<img src="'||apex_util.get_blob_file_src('P132_ICON', i.icon_id)||'" style="width:32px; height:32px;" alt="'||i.ICON_FILE_NAME||'"/>' as ICON_DISPLAY,
+ I.ICON_ID,
+ e.USER_ID
+FROM "BOB_LAENDER_ROW_DOKUMENTE" e left outer join "MIME_TYPE_ICONS" i
+ON (e.MIMETYPE = I.MIME_TYPE)
+WHERE e.ID_VORGANG = :P38_ID_VORGANG
+AND e.RAS_MELDER_ID = :LOGIN_RAS_MELDER_ID
+AND e.DELETED is null;
+
 
 
 select upper(trim(app_username)) as username
@@ -16568,3 +16645,185 @@ div.row:nth-child(5)
 div.row:nth-child(6)
 div.row:nth-child(7)
 div.row:nth-child(8)
+
+
+:P16_ID_AM_CHARGE,
+:P16_ID_VORGANG,
+:P16_AM_CHRG_BEZ_FAELS,
+:P16_AM_CHRG_PACK_TYPE_ID,
+:P16_AM_CHRG_PACK_TYPE_EQ_ORIGINAL,
+:P16_AM_CHRG_HLT_FAELS,
+:P16_AM_CHRG_HLT_ORIG,
+:P16_AM_CHRG_HLT_MON_FAELS,
+:P16_AM_CHRG_HLT_YEAR_FAELS,
+:P16_AM_CHRG_HLT_MON_ORIG,
+:P16_AM_CHRG_HLT_YEAR_ORIG,
+:P16_IDENTITY_REMARKS,
+:P16_PACKAGING,
+:P16_LABELING,
+:P16_DESCRIPTION,
+:P16_COMPOSITION,
+:P16_REMARKS_ON_ORIGIN,
+:P16_REMARKS_ON_DISTR,
+:P16_ACTIVE_COMPONENT_FRAUD,
+:P16_OTHER_REMARKS,
+:P16_VERIFICATION_STATUS_ID,
+:P16_SUSPECTED_CHRG_LOQ,
+:P16_RAS_ALERT,
+:P16_MODIFIED,
+:P16_MODIFIED_BY,
+:P16_CREATED,
+:P16_CREATED_BY
+
+INSERT INTO "AMF_VORGANG" (
+    id_vorgang,
+    vorgangsnummer,
+    bezeichnung,
+    meldende_stelle,
+    eingangsdatum,
+    erstellungsdatum,
+    staat_id,
+    bundesland_id,
+    bundesoberbehoerde,
+    bemerkung,
+    modified,
+    modified_by,
+    created,
+    created_by,
+    bearb_inspektor,
+    beteil_inspektor,
+    stellungnahme_angefordert,
+    stufenplanbeauftrag,
+    risiko_stellungnahme,
+    chargen_maengel,
+    ras_fall,
+    am_name,
+    am_znr,
+    am_pu,
+    am_chrg_orig,
+    am_chrg_faelsch,
+    am_chrg_hltb,
+    am_chrg_f_hltb,
+    art_der_faelschung,
+    faelschungsart_sonstige,
+    am_chrg_status,
+    am_wirkstoff,
+    deleted_by,
+    deleted,
+    zust_landesbehoerde,
+    am_enr,
+    am_pnr,
+    amf_meldung_status,
+    art_der_zustaendigkeit,
+    art_der_zustaendigkeit_sonst)(    
+    SELECT
+        id_vorgang,
+        vorgangsnummer,
+        bezeichnung,
+        meldende_stelle,
+        eingangsdatum,
+        erstellungsdatum,
+        staat_id,
+        bundesland_id,
+        bundesoberbehoerde,
+        bemerkung,
+        modified,
+        modified_by,
+        created,
+        created_by,
+        bearb_inspektor,
+        beteil_inspektor,
+        stellungnahme_angefordert,
+        stufenplanbeauftrag,
+        risiko_stellungnahme,
+        chargen_maengel,
+        ras_fall,
+        am_name,
+        am_znr,
+        am_pu,
+        am_chrg_orig,
+        am_chrg_faelsch,
+        am_chrg_hltb,
+        am_chrg_f_hltb,
+        art_der_faelschung,
+        faelschungsart_sonstige,
+        am_chrg_status,
+        am_wirkstoff,
+        deleted_by,
+        deleted,
+        zust_landesbehoerde,
+        am_enr,
+        am_pnr,
+        amf_meldung_status,
+        art_der_zustaendigkeit,
+        art_der_zustaendigkeit_sonst
+    FROM "AMF_VORGANG_HIST"
+    WHERE id_vorgang = :P46_ID_VORGANG
+);
+
+
+
+case when instr(mime_type, '/x-bzip') > 0 or  instr(mime_type, '/x-bzip2') > 0 or instr(mime_type, '/zip') > 0 
+then 'fa file-archive-o'
+case when instr(mime_type, 'audio/') > 0
+then 'fa file-audio-o'
+case when instr(mime_type, '/javascript') > 0 or instr(mime_type, '/json') > 0 or instr(mime_type, '/css') > 0 or instr(mime_type, 'sql') > 0 or instr(mime_type, 'java') > 0
+then 'fa file-code-o'
+case when instr(mime_type, '/vnd.ms-excel') > 0 or instr(mime_type, '/vnd.openxmlformats-officedocument.spreadsheetml.sheet') > 0
+then 'fa file-excel-o'
+case when instr(mime_type, 'image/') > 0
+then 'fa file-image-o'
+case when instr(mime_type, 'application/pdf') > 0
+then 'fa file-pdf-o'
+case when instr(mime_type, 'application/vnd.ms-powerpoint') > 0 or instr(mime_type, 'application/vnd.openxmlformats-officedocument.presentationml.presentation') > 0
+then 'fa file-powerpoint-o'
+css, csv, text/ .rtf 	Rich Text Format (RTF) 	application/rtf
+case when instr(mime_type, '/css') > 0 or case when instr(mime_type, '/csv') > 0 or case when instr(mime_type, '/rtf') > 0 case when instr(mime_type, 'text/') > 0
+then 'fa file-text-o'
+case when instr(mime_type, 'video/') > 0
+then 'fa file-video-o'
+case when instr(mime_type, 'application/x-abiword') > 0 or instr(mime_type, 'application/msword') > 0 or instr(mime_type, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') > 0 
+then 'fa file-word-o'
+else 'fa file-o'
+end as mime_icon
+
+
+
+SELECT 
+    e.ID,
+    e.ID_VORGANG,
+    nvl(e.MELDENDE_BEHOERDE, :LOGIN_RAS_DOMAIN) as MELDENDE_BEHOERDE,
+    dbms_lob.getlength(e.DATEIINHALT)||' Bytes' as DATEIGROESSE,
+    e.DATEINAME,
+    e.DOKUMENTEN_INHALT,
+    e.MIMETYPE,
+    '<img src="'||apex_util.get_blob_file_src('P47_ICON', i.icon_id)||'" style="width:32px; height:32px;" alt="'||i.ICON_FILE_NAME||'"/>' as ICON_DISPLAY,
+    I.ICON_ID,
+    e.USER_ID,
+     case when instr(mimetype, '/x-bzip') > 0 or  instr(mimetype, '/x-bzip2') > 0 or instr(mimetype, '/zip') > 0 
+    then 'fa file-archive-o'
+    when instr(mimetype, 'audio/') > 0
+    then 'fa file-audio-o'
+    when instr(mimetype, '/javascript') > 0 or instr(mimetype, '/json') > 0 or instr(mimetype, '/css') > 0 or instr(mimetype, 'sql') > 0 or instr(mimetype, 'java') > 0
+    then 'fa file-code-o'
+    when instr(mimetype, '/vnd.ms-excel') > 0 or instr(mimetype, '/vnd.openxmlformats-officedocument.spreadsheetml.sheet') > 0
+    then 'fa file-excel-o'
+    when instr(mimetype, 'image/') > 0
+    then 'fa fa-file-image-o'
+    when instr(mimetype, 'application/pdf') > 0
+    then 'fa file-pdf-o'
+    when instr(mimetype, 'application/vnd.ms-powerpoint') > 0 or instr(mimetype, 'application/vnd.openxmlformats-officedocument.presentationml.presentation') > 0
+    then 'fa file-powerpoint-o'
+    when instr(mimetype, '/css') > 0 or  instr(mimetype, '/csv') > 0 or instr(mimetype, '/rtf') > 0  or instr(mimetype, 'text/') > 0
+    then 'fa file-text-o'
+    when instr(mimetype, 'video/') > 0
+    then 'fa file-video-o'
+    when instr(mimetype, 'application/x-abiword') > 0 or instr(mimetype, 'application/msword') > 0 or instr(mimetype, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') > 0 
+    then 'fa file-word-o'
+    else 'fa file-o'
+    end as mime_icon
+FROM "BOB_LAENDER_ROW_DOKUMENTE" e left outer join "MIME_TYPE_ICONS" i
+ON (e.MIMETYPE = I.MIME_TYPE)
+WHERE e.ID_VORGANG = :P47_ID_VORGANG
+AND e.RAS_MELDER_ID = :P47_RAS_MELDER_ID
+AND e.DELETED is null;
