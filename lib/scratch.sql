@@ -16547,3 +16547,24 @@ and v('REQUEST') != 'READONLY'
 , function() {
 $('#P35_PARVER_1_DISPLAY').html($('#P35_PARVER').text());
 }
+
+
+
+apex.da.initDaEventList = function(){
+apex.da.gEventList = [
+{"triggeringElementType":"BUTTON","triggeringButtonId":"B4179989425214835","bindType":"bind","bindEventType":"click","anyActionsFireOnInit":false,actionList:[{"eventResult":true,"executeOnPageInit":false,"stopExecutionOnError":true,javascriptFunction:function (){ apex.navigation.dialog.cancel(true);
+},"action":"NATIVE_DIALOG_CANCEL"}]},
+{"triggeringElementType":"REGION","triggeringRegionId":"CHRG_CONTACTS","isIGRegion":true,"bindType":"bind","bindEventType":"apexafterclosedialog","anyActionsFireOnInit":false,actionList:[{"eventResult":true,"executeOnPageInit":false,"stopExecutionOnError":true,"affectedElementsType":"REGION","affectedRegionId":"CHRG_CONTACTS",javascriptFunction:apex.da.refresh,"action":"NATIVE_REFRESH"}]},
+{"triggeringElementType":"ITEM","triggeringElement":"P16_IDENTITY_REMARKS","bindType":"bind","bindEventType":"click","anyActionsFireOnInit":false,
+actionList:[{"eventResult":true,"executeOnPageInit":false,"stopExecutionOnError":true,"affectedElementsType":"JQUERY_SELECTOR","affectedElements":".t-hide-First",javascriptFunction:apex.da.show,"attribute01":"N","action":"NATIVE_SHOW"},{"eventResult":true,"executeOnPageInit":false,"stopExecutionOnError":true,javascriptFunction:function (){ if ($('#P16_IDENTITY_REMARKS').is(':checked')) {
+    alert('checked');
+}
+},"action":"NATIVE_JAVASCRIPT_CODE"}]}];
+}
+
+
+div.row:nth-child(n+5):nth-child(-n+8)
+div.row:nth-child(5)
+div.row:nth-child(6)
+div.row:nth-child(7)
+div.row:nth-child(8)
