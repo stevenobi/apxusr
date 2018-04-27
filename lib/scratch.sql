@@ -16521,3 +16521,29 @@ In the Page Level attribute "Execute when Page Loads" add
 
 
 $('#P35_PARVER_DISPLAY').html($('#P35_PARVER_DISPLAY').html().replace(/\:/g,''));
+
+
+http://10.15.188.113:8080/apex/f?p=100002:38:9922649583367::NO:RP,38:P38_ID,P0_P38_ID_VORGANG,P0_P38_FROM_PAGE:89,190,19
+
+http://10.15.188.113:8080/apex/f?p=100002:38:9922649583367::NO:RP,38:P38_ID,P38_ID_VORGANG:89,190
+
+
+.a-IG-header {
+    display: none;
+}
+
+.a-IG-header {
+    background-color: white;
+}
+
+
+http://10.15.188.113:8080/apex/f?p=100002:35:9922649583367:EDIT:NO:RP,35:P35_ID_VORGANG:193
+
+select 1 from  DUAL
+where :P18_ID_CHARGE_CONTACT_ID is not null 
+and v('REQUEST') != 'READONLY'
+
+
+, function() {
+$('#P35_PARVER_1_DISPLAY').html($('#P35_PARVER').text());
+}
