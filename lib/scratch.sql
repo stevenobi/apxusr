@@ -16801,26 +16801,26 @@ SELECT
     I.ICON_ID,
     e.USER_ID,
      case when instr(mimetype, '/x-bzip') > 0 or  instr(mimetype, '/x-bzip2') > 0 or instr(mimetype, '/zip') > 0 
-    then 'fa file-archive-o'
+    then 'fa fa-file-archive-o'
     when instr(mimetype, 'audio/') > 0
-    then 'fa file-audio-o'
+    then 'fa fa-file-audio-o'
     when instr(mimetype, '/javascript') > 0 or instr(mimetype, '/json') > 0 or instr(mimetype, '/css') > 0 or instr(mimetype, 'sql') > 0 or instr(mimetype, 'java') > 0
-    then 'fa file-code-o'
+    then 'fa fa-file-code-o'
     when instr(mimetype, '/vnd.ms-excel') > 0 or instr(mimetype, '/vnd.openxmlformats-officedocument.spreadsheetml.sheet') > 0
     then 'fa file-excel-o'
     when instr(mimetype, 'image/') > 0
     then 'fa fa-file-image-o'
     when instr(mimetype, 'application/pdf') > 0
-    then 'fa file-pdf-o'
+    then 'fa fa-file-pdf-o'
     when instr(mimetype, 'application/vnd.ms-powerpoint') > 0 or instr(mimetype, 'application/vnd.openxmlformats-officedocument.presentationml.presentation') > 0
-    then 'fa file-powerpoint-o'
+    then 'fa fa-file-powerpoint-o'
     when instr(mimetype, '/css') > 0 or  instr(mimetype, '/csv') > 0 or instr(mimetype, '/rtf') > 0  or instr(mimetype, 'text/') > 0
-    then 'fa file-text-o'
+    then 'fa fa-file-text-o'
     when instr(mimetype, 'video/') > 0
-    then 'fa file-video-o'
+    then 'fa fa-file-video-o'
     when instr(mimetype, 'application/x-abiword') > 0 or instr(mimetype, 'application/msword') > 0 or instr(mimetype, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') > 0 
-    then 'fa file-word-o'
-    else 'fa file-o'
+    then 'fa fa-file-word-o'
+    else 'fa fa-file-o'
     end as mime_icon
 FROM "BOB_LAENDER_ROW_DOKUMENTE" e left outer join "MIME_TYPE_ICONS" i
 ON (e.MIMETYPE = I.MIME_TYPE)
