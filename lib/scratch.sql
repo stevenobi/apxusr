@@ -16920,3 +16920,99 @@ exception when no_data_found
                  then return 'fa fa-file-o';
 end "GET_MIME_ICON";
 /
+
+
+update dokumente set ras_melder_id = 1 where ras_melder_id is null;
+update dokumente set user_id = 5 where user_id is null;
+commit;
+
+create or replace function "GET_MIME_ICON" (
+mime_type_in in varchar2
+)
+return varchar2
+is
+l_return varchar2(100);
+begin
+    select
+    case when instr(mime_type_in, '/x-bzip') > 0 or  instr(mime_type_in, '/x-bzip2') > 0 or instr(mime_type_in, '/zip') > 0 
+    then 'fa fa-file-archive-o'
+    when instr(mime_type_in, 'audio/') > 0
+    then 'fa fa-file-audio-o'
+    when instr(mime_type_in, '/javascript') > 0 or instr(mime_type_in, '/json') > 0 or instr(mime_type_in, '/css') > 0 or instr(mime_type_in, 'sql') > 0 or instr(mime_type_in, 'java') > 0
+    then 'fa fa-file-code-o'
+    when instr(mime_type_in, '/vnd.ms-excel') > 0 or instr(mime_type_in, '/vnd.openxmlformats-officedocument.spreadsheetml.sheet') > 0
+    then 'fa file-excel-o'
+    when instr(mime_type_in, 'image/') > 0
+    then 'fa fa-file-image-o'
+    when instr(mime_type_in, 'application/pdf') > 0
+    then 'fa fa-file-pdf-o'
+    when instr(mime_type_in, 'application/vnd.ms-powerpoint') > 0 or instr(mime_type_in, 'application/vnd.openxmlformats-officedocument.presentationml.presentation') > 0
+    then 'fa fa-file-powerpoint-o'
+    when instr(mime_type_in, '/css') > 0 or  instr(mime_type_in, '/csv') > 0 or instr(mime_type_in, '/rtf') > 0  or instr(mime_type_in, 'text/') > 0
+    then 'fa fa-file-text-o'
+    when instr(mime_type_in, 'video/') > 0
+    then 'fa fa-file-video-o'
+    when instr(mime_type_in, 'application/x-abiword') > 0 or instr(mime_type_in, 'application/msword') > 0 or instr(mime_type_in, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') > 0 
+    then 'fa fa-file-word-o'
+    else 'fa fa-file-o'
+    end
+    into l_return
+    from dual;
+return l_return;
+exception when no_data_found 
+                 then return 'fa fa-file-o';
+end "GET_MIME_ICON";
+/
+
+SELECT 
+    e.ID,
+    e.ID_VORGANG,
+    nvl(m.RAS_MELDER_CODE, :LOGIN_RAS_DOMAIN) as MELDENDE_BEHOERDE,
+    dbms_lob.getlength(e.DATEIINHALT)||' Bytes' as DATEIGROESSE,
+    e.DATEINAME,
+    e.DOKUMENTEN_INHALT,
+    e.MIMETYPE,
+    e.CREATED,
+    e.MODIFIED,
+    e.USER_ID,
+    "GET_MIME_ICON"(e.MIMETYPE) as mime_icon
+FROM "DOKUMENTE" e left outer join "RAS_MELDER" m
+ON (e.RAS_MELDER_ID = M.RAS_MELDER_ID)
+WHERE e.ID_VORGANG = :P32_ID_VORGANG
+AND e.RAS_MELDER_ID = :P32_RAS_MELDER_ID
+AND e.DELETED is null
+AND m.RAS_GRUPPEN_ID = ( select g.GRUPPEN_ID 
+                                            from RAS_GRUPPEN g 
+                                            where  g.RAS_GRUPPE_CODE = 'BOB');
+
+select r.ras_melder_id 
+from "RAS_MELDER" r
+where r.RAS_DISPLAY_NAME = :P40_MELDENDE_BEHOERDE;
+
+SELECT
+    id_vorgang,
+    vorgangsnummer,
+    bezeichnung,
+    meldende_stelle
+FROM
+    amf_vorgang
+    where not exists (select 1 from "RAS_MELDER" r where r.RAS_DISPLAY_NAME = meldende_stelle);
+
+EMA - European Medicines Agency
+
+
+SELECT '<a href="f?p=&APP_ID.:32:&SESSION.::NO::P32_ID_VORGANG:'|| :P40_ID_VORGANG ||'">'||COUNT(1)||'</a>' as LINK
+FROM "DOKUMENTE"
+WHERE id_vorgang = :P40_ID_VORGANG;
+
+SELECT COUNT(1) as ANZAHL_DOKUMENTE
+FROM "DOKUMENTE" d
+WHERE d.id_vorgang = :P40_ID_VORGANG
+AND d.RAS_MELDER_ID in (select m.RAS_MELDER_ID 
+                        from RAS_MELDER m 
+                        where m.RAS_GRUPPEN_ID = (select g.GRUPPEN_ID
+                                                  from RAS_GRUPPEN g
+                                                  WHERE g.RAS_GRUPPE_CODE = 'BOB')
+                       );
+
+                       
