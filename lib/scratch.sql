@@ -16881,3 +16881,42 @@ begin
     apex_debug.error('exception in AJAX process: %s, %s', sqlerrm, DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);  
     raise;       
 end;
+#
+
+create or replace function "GET_MIME_ICON" (
+mime_type_in in varchar2
+)
+return varchar2
+is
+l_return varchar2(100);
+begin
+    select
+    case when instr(mime_type_in, '/x-bzip') > 0 or  instr(mime_type_in, '/x-bzip2') > 0 or instr(mime_type_in, '/zip') > 0 
+    then 'fa fa-file-archive-o'
+    when instr(mime_type_in, 'audio/') > 0
+    then 'fa fa-file-audio-o'
+    when instr(mime_type_in, '/javascript') > 0 or instr(mime_type_in, '/json') > 0 or instr(mime_type_in, '/css') > 0 or instr(mime_type_in, 'sql') > 0 or instr(mime_type_in, 'java') > 0
+    then 'fa fa-file-code-o'
+    when instr(mime_type_in, '/vnd.ms-excel') > 0 or instr(mime_type_in, '/vnd.openxmlformats-officedocument.spreadsheetml.sheet') > 0
+    then 'fa file-excel-o'
+    when instr(mime_type_in, 'image/') > 0
+    then 'fa fa-file-image-o'
+    when instr(mime_type_in, 'application/pdf') > 0
+    then 'fa fa-file-pdf-o'
+    when instr(mime_type_in, 'application/vnd.ms-powerpoint') > 0 or instr(mime_type_in, 'application/vnd.openxmlformats-officedocument.presentationml.presentation') > 0
+    then 'fa fa-file-powerpoint-o'
+    when instr(mime_type_in, '/css') > 0 or  instr(mime_type_in, '/csv') > 0 or instr(mime_type_in, '/rtf') > 0  or instr(mime_type_in, 'text/') > 0
+    then 'fa fa-file-text-o'
+    when instr(mime_type_in, 'video/') > 0
+    then 'fa fa-file-video-o'
+    when instr(mime_type_in, 'application/x-abiword') > 0 or instr(mime_type_in, 'application/msword') > 0 or instr(mime_type_in, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') > 0 
+    then 'fa fa-file-word-o'
+    else 'fa fa-file-o'
+    end
+    into l_return
+    from dual;
+return l_return;
+exception when no_data_found 
+                 then return 'fa fa-file-o';
+end "GET_MIME_ICON";
+/
