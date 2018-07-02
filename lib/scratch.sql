@@ -16831,10 +16831,53 @@ AND e.DELETED is null;
 and :P120_FROM_PAGE is null
 
 
+SELECT '<a href="javascript:apex.navigation.dialog('f?p=100002:32:15716223650595:::::\u0026p_dialog_cs=EOAHRGbA3ACKsv4KUbnkKIhObM8',{title:'BOB Dokumente \u00DCbersicht',height:'720',width:'1024',maxWidth:'2048',modal:true,dialog:null},'t-Dialog--standard',this);::NO::P32_ID_VORGANG:'|| :P40_ID_VORGANG ||'">'||COUNT(1)||'</a>' as ANZAHL_DOKUMENTE
+FROM "DOKUMENTE"
+WHERE id_vorgang = :P40_ID_VORGANG
 
+SELECT utl_url.escape('<a href="javascript:apex.navigation.dialog('f?p=100002:32:15716223650595:::::\u0026p_dialog_cs=EOAHRGbA3ACKsv4KUbnkKIhObM8',{title:'BOB Dokumente \u00DCbersicht',height:'720',width:'1024',maxWidth:'2048',modal:true,dialog:null},'t-Dialog--standard',this);::NO::P32_ID_VORGANG:'|| :P40_ID_VORGANG ||'">'||COUNT(1)||'</a>') as ANZAHL_DOKUMENTE
+FROM "DOKUMENTE"
+WHERE id_vorgang = :P40_ID_VORGANG
 
+javascript:apex.navigation.dialog.close(true,function(pDialog){ apex.navigation.dialog('f?p=100002:125:15716223650595:APPLICATION_PROCESS\u00253DDOWNLOAD_FILE:NO::DOWNLOAD_FILE_ID,DOWNLOAD_FILENAME:107,Velcade_3.png\u0026cs=19z0ixn1IBoFCueq7c3_r7qw9RDw\u0026p_dialog_cs=uiLf-Xiyb0P7kDwWLFRGllyPhQI',{title:'Dokumente \u00DCbersicht',height:'720',width:'1024',maxWidth:'2048',modal:true,dialog:pDialog},'t-Dialog--standard',apex.jQuery('#R74324245002349450')); });
+#P33_DATEIINHALT
 
 202
 201
 199
 192
+
+
+declare  
+    v_file     BLOB;  
+    v_filename VARCHAR2(1000);
+    v_mimetype VARCHAR2(1000);
+begin  
+  apex_debug.info('start in AJAX process DOWNLOAD_FILE');  
+  
+    select DATEIINHALT, DATEINAME, MIMETYPE 
+    into v_file, v_filename, v_mimetype
+      from "DOKUMENTE"  
+     where id = :DOWNLOAD_FILE_ID;  -- ID from table
+        --  
+        sys.htp.init;  
+        sys.owa_util.mime_header(v_mimetype , FALSE );  
+        sys.htp.p('Content-length: ' || sys.dbms_lob.getlength( v_file));  
+        sys.htp.p('Content-Disposition: attachment; filename="' || v_filename || '"');  
+        --sys.htp.p('filename="' || :DOWNLOAD_FILENAME || '"' );  
+        sys.htp.p('Cache-Control: max-age=3600');  -- tell the browser to cache for one hour, adjust as necessary  
+  
+        sys.owa_util.http_header_close;  
+  
+        sys.wpg_docload.download_file( v_file );  
+  
+        -- I am not sure about this  
+      --apex_application.stop_apex_engine;  
+        --  throws an exception: ORA-20876: Stop APEX Engine, ORA-06512: in "APEX_040200.WWV_FLOW", Line 3255 ORA-06512: in Line 20  
+  
+  apex_debug.info('end in AJAX process DOWNLOAD_FILE');  
+  
+    EXCEPTION when others then  
+    apex_debug.error('exception in AJAX process: %s, %s', sqlerrm, DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);  
+    raise;       
+end;
