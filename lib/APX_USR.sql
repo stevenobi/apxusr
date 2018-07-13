@@ -2876,3 +2876,64 @@ from cons c
 where exists (select 1 from pks p1 where p1.constraint_name = c.constraint_name)
 order by  2, 3, 1 asc;						   
 						   
+select * 
+from DBA_IND_EXPRESSIONS 
+where TABLE_OWNER in ('SYS', 'SYSTEM');
+
+
+create table IND_EXP (
+index_owner varchar2(100), 
+table_name  varchar2(100), 
+index_name varchar2(100), 
+column_expression varchar2(4000), 
+column_position number
+);
+
+declare
+l_long long;
+l_vchr varchar2(4000);
+begin
+    for i in (select index_owner, table_name, index_name, column_expression, column_position 
+                 from DBA_IND_EXPRESSIONS 
+                 where index_OWNER in ('SYS', 'SYSTEM')) loop
+        l_long := i.column_expression;
+        l_vchr := substr(l_long, 1, 4000);
+        insert into IND_EXP
+        values (i.index_owner, i.table_name, i.index_name, l_vchr, i.column_position);
+    end loop;
+    commit;
+end;
+/
+
+
+select * from IND_EXP;
+
+
+with unq
+as (
+select owner, table_name, index_name 
+from dba_indexes
+where uniqueness = 'UNIQUE'
+and owner in ('SYSTEM', 'SYS')
+),
+ind_exp
+as
+(select index_owner, table_name, index_name, column_expression, column_position 
+ from IND_EXP 
+ where index_OWNER in ('SYS', 'SYSTEM')
+)
+select distinct  u.owner, u.table_name, ic.index_name,  IC.COLUMN_NAME, ie.column_expression, IC.COLUMN_POSITION
+from unq u right outer join dba_ind_columns ic
+on (U.OWNER = IC.INDEX_OWNER
+     and U.TABLE_NAME = IC.TABLE_NAME
+     and U.INDEX_NAME = IC.INDEX_NAME)
+left outer join ind_exp ie
+on (IC.INDEX_OWNER = ie.INDEX_OWNER
+     and IC.INDEX_NAME = IE.INDEX_NAME
+     and ic.COLUMN_POSITION = ie.column_position)
+where ic.index_owner in ('SYSTEM', 'SYS')
+and not exists (select 1 from dba_constraints c where c.constraint_name = u.index_name and c.constraint_type in ('P', 'R'))
+and u.owner is not null
+and u.table_name is not null
+order by 1, 2, 3, 6;
+						   
