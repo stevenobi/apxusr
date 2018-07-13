@@ -2840,3 +2840,39 @@ prompt
 set pages 0 line 120 define off verify off feed off timing off echo off
 
 EXIT SQL.SQLCODE;
+						   
+						   
+with pks
+as (
+select  c2.owner, c2.table_name, c2.constraint_name, c2.constraint_type as  constraint_type, c2.delete_rule, c2.status
+from dba_constraints c2 
+where c2.owner in ('SYS', 'SYSTEM') 
+and c2.CONSTRAINT_TYPE = 'P'
+),
+cons
+as (
+select  c2.owner, c2.table_name, c2.constraint_name, c2.constraint_type as  constraint_type,
+            c.owner as ref_owner, c.table_name as ref_table, c.constraint_name as ref_constraint, 
+            c.constraint_type as ref_constraint_type, c.delete_rule as ref_delete_rule,
+            c.status as ref_status,  c2.table_name as primary_table
+from dba_constraints c2 
+left outer join
+(select c.owner, c.table_name, c.constraint_name, 
+            c.r_constraint_name,  
+            c.constraint_type,  
+            c.delete_rule, c.status
+ from dba_constraints c 
+ where c.constraint_type = 'R')  c
+on (c2.constraint_name = c.r_constraint_name)
+where c2.owner in ('SYS', 'SYSTEM') 
+and c2.CONSTRAINT_TYPE = 'P'
+and C.TABLE_NAME is not null
+)
+select 1 as cnt, p.owner, p.table_name, p.constraint_name, decode(p.constraint_type, 'P', 'Primary Key', 'R', 'Foreign Key') as constraint_type,  'n.a.' as delete_rule, p.status
+from pks p
+union
+select 2 as cnt, c.ref_owner, c.ref_table, c.ref_constraint, decode(c.ref_constraint_type, 'P', 'Primary Key', 'R', 'Foreign Key') as constraint_type,  c.ref_delete_rule, c.ref_status
+from cons c
+where exists (select 1 from pks p1 where p1.constraint_name = c.constraint_name)
+order by  2, 3, 1 asc;
+						   
